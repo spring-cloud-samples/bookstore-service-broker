@@ -17,6 +17,10 @@
 package org.springframework.cloud.broker.keyvalue.webmvc.service;
 
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cloud.broker.keyvalue.webmvc.model.ApplicationInformation;
+import org.springframework.cloud.broker.keyvalue.webmvc.model.ServiceBinding;
+import org.springframework.cloud.broker.keyvalue.webmvc.repository.ServiceBindingRepository;
+import org.springframework.cloud.servicebroker.exception.ServiceInstanceBindingDoesNotExistException;
 import org.springframework.cloud.servicebroker.model.CreateServiceInstanceAppBindingResponse;
 import org.springframework.cloud.servicebroker.model.CreateServiceInstanceBindingRequest;
 import org.springframework.cloud.servicebroker.model.CreateServiceInstanceBindingResponse;
@@ -26,33 +30,71 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 @Service
 public class KeyValueServiceInstanceBindingService implements ServiceInstanceBindingService {
+	private final ServiceBindingRepository repository;
 	private final ApplicationInformation applicationInformation;
-	private UserDetails defaultUser;
+	private final UserDetails defaultUser;
 
-	public KeyValueServiceInstanceBindingService(ApplicationInformation applicationInformation,
+	public KeyValueServiceInstanceBindingService(ServiceBindingRepository repository,
+												 ApplicationInformation applicationInformation,
 												 @Qualifier("defaultUser") UserDetails defaultUser) {
+		this.repository = repository;
 		this.applicationInformation = applicationInformation;
 		this.defaultUser = defaultUser;
 	}
 
 	@Override
 	public CreateServiceInstanceBindingResponse createServiceInstanceBinding(CreateServiceInstanceBindingRequest request) {
-		String uri = UriComponentsBuilder
-				.fromPath(applicationInformation.getBaseUrl())
-				.pathSegment("keyvalue", request.getServiceInstanceId())
-				.build()
-				.toUriString();
+		Optional<ServiceBinding> binding = repository.findById(request.getBindingId());
+
+		Map<String, Object> credentials;
+		if (binding.isPresent()) {
+			credentials = binding.get().getCredentials();
+		} else {
+			credentials = buildCredentials(request.getServiceInstanceId());
+			persistBinding(request, credentials);
+		}
 
 		return CreateServiceInstanceAppBindingResponse.builder()
-				.credentials("uri", uri)
-				.credentials("username", defaultUser.getUsername())
-				.credentials("password", defaultUser.getPassword())
+				.bindingExisted(binding.isPresent())
+				.credentials(credentials)
 				.build();
 	}
 
 	@Override
 	public void deleteServiceInstanceBinding(DeleteServiceInstanceBindingRequest request) {
+		String bindingId = request.getBindingId();
+
+		if (repository.existsById(bindingId)) {
+			repository.deleteById(bindingId);
+		} else {
+			throw new ServiceInstanceBindingDoesNotExistException(bindingId);
+		}
+	}
+
+	private Map<String, Object> buildCredentials(String id) {
+		String uri = UriComponentsBuilder
+				.fromUriString(applicationInformation.getBaseUrl())
+				.pathSegment("keyvalue", id)
+				.build()
+				.toUriString();
+
+		Map<String, Object> credentials = new HashMap<>();
+		credentials.put("uri", uri);
+		credentials.put("username", defaultUser.getUsername());
+		credentials.put("password", defaultUser.getPassword());
+
+		return credentials;
+	}
+
+	private void persistBinding(CreateServiceInstanceBindingRequest request, Map<String, Object> credentials) {
+		ServiceBinding serviceBinding = new ServiceBinding(request.getBindingId(), request.getContext(),
+				credentials);
+		repository.save(serviceBinding);
 	}
 }

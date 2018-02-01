@@ -42,18 +42,18 @@ public class KeyValueController {
 
 	@GetMapping("/{instanceId}/{key}")
 	public Map<String, Object> get(@PathVariable String instanceId, @PathVariable String key) {
-		return Collections.singletonMap(key, store.get(instanceId, key));
+		return Collections.singletonMap(key, store.getValueFromMap(instanceId, key));
 	}
 
 	@PutMapping("/{instanceId}/{key}")
 	public Map<String, Object> put(@PathVariable String instanceId, @PathVariable String key, @RequestBody Object value) {
-		store.put(instanceId, key, value);
-		return Collections.singletonMap(key, store.get(instanceId, key));
+		store.putValueInMap(instanceId, key, value);
+		return Collections.singletonMap(key, store.getValueFromMap(instanceId, key));
 	}
 
 	@DeleteMapping("/{instanceId}/{key}")
 	public Map<String, Object> delete(@PathVariable String instanceId, @PathVariable String key) {
-		return Collections.singletonMap(key, store.remove(instanceId, key));
+		return Collections.singletonMap(key, store.removeValueFromMap(instanceId, key));
 	}
 
 	@ExceptionHandler(IllegalArgumentException.class)

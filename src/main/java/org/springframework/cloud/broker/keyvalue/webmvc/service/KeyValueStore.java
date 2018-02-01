@@ -23,36 +23,39 @@ import java.util.Map;
 
 @Service
 public class KeyValueStore {
-	private Map<String, Map<String, Object>> store = new HashMap<>();
+	private final Map<String, KeyValueMap> maps = new HashMap<>();
 
-	public void createInstance(String id) {
-		store.put(id, new HashMap<>());
+	public void createMap(String id) {
+		maps.put(id, new KeyValueMap());
 	}
 
-	public void deleteInstance(String id) {
-		store.remove(id);
-	}
-
-	public Object get(String id, String key) {
-		Map<String, Object> instance = getStoreById(id);
-		return instance.get(key);
-	}
-
-	public Object put(String id, String key, Object value) {
-		Map<String, Object> instance = getStoreById(id);
-		return instance.put(key, value);
-	}
-
-	public Object remove(String id, String key) {
-		Map<String, Object> instance = getStoreById(id);
-		return instance.remove(key);
-	}
-
-	private Map<String, Object> getStoreById(String id) {
-		Map<String, Object> selectedStore = store.get(id);
+	private KeyValueMap getMap(String id) {
+		KeyValueMap selectedStore = maps.get(id);
 		if (selectedStore == null) {
 			throw new IllegalArgumentException("Invalid instance ID " + id + ".");
 		}
 		return selectedStore;
+	}
+
+	public void deleteMap(String id) {
+		maps.remove(id);
+	}
+
+	public Object getValueFromMap(String mapId, String key) {
+		KeyValueMap map = getMap(mapId);
+		return map.get(key);
+	}
+
+	public Object putValueInMap(String mapId, String key, Object value) {
+		KeyValueMap map = getMap(mapId);
+		return map.put(key, value);
+	}
+
+	public Object removeValueFromMap(String mapId, String key) {
+		Map<String, Object> map = getMap(mapId);
+		return map.remove(key);
+	}
+
+	private static class KeyValueMap extends HashMap<String, Object> {
 	}
 }

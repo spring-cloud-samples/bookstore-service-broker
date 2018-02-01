@@ -16,11 +16,12 @@
 
 package org.springframework.cloud.broker.keyvalue.webmvc.service;
 
+import org.springframework.cloud.broker.keyvalue.webmvc.model.ServiceInstance;
 import org.springframework.cloud.broker.keyvalue.webmvc.repository.ServiceInstanceRepository;
 import org.springframework.cloud.servicebroker.exception.ServiceInstanceDoesNotExistException;
-import org.springframework.cloud.servicebroker.exception.ServiceInstanceExistsException;
 import org.springframework.cloud.servicebroker.model.CreateServiceInstanceRequest;
 import org.springframework.cloud.servicebroker.model.CreateServiceInstanceResponse;
+import org.springframework.cloud.servicebroker.model.CreateServiceInstanceResponse.CreateServiceInstanceResponseBuilder;
 import org.springframework.cloud.servicebroker.model.DeleteServiceInstanceRequest;
 import org.springframework.cloud.servicebroker.model.DeleteServiceInstanceResponse;
 import org.springframework.cloud.servicebroker.model.GetLastServiceOperationRequest;
@@ -32,8 +33,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class KeyValueServiceInstanceService implements ServiceInstanceService {
-	private ServiceInstanceRepository instanceRepository;
-	private KeyValueStore store;
+	private final ServiceInstanceRepository instanceRepository;
+	private final KeyValueStore store;
 
 	public KeyValueServiceInstanceService(KeyValueStore store, ServiceInstanceRepository instanceRepository) {
 		this.store = store;
@@ -43,16 +44,17 @@ public class KeyValueServiceInstanceService implements ServiceInstanceService {
 	@Override
 	public CreateServiceInstanceResponse createServiceInstance(CreateServiceInstanceRequest request) {
 		String instanceId = request.getServiceInstanceId();
-		String definitionId = request.getServiceDefinitionId();
+
+		CreateServiceInstanceResponseBuilder responseBuilder = CreateServiceInstanceResponse.builder();
 
 		if (instanceRepository.existsById(instanceId)) {
-			throw new ServiceInstanceExistsException(instanceId, definitionId);
+			responseBuilder.instanceExisted(true);
+		} else {
+			store.createMap(instanceId);
+			instanceRepository.save(new ServiceInstance(instanceId, request.getContext()));
 		}
 
-		store.createInstance(instanceId);
-
-		return new CreateServiceInstanceResponse()
-				.withInstanceExisted(false);
+		return responseBuilder.build();
 	}
 
 	@Override
@@ -65,10 +67,10 @@ public class KeyValueServiceInstanceService implements ServiceInstanceService {
 		String instanceId = request.getServiceInstanceId();
 
 		if (instanceRepository.existsById(instanceId)) {
-			store.deleteInstance(instanceId);
+			store.deleteMap(instanceId);
 			instanceRepository.deleteById(instanceId);
 
-			return new DeleteServiceInstanceResponse();
+			return DeleteServiceInstanceResponse.builder().build();
 		} else {
 			throw new ServiceInstanceDoesNotExistException(instanceId);
 		}

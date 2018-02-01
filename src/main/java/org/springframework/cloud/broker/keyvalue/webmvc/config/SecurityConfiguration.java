@@ -43,23 +43,25 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
+	public UserDetailsService userDetailsService(@Qualifier("defaultUser") UserDetails defaultUser) {
+		return new InMemoryUserDetailsManager(adminUser(), defaultUser);
+	}
+
+	@Bean
 	@Qualifier("defaultUser")
 	public UserDetails defaultUser() {
 		return User.withDefaultPasswordEncoder()
 				.username("user")
-				.password("user")
+				.password("secret")
 				.roles("USER")
 				.build();
 	}
 
-	@Bean
-	public UserDetailsService userDetailsService(@Qualifier("defaultUser") UserDetails defaultUser) {
-		return new InMemoryUserDetailsManager(
-				User.withDefaultPasswordEncoder()
-						.username("admin")
-						.password("admin")
-						.roles("ADMIN", "USER")
-						.build(),
-				defaultUser);
+	private UserDetails adminUser() {
+		return User.withDefaultPasswordEncoder()
+				.username("admin")
+				.password("admin")
+				.roles("ADMIN", "USER")
+				.build();
 	}
 }

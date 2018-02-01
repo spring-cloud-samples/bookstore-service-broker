@@ -22,19 +22,19 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.keyvalue.annotation.KeySpace;
 
 @KeySpace("serviceInstances")
-public class KeyValueServiceInstance {
+public class ServiceInstance {
 	@Id
-	private String id;
+	private final String instanceId;
 
-	private Context context;
+	private final Context context;
 
-	public KeyValueServiceInstance(String id, Context context) {
-		this.id = id;
+	public ServiceInstance(String instanceId, Context context) {
+		this.instanceId = instanceId;
 		this.context = context;
 	}
 
-	public String getId() {
-		return id;
+	public String getInstanceId() {
+		return instanceId;
 	}
 
 	public Context getContext() {
