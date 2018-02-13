@@ -1,0 +1,14 @@
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ClusterServiceBroker
+metadata:
+  name: keyvalue-broker
+  labels:
+    run: keyvalue-broker
+spec:
+  url: http://keyvalue-broker.keyvalue-broker.svc.cluster.local
+  authInfo:
+    basic:
+      secretRef:
+        name: keyvalue-broker-secret
+        namespace: keyvalue-broker
+

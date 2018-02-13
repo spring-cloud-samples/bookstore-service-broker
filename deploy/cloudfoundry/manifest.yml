@@ -1,0 +1,6 @@
+---
+applications:
+- name: keyvalue-broker
+  memory: 1G
+  path: ../../build/libs/keyvalue-broker-0.0.1.BUILD-SNAPSHOT.jar
+

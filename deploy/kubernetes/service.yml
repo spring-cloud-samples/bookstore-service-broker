@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: keyvalue-broker
+  namespace: keyvalue-broker
+  labels:
+    run: keyvalue-broker
+spec:
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+  selector:
+    run: keyvalue-broker
+  type: NodePort

@@ -1,0 +1,22 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: keyvalue-broker
+  namespace: keyvalue-broker
+  labels:
+    run: keyvalue-broker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: keyvalue-broker
+  template:
+    metadata:
+      labels:
+        run: keyvalue-broker
+    spec:
+      containers:
+      - image: scottyfred/keyvalue-broker:0.0.1.BUILD-SNAPSHOT
+        name: keyvalue-broker
+        ports:
+        - containerPort: 8080

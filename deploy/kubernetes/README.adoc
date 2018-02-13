@@ -1,0 +1,481 @@
+This document contains instructions for deploying the sample service broker to a Kubernetes cluster.
+
+All instructions below assume that the commands are being run from the root of the project repository.
+
+= Prerequisites
+
+== Kubernetes CLI
+
+These instructions use the `kubectl` CLI to interact with a running Kubernetes cluster. Follow the https://kubernetes.io/docs/reference/kubectl/overview/[`kubectl` documentation] to install and verify the CLI.
+
+== Kubernetes cluster
+
+A Kubernetes cluster will be used to deploy the service broker application and register it to the Kubernetes service catalog.
+
+=== minikube
+
+The `minikube` project can be used to run a small Kubernetes cluster on a development workstation. Follow the https://kubernetes.io/docs/getting-started-guides/minikube[Kubernetes documentation] to install `minikube`, start a cluster, and target the cluster with `kubectl`.
+
+=== Pivotal Container Service (PKS)
+
+Pivotal Container Service (PKS) can be used to deploy and manage production-quality Kubernetes clusters on Pivotal Cloud Foundry. Follow the https://docs.pivotal.io/runtimes/pks/[PKS documentation] to install the product, create a cluster, and target the cluster with `kubectl`.
+
+*NOTE*: Ensure that post-deploy scripts have been enabled in PCF Ops Manager as described on the https://docs.pivotal.io/runtimes/pks/1-0/troubleshoot-issues.html#timeouts[PKS Troubleshooting page].
+
+== Service Catalog
+
+Kubernetes support for service brokers via the Open Service Broker API is provided by the https://kubernetes.io/docs/concepts/service-catalog/[Service Catalog] project. Follow the https://github.com/kubernetes-incubator/service-catalog/blob/master/docs/install.md[project documentation] to install the service catalog into your Kubernetes cluster.
+
+== Docker
+
+An applications deployed to Kubernetes must be packaged into a Docker image using a Docker Engine. Follow the https://docs.docker.com/install/[Docker documentation] to install Docker and verify the `docker` CLI.
+
+The Docker image for the sample service broker must be available in a repository. Public repositories are available from https://hub.docker.com/[Docker], https://cloud.google.com/container-registry/[Google Cloud Platform], https://aws.amazon.com/ecr/[Amazon Web Services], and others. If you are using one of these public repositories, use the `docker` CLI to https://docs.docker.com/engine/reference/commandline/login/[log into the repository].
+
+=== minikube
+
+If you are using `minikube` to start a Kubernetes cluster, you can use the Docker Engine and repository https://kubernetes.io/docs/getting-started-guides/minikube/#reusing-the-docker-daemon[included with `minikube`].
+
+----
+$ eval $(minikube docker-env)
+----
+
+=== PKS with Harbor
+
+The VMware Harbor product can be used to deploy a Docker registry in the same infrastructure as the Kubernetes clusters deployed by PKS. Follow the https://docs.pivotal.io/partners/vmware-harbor[product documentation] to install Harbor and log in with `docker`.
+
+= Build a Docker image
+
+The Gradle build file for the service broker sample project can be used to build a Docker image and push it to a repository.
+
+When using a private Docker repository, the following command can be used to build the image and push it with the default `sample` group. This isn't likely to work with a public Docker repository unless you own the group named `demo` in that repository.
+
+----
+$ ./gradlew assemble dockerPush
+----
+
+When using a public Docker repository, provide your repository username to the Gradle command. 
+
+----
+$ ./gradlew assemble dockerPush -PdockerGroup=[username]
+----
+
+= Deploy and test the service broker
+
+== Deploy the service broker application
+
+Create a namespace for the service broker application:
+
+----
+$ kubectl create namespace keyvalue-broker
+namespace "keyvalue-broker" created
+----
+
+Deploy the service broker application Docker image:
+
+----
+$ kubectl create -f deploy/kubernetes/deployment.yml
+deployment "keyvalue-broker" created
+----
+
+Show the details of the deployed application:
+
+----
+$ kubectl describe deployment keyvalue-broker -n keyvalue-broker
+Name:                   keyvalue-broker
+Namespace:              keyvalue-broker
+Labels:                 run=keyvalue-broker
+Annotations:            deployment.kubernetes.io/revision=1
+Selector:               run=keyvalue-broker
+Replicas:               1 desired | 1 updated | 1 total | 1 available | 0 unavailable
+StrategyType:           RollingUpdate
+MinReadySeconds:        0
+RollingUpdateStrategy:  1 max unavailable, 1 max surge
+Pod Template:
+  Labels:  run=keyvalue-broker
+  Containers:
+   keyvalue-broker:
+    Image:        keyvalue-broker/keyvalue-broker:0.0.1.BUILD-SNAPSHOT
+    Port:         8080/TCP
+    Environment:  <none>
+    Mounts:       <none>
+  Volumes:        <none>
+Conditions:
+  Type           Status  Reason
+  ----           ------  ------
+  Available      True    MinimumReplicasAvailable
+OldReplicaSets:  <none>
+NewReplicaSet:   keyvalue-broker-6797f89fcb (1/1 replicas created)
+Events:
+  Type    Reason             Age   From                   Message
+  ----    ------             ----  ----                   -------
+  Normal  ScalingReplicaSet  48s   deployment-controller  Scaled up replica set keyvalue-broker-6797f89fcb to 1
+----
+
+It may take some time for the application to start. When it has started successfully, the `Replicas` row of the output should show `1 available`.
+
+== Expose the service broker application
+
+Create a Kubernetes service that exposes the service broker application outside of the container:
+
+----
+$ kubectl create -f deploy/kubernetes/service.yml
+service "keyvalue-broker" created
+----
+
+Show the details of the created service:
+
+----
+$ kubectl describe service keyvalue-broker -n keyvalue-broker
+Name:                     keyvalue-broker
+Namespace:                keyvalue-broker
+Labels:                   run=keyvalue-broker
+Annotations:              <none>
+Selector:                 run=keyvalue-broker
+Type:                     NodePort
+IP:                       10.107.161.81
+Port:                     <unset>  8080/TCP
+TargetPort:               8080/TCP
+NodePort:                 <unset>  32248/TCP
+Endpoints:
+Session Affinity:         None
+External Traffic Policy:  Cluster
+Events:                   <none>
+----
+
+== Verify the service broker application
+
+In order to verify that the service broker application is running, you will need some information to construct a URL. 
+
+=== minikube
+
+When using `minikube`, the following command will show the URL that can be used to access the deployed application:
+
+----
+$ minikube service keyvalue-broker --url
+http://192.168.99.100:31742
+----
+
+Use the provided URL to access the `/v2/catalog` endpoint of the service broker application:
+
+----
+$ curl http://192.168.99.100:31742/v2/catalog -u admin:supersecret
+{"services":[{"id":"bdb1be2e-360b-495c-8115-d7697f9c6a9e","name":"key-value","description":"A simple key-value service","bindable":true,"plan_updateable":false,"plans":[{"id":"b973fb78-82f3-49ef-9b8b-c1876974a6cd","name":"standard","description":"A simple key-value plan","free":true}],"tags":["key-value","sample"]}]}
+----
+
+=== kubectl
+
+Show the details of the service broker application service again:
+
+----
+$ kubectl describe service keyvalue-broker -n keyvalue-broker
+Name:                     keyvalue-broker
+Namespace:                keyvalue-broker
+Labels:                   run=keyvalue-broker
+Annotations:              <none>
+Selector:                 run=keyvalue-broker
+Type:                     NodePort
+IP:                       10.107.161.81
+Port:                     <unset>  8080/TCP
+TargetPort:               8080/TCP
+NodePort:                 <unset>  32248/TCP
+Endpoints:
+Session Affinity:         None
+External Traffic Policy:  Cluster
+Events:                   <none>
+----
+
+Note the value of the `NodePort` row.
+
+Show a list of Kubernetes pods running in the cluster:
+
+----
+$ kubectl get pods -n keyvalue-broker -o=wide
+NAME                               READY     STATUS    IP            NODE
+keyvalue-broker-68f88cbbfb-vvmn4   1/1       Running   10.200.37.3   8ce76de4-4cfc-4bcd-b860-043a69cd2402
+----
+
+Note the value in the `NODE` column for the `keyvalue-broker` pod.
+
+Show a list of Kubernetes nodes running in the cluster:
+
+----
+$ kubectl get nodes -n keyvalue-broker -o=wide
+NAME                                   STATUS    AGE       VERSION   EXTERNAL-IP
+2e45b4e3-1f9a-439e-b830-e051135f9e52   Ready     1d        v1.9.2    192.168.1.236
+8ce76de4-4cfc-4bcd-b860-043a69cd2402   Ready     1d        v1.9.2    192.168.1.235
+cf353f58-bb1a-45cf-8b18-96976f818c5f   Ready     1d        v1.9.2    192.168.1.234
+----
+
+Note the value in the `EXTERNAL-IP` column of the node whose `NAME` matches the node for the `keyvalue-broker` pod.
+
+Construct a URL using the IP address of the node and the port of the service, and use the this URL to access the `/v2/catalog` endpoint of the service broker application:
+
+----
+$ curl http://192.168.1.235:32248/v2/catalog -u admin:supersecret
+{"services":[{"id":"bdb1be2e-360b-495c-8115-d7697f9c6a9e","name":"key-value","description":"A simple key-value service","bindable":true,"plan_updateable":false,"plans":[{"id":"b973fb78-82f3-49ef-9b8b-c1876974a6cd","name":"standard","description":"A simple key-value plan","free":true}],"tags":["key-value","sample"]}]}
+----
+
+= Register and test the service broker
+
+== Register to the Service Catalog
+
+Now that the application has been deployed and verified, it can be registered to the Service Catalog.
+
+The Open Service Broker API endpoints in the service broker application are secured with a basic auth username and password. Create a Kubernetes secret to store these credentials:
+
+----
+$ kubectl create -f deploy/kubernetes/service-broker-secret.yml
+secret "keyvalue-broker-secret" created
+----
+
+Register the service broker to the Service Catalog:     
+
+----
+$ kubectl create -f deploy/kubernetes/service-broker.yml
+clusterservicebroker "keyvalue-broker" created
+----
+
+Show the details of the registration:
+
+----
+$ kubectl describe clusterservicebrokers keyvalue-broker
+Name:         keyvalue-broker
+Namespace:
+Labels:       <none>
+Annotations:  <none>
+API Version:  servicecatalog.k8s.io/v1beta1
+Kind:         ClusterServiceBroker
+Metadata:
+  Finalizers:
+    kubernetes-incubator/service-catalog
+  Generation:        1
+  Resource Version:  233
+  Self Link:         /apis/servicecatalog.k8s.io/v1beta1/clusterservicebrokers/keyvalue-broker
+  UID:               d36778a6-0ab1-11e8-aa16-0242ac110005
+Spec:
+  Auth Info:
+    Basic:
+      Secret Ref:
+        Name:       keyvalue-broker-secret
+        Namespace:  keyvalue-broker
+  Relist Behavior:  Duration
+  Relist Duration:  15m0s
+  Relist Requests:  0
+  URL:              http://keyvalue-broker.keyvalue-broker.svc.cluster.local
+Status:
+  Conditions:
+    Message: Successfully fetched catalog entries from broker.
+    Reason: FetchedCatalog
+    Status: "True"
+    Type: Ready
+  Reconciled Generation:  0
+Events:                   <none>
+----
+
+On registration, the Service Catalog will call the service broker application to retrieve the catalog of service provided by the broker. This process might take a while. When this is complete you should see `Message: Successfully fetched catalog entries from broker.` in the output from previous command.
+
+== View service offerings
+
+Show the list of brokered service offerings advertised by the service broker:
+
+----
+$ kubectl get clusterserviceclasses -o=custom-columns=NAME:.metadata.name,EXTERNAL\ NAME:.spec.externalName
+NAME                                   EXTERNAL NAME
+bdb1be2e-360b-495c-8115-d7697f9c6a9e   key-value
+----
+
+Show the details of the brokered service offering:
+
+----
+$ kubectl get clusterserviceclasses bdb1be2e-360b-495c-8115-d7697f9c6a9e -o=yaml
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ClusterServiceClass
+metadata:
+  name: bdb1be2e-360b-495c-8115-d7697f9c6a9e
+  resourceVersion: "2147"
+  selfLink: /apis/servicecatalog.k8s.io/v1beta1/clusterserviceclasses/bdb1be2e-360b-495c-8115-d7697f9c6a9e
+  uid: 427af5da-0acb-11e8-aa16-0242ac110005
+spec:
+  bindable: true
+  bindingRetrievable: false
+  clusterServiceBrokerName: keyvalue-broker
+  description: A simple key-value service
+  externalID: bdb1be2e-360b-495c-8115-d7697f9c6a9e
+  externalName: key-value
+  planUpdatable: false
+  tags:
+  - key-value
+  - sample
+status:
+  removedFromBrokerCatalog: false
+----
+
+== View service plans
+
+Show the list of brokered service plans advertised by the service broker:
+
+----
+$ kubectl get clusterserviceplans -o=custom-columns=NAME:.metadata.name,EXTERNAL\ NAME:.spec.externalName
+NAME                                   EXTERNAL NAME
+b973fb78-82f3-49ef-9b8b-c1876974a6cd   standard
+----
+
+Show the details of the brokered service plan:
+
+----
+$ kubectl get clusterserviceplans b973fb78-82f3-49ef-9b8b-c1876974a6cd -o yaml
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ClusterServicePlan
+metadata:
+  name: b973fb78-82f3-49ef-9b8b-c1876974a6cd
+  resourceVersion: "2148"
+  selfLink: /apis/servicecatalog.k8s.io/v1beta1/clusterserviceplans/b973fb78-82f3-49ef-9b8b-c1876974a6cd
+  uid: 427ca7e7-0acb-11e8-aa16-0242ac110005
+spec:
+  clusterServiceBrokerName: keyvalue-broker
+  clusterServiceClassRef:
+    name: bdb1be2e-360b-495c-8115-d7697f9c6a9e
+  description: A simple key-value plan
+  externalID: b973fb78-82f3-49ef-9b8b-c1876974a6cd
+  externalName: standard
+  free: true
+status:
+  removedFromBrokerCatalog: false
+----
+
+= Use the service broker
+
+== Create a service instance
+
+Service instances and bindings must be created in a Kubernetes namespace. Create a new namespace for testing:
+
+----
+$ kubectl create namespace test
+namespace "test" created
+----
+
+Create an instance of a brokered service from the sample service broker:  
+
+----
+$ kubectl create -f deploy/kubernetes/service-instance.yml
+serviceinstance "keyvalue-instance" created
+----
+
+Show the details of the created service instance:
+
+----
+$ kubectl describe serviceinstance keyvalue-instance -n test
+Name:         keyvalue-instance
+Namespace:    test
+Labels:       <none>
+Annotations:  <none>
+API Version:  servicecatalog.k8s.io/v1beta1
+Kind:         ServiceInstance
+Metadata:
+  Finalizers:
+    kubernetes-incubator/service-catalog
+  Generation:        1
+  Resource Version:  2364
+  Self Link:         /apis/servicecatalog.k8s.io/v1beta1/namespaces/test/serviceinstances/keyvalue-instance
+  UID:               3f533993-0acd-11e8-aa16-0242ac110005
+Spec:
+  Cluster Service Class External Name:  key-value
+  Cluster Service Class Ref:
+    Name:                              bdb1be2e-360b-495c-8115-d7697f9c6a9e
+  Cluster Service Plan External Name:  standard
+  Cluster Service Plan Ref:
+    Name:       b973fb78-82f3-49ef-9b8b-c1876974a6cd
+  External ID:  b0a7dff9-769f-458c-865f-f8578ad6b740
+  Parameters:
+    Max:            10
+  Update Requests:  0
+Status:
+  Async Op In Progress:  false
+  Conditions:
+    Message:               The instance was provisioned successfully
+    Reason:                ProvisionedSuccessfully
+    Status:                True
+    Type:                  Ready
+  Deprovision Status:      Required
+  External Properties:
+    Cluster Service Plan External ID:    b973fb78-82f3-49ef-9b8b-c1876974a6cd
+    Cluster Service Plan External Name:  standard
+    Parameter Checksum:                  4fa544b50ca7a33fe5e8bc0780f1f36aa0c2c7098242db27bc8a3e21f4b4ab55
+    Parameters:
+      Max:            10
+  Orphan Mitigation In Progress:  false
+  Reconciled Generation:          1
+Events:
+  Type    Reason                   Age   From                                Message
+  ----    ------                   ----  ----                                -------
+  Normal  ProvisionedSuccessfully  1m    service-catalog-controller-manager  The instance was provisioned successfully
+----
+
+== Create a service binding
+
+Create a service binding for the service instance:
+
+----
+$ kubectl create -f deploy/kubernetes/service-binding.yml
+servicebinding "keyvalue-binding" created
+----
+
+Show the details of the created service binding:
+
+----
+$ kubectl describe servicebinding keyvalue-binding -n test
+Name:         keyvalue-binding
+Namespace:    test
+Labels:       <none>
+Annotations:  <none>
+API Version:  servicecatalog.k8s.io/v1beta1
+Kind:         ServiceBinding
+Metadata:
+  Finalizers:
+    kubernetes-incubator/service-catalog
+  Generation:        1
+  Resource Version:  2427
+  Self Link:         /apis/servicecatalog.k8s.io/v1beta1/namespaces/test/servicebindings/keyvalue-binding
+  UID:               d2aa53b4-0acd-11e8-aa16-0242ac110005
+Spec:
+  External ID:  2464fe07-fc7f-489e-a508-e47370f69eb1
+  Instance Ref:
+    Name:       keyvalue-instance
+  Secret Name:  keyvalue-binding
+Status:
+  Async Op In Progress:  false
+  Conditions:
+    Message:               Injected bind result
+    Reason:                InjectedBindResult
+    Status:                True
+    Type:                  Ready
+  External Properties:
+  Orphan Mitigation In Progress:  false
+  Reconciled Generation:          1
+  Unbind Status:                  Required
+Events:
+  Type    Reason              Age   From                                Message
+  ----    ------              ----  ----                                -------
+  Normal  InjectedBindResult  35s   service-catalog-controller-manager  Injected bind result
+----
+
+Service bindings are exposed via Kubernetes secret objects. Show the details of the secret containing the binding credentials:
+
+----
+$ kubectl describe secret keyvalue-binding -n test
+Name:         keyvalue-binding
+Namespace:    test
+Labels:       <none>
+Annotations:  <none>
+
+Type:  Opaque
+
+Data
+====
+password:  68 bytes
+uri:       67 bytes
+username:  4 bytes
+----
+
+

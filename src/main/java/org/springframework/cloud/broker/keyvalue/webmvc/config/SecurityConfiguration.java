@@ -17,6 +17,7 @@
 package org.springframework.cloud.broker.keyvalue.webmvc.config;
 
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -37,14 +38,16 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.csrf().disable()
 				.authorizeRequests()
 					.antMatchers("/keyvalue/**").hasRole("USER")
+					.requestMatchers(EndpointRequest.to("info", "health")).permitAll()
+					.requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole("ADMIN")
 					.anyRequest().hasRole("ADMIN")
 				.and()
 					.httpBasic();
 	}
 
 	@Bean
-	public UserDetailsService userDetailsService(@Qualifier("defaultUser") UserDetails defaultUser) {
-		return new InMemoryUserDetailsManager(adminUser(), defaultUser);
+	public UserDetailsService userDetailsService() {
+		return new InMemoryUserDetailsManager(adminUser(), defaultUser());
 	}
 
 	@Bean
@@ -60,7 +63,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	private UserDetails adminUser() {
 		return User.withDefaultPasswordEncoder()
 				.username("admin")
-				.password("admin")
+				.password("supersecret")
 				.roles("ADMIN", "USER")
 				.build();
 	}

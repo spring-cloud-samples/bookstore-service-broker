@@ -1,0 +1,184 @@
+This document contains instructions for deploying the sample service broker to a Cloud Foundry foundation.
+
+All instructions below assume that the commands are being run from the root of the project repository.
+
+= Prerequisites
+
+== Cloud Foundry CLI
+
+These instructions use the `cf` CLI to interact with a running Cloud Foundry foundation. Follow the https://docs.cloudfoundry.org/cf-cli/[`cf` documentation] to install and verify the CLI.
+
+== Cloud Foundry foundation
+
+A Cloud Foundry foundation will be used to deploy the service broker application and register it to the service marketplace. This can be a public hosted Cloud Foundry, a private Cloud Foundry, or a workstation-deployed Cloud Foundry like https://pivotal.io/pcf-dev[PCF Dev].
+
+Use the `cf` CLI to https://docs.cloudfoundry.org/cf-cli/getting-started.html#login[log into] Cloud Foundry and target an organization and space for deployment of an application.
+
+= Build the service broker application
+
+The Gradle build file for the service broker sample project can be used to build a Docker image and push it to a repository.
+
+----
+$ ./gradlew assemble
+----
+
+= Deploy and test the service broker
+
+== Deploy the service broker application
+
+Deploy the service broker application to Cloud Foundry:
+
+----
+$ cf push -f deploy/cloudfoundry/manifest.yml
+Pushing from manifest to org sample / space test as user@example.com...
+Using manifest file deploy/cloudfoundry/manifest.yml
+Getting app info...
+Creating app with these attributes...
++ name:       keyvalue-broker
+  path:       build/libs/keyvalue-broker-0.0.1.BUILD-SNAPSHOT.jar
++ memory:     1G
+  routes:
++   keyvalue-broker.apps.example.com
+
+...
+
+name:              keyvalue-broker
+requested state:   started
+instances:         1/1
+usage:             1G x 1 instances
+routes:            keyvalue-broker.apps.example.com
+
+...
+
+      state     since                  cpu    memory         disk           details
+#0   running   2018-02-13T21:58:44Z   0.0%   290.8M of 1G   144.7M of 1G
+----
+
+== Verify the service broker application
+
+Note the value of the `route` row in the output from the command above. Use this route to build a URL to access the `/v2/catalog` endpoint of the service broker application.
+
+----
+$ curl https://keyvalue-broker.apps.example.com/v2/catalog -u admin:supersecret
+{"services":[{"id":"bdb1be2e-360b-495c-8115-d7697f9c6a9e","name":"key-value","description":"A simple key-value service","bindable":true,"plan_updateable":false,"plans":[{"id":"b973fb78-82f3-49ef-9b8b-c1876974a6cd","name":"standard","description":"A simple key-value plan","free":true}],"tags":["key-value","sample"]}]}
+----
+
+= Register and test the service broker
+
+== Register to the services marketplace
+
+Now that the application has been deployed and verified, it can be registered to the Cloud Foundry services marketplace.
+
+=== With administrator privileges
+
+If you have administrator privileges on Cloud Foundry, you can make the service broker available in all organizations and spaces.
+
+The Open Service Broker API endpoints in the service broker application are secured with a basic auth username and password. Register the service broker using the URL from above and the credentials:
+
+----
+$ cf create-service-broker keyvalue admin supersecret https://keyvalue-broker.apps.example.com
+Creating service broker keyvalue as admin...
+OK
+----
+
+Make the service offerings from the service broker visible in the services marketplace:
+
+----
+$ cf enable-service-access key-value
+Enabling access to all plans of service key-value for all orgs as admin...
+OK
+----
+
+=== Without administrator privileges
+
+If you do not have administrator privileges on Cloud Foundry, you can make the service broker available in a single organization and space that you have privileges in:
+
+----
+$ cf create-service-broker keyvalue admin supersecret https://keyvalue-broker.cfapps.io --space-scoped
+Creating service broker keyvalue in org sample / space test as user@example.com...
+OK
+----
+
+== View to the services marketplace
+
+Show the services marketplace:
+
+----
+$ cf marketplace
+Getting services from marketplace in org sample / space test as user@example.com...
+OK
+
+service                       plans                 description
+key-value                     standard              A simple key-value service
+
+TIP:  Use 'cf marketplace -s SERVICE' to view descriptions of individual plans of a given service.
+----
+
+----
+$ cf marketplace -s key-value
+Getting service plan information for service key-value as user@example.com...
+OK
+
+service plan   description               free or paid
+standard       A simple key-value plan   free
+----
+
+= Use the service broker
+
+== Create a service instance
+
+Create an instance of a brokered service from the sample service broker:
+
+----
+$ cf create-service key-value standard my-key-value
+Creating service instance my-key-value in org sample / space test as user@example.com...
+OK
+----
+
+Show the details of the created service instance:
+
+----
+$ cf service my-key-value
+Showing info of service my-key-value in org sample / space test as user@example.com...
+
+name:            my-key-value
+service:         key-value
+bound apps:
+tags:
+plan:            standard
+description:     A simple key-value service
+documentation:
+dashboard:
+
+Showing status of last operation from service my-key-value...
+
+status:    create succeeded
+message:
+started:   2018-02-13T22:24:21Z
+updated:   2018-02-13T22:24:21Z
+----
+
+== Create a service binding
+
+Create a service binding for the service instance:
+
+----
+cf create-service-key my-key-value my-key-value-binding
+Creating service key my-key-value-binding for service instance my-key-value as user@example.com...
+OK
+----
+
+Show the details of the created service binding:
+
+----
+cf service-key my-key-value my-key-value-binding
+Getting key my-key-value-binding for service instance my-key-value as user@example.com...
+
+{
+ "password": "{bcrypt}$2a$10$gJqlA/YKBKzCMBgfSlvr3OGyrbLvBVPWi/pgYrEHOTQEpN7FO.hvq",
+ "uri": "https://keyvalue-broker.apps.example.com/keyvalue/ccd45032-5ac9-487a-a37a-506eb65b0cf9",
+ "username": "user"
+}
+----
+
+

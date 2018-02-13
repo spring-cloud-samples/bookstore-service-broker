@@ -3,3 +3,7 @@ management:
     web:
       expose: ["*"]
 
+endpoints:
+  default:
+    web:
+      enabled: true

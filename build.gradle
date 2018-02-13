@@ -22,9 +22,11 @@ buildscript {
 		mavenCentral()
 		maven { url "https://repo.spring.io/snapshot" }
 		maven { url "https://repo.spring.io/milestone" }
+		maven { url "https://plugins.gradle.org/m2/" }
 	}
 	dependencies {
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+		classpath("gradle.plugin.com.palantir.gradle.docker:gradle-docker:0.17.2")
 	}
 }
 
@@ -32,9 +34,12 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
+apply plugin: 'com.palantir.docker'
 
 group = 'org.springframework.cloud'
-version = '0.0.1-SNAPSHOT'
+archivesBaseName = 'keyvalue-broker'
+version = '0.0.1.BUILD-SNAPSHOT'
+
 sourceCompatibility = 1.8
 
 repositories {
@@ -59,3 +64,13 @@ dependencies {
 	testCompile("org.assertj:assertj-core:3.9.0")
 }
 
+if (!project.hasProperty("dockerGroup")) {
+	ext.dockerGroup = "sample"
+}
+
+docker {
+	name "${dockerGroup}/keyvalue-broker:${version}"
+	dockerfile file('deploy/docker/Dockerfile')
+	files jar.archivePath
+	buildArgs(['JAR_FILE': "${jar.archiveName}"])
+}
