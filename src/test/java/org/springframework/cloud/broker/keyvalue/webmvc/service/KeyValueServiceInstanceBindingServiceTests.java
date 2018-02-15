@@ -69,9 +69,9 @@ public class KeyValueServiceInstanceBindingServiceTests {
 				.thenReturn(Optional.empty());
 
 		CreateServiceInstanceBindingRequest request = CreateServiceInstanceBindingRequest.builder()
+				.serviceInstanceId(SERVICE_INSTANCE_ID)
+				.bindingId(SERVICE_BINDING_ID)
 				.build();
-		request.setServiceInstanceId(SERVICE_INSTANCE_ID);
-		request.setBindingId(SERVICE_BINDING_ID);
 
 		CreateServiceInstanceBindingResponse response = service.createServiceInstanceBinding(request);
 
@@ -115,9 +115,9 @@ public class KeyValueServiceInstanceBindingServiceTests {
 				.thenReturn(Optional.of(binding));
 
 		CreateServiceInstanceBindingRequest request = CreateServiceInstanceBindingRequest.builder()
+				.serviceInstanceId(SERVICE_INSTANCE_ID)
+				.bindingId(SERVICE_BINDING_ID)
 				.build();
-		request.setServiceInstanceId(SERVICE_INSTANCE_ID);
-		request.setBindingId(SERVICE_BINDING_ID);
 
 		CreateServiceInstanceBindingResponse response = service.createServiceInstanceBinding(request);
 
@@ -137,9 +137,10 @@ public class KeyValueServiceInstanceBindingServiceTests {
 		when(repository.existsById(SERVICE_BINDING_ID))
 				.thenReturn(true);
 
-		DeleteServiceInstanceBindingRequest request = new DeleteServiceInstanceBindingRequest();
-		request.setServiceInstanceId(SERVICE_INSTANCE_ID);
-		request.setBindingId(SERVICE_BINDING_ID);
+		DeleteServiceInstanceBindingRequest request = DeleteServiceInstanceBindingRequest.builder()
+				.serviceInstanceId(SERVICE_INSTANCE_ID)
+				.bindingId(SERVICE_BINDING_ID)
+				.build();
 
 		service.deleteServiceInstanceBinding(request);
 
@@ -153,9 +154,10 @@ public class KeyValueServiceInstanceBindingServiceTests {
 		when(repository.existsById(SERVICE_BINDING_ID))
 				.thenReturn(false);
 
-		DeleteServiceInstanceBindingRequest request = new DeleteServiceInstanceBindingRequest();
-		request.setServiceInstanceId(SERVICE_INSTANCE_ID);
-		request.setBindingId(SERVICE_BINDING_ID);
+		DeleteServiceInstanceBindingRequest request = DeleteServiceInstanceBindingRequest.builder()
+				.serviceInstanceId(SERVICE_INSTANCE_ID)
+				.bindingId(SERVICE_BINDING_ID)
+				.build();
 
 		service.deleteServiceInstanceBinding(request);
 	}

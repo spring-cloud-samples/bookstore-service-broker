@@ -163,7 +163,7 @@ updated:   2018-02-13T22:24:21Z
 Create a service binding for the service instance:
 
 ----
-cf create-service-key my-key-value my-key-value-binding
+$ cf create-service-key my-key-value my-key-value-binding
 Creating service key my-key-value-binding for service instance my-key-value as user@example.com...
 OK
 ----
@@ -171,7 +171,7 @@ OK
 Show the details of the created service binding:
 
 ----
-cf service-key my-key-value my-key-value-binding
+$ cf service-key my-key-value my-key-value-binding
 Getting key my-key-value-binding for service instance my-key-value as user@example.com...
 
 {

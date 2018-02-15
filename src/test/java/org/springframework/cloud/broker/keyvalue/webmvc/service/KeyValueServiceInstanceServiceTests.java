@@ -63,8 +63,8 @@ public class KeyValueServiceInstanceServiceTests {
 				.thenReturn(true);
 
 		CreateServiceInstanceRequest request = CreateServiceInstanceRequest.builder()
+				.serviceInstanceId(SERVICE_INSTANCE_ID)
 				.build();
-		request.setServiceInstanceId(SERVICE_INSTANCE_ID);
 
 		CreateServiceInstanceResponse response = service.createServiceInstance(request);
 
@@ -89,9 +89,9 @@ public class KeyValueServiceInstanceServiceTests {
 				.thenReturn(false);
 
 		CreateServiceInstanceRequest request = CreateServiceInstanceRequest.builder()
+				.serviceInstanceId(SERVICE_INSTANCE_ID)
 				.context(context)
 				.build();
-		request.setServiceInstanceId(SERVICE_INSTANCE_ID);
 
 		CreateServiceInstanceResponse response = service.createServiceInstance(request);
 
@@ -118,8 +118,9 @@ public class KeyValueServiceInstanceServiceTests {
 		when(repository.existsById(SERVICE_INSTANCE_ID))
 				.thenReturn(true);
 
-		DeleteServiceInstanceRequest request = new DeleteServiceInstanceRequest();
-		request.setServiceInstanceId(SERVICE_INSTANCE_ID);
+		DeleteServiceInstanceRequest request = DeleteServiceInstanceRequest.builder()
+				.serviceInstanceId(SERVICE_INSTANCE_ID)
+				.build();
 
 		DeleteServiceInstanceResponse response = service.deleteServiceInstance(request);
 
@@ -139,8 +140,9 @@ public class KeyValueServiceInstanceServiceTests {
 		when(repository.existsById(SERVICE_INSTANCE_ID))
 				.thenReturn(false);
 
-		DeleteServiceInstanceRequest request = new DeleteServiceInstanceRequest();
-		request.setServiceInstanceId(SERVICE_INSTANCE_ID);
+		DeleteServiceInstanceRequest request = DeleteServiceInstanceRequest.builder()
+				.serviceInstanceId(SERVICE_INSTANCE_ID)
+				.build();
 
 		service.deleteServiceInstance(request);
 	}
