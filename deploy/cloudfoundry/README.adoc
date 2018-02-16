@@ -34,19 +34,19 @@ Pushing from manifest to org sample / space test as user@example.com...
 Using manifest file deploy/cloudfoundry/manifest.yml
 Getting app info...
 Creating app with these attributes...
-+ name:       keyvalue-broker
-  path:       build/libs/keyvalue-broker-0.0.1.BUILD-SNAPSHOT.jar
++ name:       bookstore-service-broker
+  path:       build/libs/bookstore-service-broker-0.0.1.BUILD-SNAPSHOT.jar
 + memory:     1G
   routes:
-+   keyvalue-broker.apps.example.com
++   bookstore-service-broker.apps.example.com
 
 ...
 
-name:              keyvalue-broker
+name:              bookstore-service-broker
 requested state:   started
 instances:         1/1
 usage:             1G x 1 instances
-routes:            keyvalue-broker.apps.example.com
+routes:            bookstore-service-broker.apps.example.com
 
 ...
 
@@ -59,8 +59,8 @@ routes:            keyvalue-broker.apps.example.com
 Note the value of the `route` row in the output from the command above. Use this route to build a URL to access the `/v2/catalog` endpoint of the service broker application.
 
 ----
-$ curl https://keyvalue-broker.apps.example.com/v2/catalog -u admin:supersecret
-{"services":[{"id":"bdb1be2e-360b-495c-8115-d7697f9c6a9e","name":"key-value","description":"A simple key-value service","bindable":true,"plan_updateable":false,"plans":[{"id":"b973fb78-82f3-49ef-9b8b-c1876974a6cd","name":"standard","description":"A simple key-value plan","free":true}],"tags":["key-value","sample"]}]}
+$ curl https://bookstore-service-broker.apps.example.com/v2/catalog -u admin:supersecret
+{"services":[{"id":"bdb1be2e-360b-495c-8115-d7697f9c6a9e","name":"bookstore","description":"A simple book store service","bindable":true,"plan_updateable":false,"plans":[{"id":"b973fb78-82f3-49ef-9b8b-c1876974a6cd","name":"standard","description":"A simple book store plan","free":true}],"tags":["book-store","books", "sample"]}]}
 ----
 
 = Register and test the service broker
@@ -76,16 +76,16 @@ If you have administrator privileges on Cloud Foundry, you can make the service 
 The Open Service Broker API endpoints in the service broker application are secured with a basic auth username and password. Register the service broker using the URL from above and the credentials:
 
 ----
-$ cf create-service-broker keyvalue admin supersecret https://keyvalue-broker.apps.example.com
-Creating service broker keyvalue as admin...
+$ cf create-service-broker bookstore admin supersecret https://bookstore-service-broker.apps.example.com
+Creating service broker bookstore as admin...
 OK
 ----
 
 Make the service offerings from the service broker visible in the services marketplace:
 
 ----
-$ cf enable-service-access key-value
-Enabling access to all plans of service key-value for all orgs as admin...
+$ cf enable-service-access bookstore
+Enabling access to all plans of service bookstore for all orgs as admin...
 OK
 ----
 
@@ -94,8 +94,8 @@ OK
 If you do not have administrator privileges on Cloud Foundry, you can make the service broker available in a single organization and space that you have privileges in:
 
 ----
-$ cf create-service-broker keyvalue admin supersecret https://keyvalue-broker.cfapps.io --space-scoped
-Creating service broker keyvalue in org sample / space test as user@example.com...
+$ cf create-service-broker bookstore admin supersecret https://bookstore-service-broker.cfapps.io --space-scoped
+Creating service broker bookstore in org sample / space test as user@example.com...
 OK
 ----
 
@@ -109,18 +109,18 @@ Getting services from marketplace in org sample / space test as user@example.com
 OK
 
 service                       plans                 description
-key-value                     standard              A simple key-value service
+bookstore                     standard              A simple book store service
 
 TIP:  Use 'cf marketplace -s SERVICE' to view descriptions of individual plans of a given service.
 ----
 
 ----
-$ cf marketplace -s key-value
-Getting service plan information for service key-value as user@example.com...
+$ cf marketplace -s bookstore
+Getting service plan information for service bookstore as user@example.com...
 OK
 
 service plan   description               free or paid
-standard       A simple key-value plan   free
+standard       A simple bookstore plan   free
 ----
 
 = Use the service broker
@@ -130,27 +130,27 @@ standard       A simple key-value plan   free
 Create an instance of a brokered service from the sample service broker:
 
 ----
-$ cf create-service key-value standard my-key-value
-Creating service instance my-key-value in org sample / space test as user@example.com...
+$ cf create-service bookstore standard my-bookstore
+Creating service instance my-bookstore in org sample / space test as user@example.com...
 OK
 ----
 
 Show the details of the created service instance:
 
 ----
-$ cf service my-key-value
-Showing info of service my-key-value in org sample / space test as user@example.com...
+$ cf service my-bookstore
+Showing info of service my-bookstore in org sample / space test as user@example.com...
 
-name:            my-key-value
-service:         key-value
+name:            my-bookstore
+service:         bookstore
 bound apps:
 tags:
 plan:            standard
-description:     A simple key-value service
+description:     A simple bookstore service
 documentation:
 dashboard:
 
-Showing status of last operation from service my-key-value...
+Showing status of last operation from service my-bookstore...
 
 status:    create succeeded
 message:
@@ -163,20 +163,20 @@ updated:   2018-02-13T22:24:21Z
 Create a service binding for the service instance:
 
 ----
-$ cf create-service-key my-key-value my-key-value-binding
-Creating service key my-key-value-binding for service instance my-key-value as user@example.com...
+$ cf create-service-key my-bookstore my-bookstore-binding
+Creating service key my-bookstore-binding for service instance my-bookstore as user@example.com...
 OK
 ----
 
 Show the details of the created service binding:
 
 ----
-$ cf service-key my-key-value my-key-value-binding
-Getting key my-key-value-binding for service instance my-key-value as user@example.com...
+$ cf service-key my-bookstore my-bookstore-binding
+Getting key my-bookstore-binding for service instance my-bookstore as user@example.com...
 
 {
  "password": "{bcrypt}$2a$10$gJqlA/YKBKzCMBgfSlvr3OGyrbLvBVPWi/pgYrEHOTQEpN7FO.hvq",
- "uri": "https://keyvalue-broker.apps.example.com/keyvalue/ccd45032-5ac9-487a-a37a-506eb65b0cf9",
+ "uri": "https://bookstore-service-broker.apps.example.com/bookstore/ccd45032-5ac9-487a-a37a-506eb65b0cf9",
  "username": "user"
 }
 ----

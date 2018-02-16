@@ -1,6 +1,6 @@
 ---
 applications:
-- name: keyvalue-broker
+- name: bookstore-service-broker
   memory: 1G
-  path: ../../build/libs/keyvalue-broker-0.0.1.BUILD-SNAPSHOT.jar
+  path: ../../build/libs/bookstore-service-broker-0.0.1.BUILD-SNAPSHOT.jar
 

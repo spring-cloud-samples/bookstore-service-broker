@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.broker.keyvalue.webmvc.model;
+package org.springframework.cloud.broker.bookstore.webmvc.model;
 
 
 import org.springframework.cloud.servicebroker.model.Context;

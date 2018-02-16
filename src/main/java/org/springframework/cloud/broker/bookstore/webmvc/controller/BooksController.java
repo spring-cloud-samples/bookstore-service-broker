@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.broker.keyvalue.webmvc.controller;
+package org.springframework.cloud.broker.bookstore.webmvc.controller;
 
-import org.springframework.cloud.broker.keyvalue.webmvc.service.KeyValueStore;
+import org.springframework.cloud.broker.bookstore.webmvc.model.Book;
+import org.springframework.cloud.broker.bookstore.webmvc.service.BookStoreService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -32,28 +33,28 @@ import java.util.Collections;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/keyvalue")
-public class KeyValueController {
-	private final KeyValueStore store;
+@RequestMapping("/bookstore")
+public class BooksController {
+	private final BookStoreService bookStoreService;
 
-	public KeyValueController(KeyValueStore store) {
-		this.store = store;
+	public BooksController(BookStoreService bookStoreService) {
+		this.bookStoreService = bookStoreService;
 	}
 
-	@GetMapping("/{instanceId}/{key}")
-	public Map<String, Object> get(@PathVariable String instanceId, @PathVariable String key) {
-		return Collections.singletonMap(key, store.getValueFromMap(instanceId, key));
+	@GetMapping("/{bookStoreId}/books/{bookId}")
+	public Map<String, Book> get(@PathVariable String bookStoreId, @PathVariable String bookId) {
+		return Collections.singletonMap(bookId, bookStoreService.getBookFromStore(bookStoreId, bookId));
 	}
 
-	@PutMapping("/{instanceId}/{key}")
-	public Map<String, Object> put(@PathVariable String instanceId, @PathVariable String key, @RequestBody Object value) {
-		store.putValueInMap(instanceId, key, value);
-		return Collections.singletonMap(key, store.getValueFromMap(instanceId, key));
+	@PutMapping("/{bookStoreId}/books/{bookId}")
+	public Map<String, Book> put(@PathVariable String bookStoreId, @PathVariable String bookId, @RequestBody Book book) {
+		bookStoreService.putBookInStore(bookStoreId, bookId, book);
+		return Collections.singletonMap(bookId, bookStoreService.getBookFromStore(bookStoreId, bookId));
 	}
 
-	@DeleteMapping("/{instanceId}/{key}")
-	public Map<String, Object> delete(@PathVariable String instanceId, @PathVariable String key) {
-		return Collections.singletonMap(key, store.removeValueFromMap(instanceId, key));
+	@DeleteMapping("/{bookStoreId}/books/{bookId}")
+	public Map<String, Book> delete(@PathVariable String bookStoreId, @PathVariable String bookId) {
+		return Collections.singletonMap(bookId, bookStoreService.removeBookFromStore(bookStoreId, bookId));
 	}
 
 	@ExceptionHandler(IllegalArgumentException.class)

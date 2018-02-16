@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.broker.keyvalue.webmvc.config;
+package org.springframework.cloud.broker.bookstore.webmvc.config;
 
 import org.junit.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
-import org.springframework.cloud.broker.keyvalue.webmvc.model.ApplicationInformation;
+import org.springframework.cloud.broker.bookstore.webmvc.model.ApplicationInformation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

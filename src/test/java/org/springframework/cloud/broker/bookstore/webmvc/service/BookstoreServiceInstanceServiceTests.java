@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.broker.keyvalue.webmvc.service;
+package org.springframework.cloud.broker.bookstore.webmvc.service;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -22,8 +22,8 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.cloud.broker.keyvalue.webmvc.model.ServiceInstance;
-import org.springframework.cloud.broker.keyvalue.webmvc.repository.ServiceInstanceRepository;
+import org.springframework.cloud.broker.bookstore.webmvc.model.ServiceInstance;
+import org.springframework.cloud.broker.bookstore.webmvc.repository.ServiceInstanceRepository;
 import org.springframework.cloud.servicebroker.exception.ServiceInstanceDoesNotExistException;
 import org.springframework.cloud.servicebroker.model.Context;
 import org.springframework.cloud.servicebroker.model.instances.CreateServiceInstanceRequest;
@@ -39,22 +39,22 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 @RunWith(MockitoJUnitRunner.class)
-public class KeyValueServiceInstanceServiceTests {
+public class BookstoreServiceInstanceServiceTests {
 	private static final String SERVICE_INSTANCE_ID = "instance-id";
 
 	@Mock
-	private KeyValueStore store;
+	private BookStoreService store;
 
 	@Mock
 	private ServiceInstanceRepository repository;
 
-	private KeyValueServiceInstanceService service;
+	private BookStoreServiceInstanceService service;
 
 	@Before
 	public void setUp() {
 		initMocks(this);
 
-		service = new KeyValueServiceInstanceService(store, repository);
+		service = new BookStoreServiceInstanceService(store, repository);
 	}
 
 	@Test
@@ -109,7 +109,7 @@ public class KeyValueServiceInstanceServiceTests {
 		assertThat(actual.getInstanceId()).isEqualTo(SERVICE_INSTANCE_ID);
 		assertThat(actual.getContext()).isEqualTo(context);
 
-		verify(store).createMap(SERVICE_INSTANCE_ID);
+		verify(store).createBookStore(SERVICE_INSTANCE_ID);
 		verifyNoMoreInteractions(store);
 	}
 
@@ -131,7 +131,7 @@ public class KeyValueServiceInstanceServiceTests {
 		verify(repository).deleteById(SERVICE_INSTANCE_ID);
 		verifyNoMoreInteractions(repository);
 
-		verify(store).deleteMap(SERVICE_INSTANCE_ID);
+		verify(store).deleteBookStore(SERVICE_INSTANCE_ID);
 		verifyNoMoreInteractions(store);
 	}
 

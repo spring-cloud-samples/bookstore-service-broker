@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.broker.keyvalue.webmvc.service;
+package org.springframework.cloud.broker.bookstore.webmvc.service;
 
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cloud.broker.keyvalue.webmvc.model.ApplicationInformation;
-import org.springframework.cloud.broker.keyvalue.webmvc.model.ServiceBinding;
-import org.springframework.cloud.broker.keyvalue.webmvc.repository.ServiceBindingRepository;
+import org.springframework.cloud.broker.bookstore.webmvc.model.ApplicationInformation;
+import org.springframework.cloud.broker.bookstore.webmvc.model.ServiceBinding;
+import org.springframework.cloud.broker.bookstore.webmvc.repository.ServiceBindingRepository;
 import org.springframework.cloud.servicebroker.exception.ServiceInstanceBindingDoesNotExistException;
 import org.springframework.cloud.servicebroker.model.bindings.CreateServiceInstanceAppBindingResponse;
 import org.springframework.cloud.servicebroker.model.bindings.CreateServiceInstanceBindingRequest;
@@ -35,14 +35,14 @@ import java.util.Map;
 import java.util.Optional;
 
 @Service
-public class KeyValueServiceInstanceBindingService implements ServiceInstanceBindingService {
+public class BookStoreServiceInstanceBindingService implements ServiceInstanceBindingService {
 	private final ServiceBindingRepository repository;
 	private final ApplicationInformation applicationInformation;
 	private final UserDetails defaultUser;
 
-	public KeyValueServiceInstanceBindingService(ServiceBindingRepository repository,
-												 ApplicationInformation applicationInformation,
-												 @Qualifier("defaultUser") UserDetails defaultUser) {
+	public BookStoreServiceInstanceBindingService(ServiceBindingRepository repository,
+												  ApplicationInformation applicationInformation,
+												  @Qualifier("defaultUser") UserDetails defaultUser) {
 		this.repository = repository;
 		this.applicationInformation = applicationInformation;
 		this.defaultUser = defaultUser;
@@ -80,7 +80,7 @@ public class KeyValueServiceInstanceBindingService implements ServiceInstanceBin
 	private Map<String, Object> buildCredentials(String id) {
 		String uri = UriComponentsBuilder
 				.fromUriString(applicationInformation.getBaseUrl())
-				.pathSegment("keyvalue", id)
+				.pathSegment("bookstore", id)
 				.build()
 				.toUriString();
 

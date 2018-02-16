@@ -37,7 +37,7 @@ apply plugin: 'io.spring.dependency-management'
 apply plugin: 'com.palantir.docker'
 
 group = 'org.springframework.cloud'
-archivesBaseName = 'keyvalue-broker'
+archivesBaseName = 'bookstore-service-broker'
 version = '0.0.1.BUILD-SNAPSHOT'
 
 sourceCompatibility = 1.8
@@ -69,7 +69,7 @@ if (!project.hasProperty("dockerGroup")) {
 }
 
 docker {
-	name "${dockerGroup}/keyvalue-broker:${version}"
+	name "${dockerGroup}/bookstore-service-broker:${version}"
 	dockerfile file('deploy/docker/Dockerfile')
 	files jar.archivePath
 	buildArgs(['JAR_FILE': "${jar.archiveName}"])

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.broker.keyvalue.webmvc.config;
+package org.springframework.cloud.broker.bookstore.webmvc.config;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
@@ -37,10 +37,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		http
 				.csrf().disable()
 				.authorizeRequests()
-					.antMatchers("/keyvalue/**").hasRole("USER")
+					.antMatchers("/bookstore/**").hasRole("USER")
+					.antMatchers("/v2/**").hasRole("ADMIN")
 					.requestMatchers(EndpointRequest.to("info", "health")).permitAll()
 					.requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole("ADMIN")
-					.anyRequest().hasRole("ADMIN")
+					.anyRequest().anonymous()
 				.and()
 					.httpBasic();
 	}

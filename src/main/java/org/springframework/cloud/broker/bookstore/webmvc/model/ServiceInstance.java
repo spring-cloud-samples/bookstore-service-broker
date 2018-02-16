@@ -14,13 +14,30 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.broker.keyvalue.webmvc.config;
+package org.springframework.cloud.broker.bookstore.webmvc.model;
 
-import org.springframework.cloud.broker.keyvalue.webmvc.repository.ServiceInstanceRepository;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.data.map.repository.config.EnableMapRepositories;
 
-@Configuration
-@EnableMapRepositories(basePackageClasses = ServiceInstanceRepository.class)
-public class RepositoryConfiguration {
+import org.springframework.cloud.servicebroker.model.Context;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.keyvalue.annotation.KeySpace;
+
+@KeySpace("serviceInstances")
+public class ServiceInstance {
+	@Id
+	private final String instanceId;
+
+	private final Context context;
+
+	public ServiceInstance(String instanceId, Context context) {
+		this.instanceId = instanceId;
+		this.context = context;
+	}
+
+	public String getInstanceId() {
+		return instanceId;
+	}
+
+	public Context getContext() {
+		return context;
+	}
 }

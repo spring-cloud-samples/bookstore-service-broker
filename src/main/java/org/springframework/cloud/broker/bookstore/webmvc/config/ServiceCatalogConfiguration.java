@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.broker.keyvalue.webmvc.config;
+package org.springframework.cloud.broker.bookstore.webmvc.config;
 
 import org.springframework.cloud.servicebroker.model.catalog.Catalog;
 import org.springframework.cloud.servicebroker.model.catalog.Plan;
@@ -29,16 +29,16 @@ public class ServiceCatalogConfiguration {
 		Plan plan = Plan.builder()
 				.id("b973fb78-82f3-49ef-9b8b-c1876974a6cd")
 				.name("standard")
-				.description("A simple key-value plan")
+				.description("A simple book store plan")
 				.free(true)
 				.build();
 
 		ServiceDefinition serviceDefinition = ServiceDefinition.builder()
 				.id("bdb1be2e-360b-495c-8115-d7697f9c6a9e")
-				.name("key-value")
-				.description("A simple key-value service")
+				.name("bookstore")
+				.description("A simple book store service")
 				.bindable(true)
-				.tags("key-value", "sample")
+				.tags("book-store", "books", "sample")
 				.plans(plan)
 				.build();
 

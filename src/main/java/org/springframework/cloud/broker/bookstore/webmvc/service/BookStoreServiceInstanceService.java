@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.broker.keyvalue.webmvc.service;
+package org.springframework.cloud.broker.bookstore.webmvc.service;
 
-import org.springframework.cloud.broker.keyvalue.webmvc.model.ServiceInstance;
-import org.springframework.cloud.broker.keyvalue.webmvc.repository.ServiceInstanceRepository;
+import org.springframework.cloud.broker.bookstore.webmvc.model.ServiceInstance;
+import org.springframework.cloud.broker.bookstore.webmvc.repository.ServiceInstanceRepository;
 import org.springframework.cloud.servicebroker.exception.ServiceInstanceDoesNotExistException;
 import org.springframework.cloud.servicebroker.model.instances.CreateServiceInstanceRequest;
 import org.springframework.cloud.servicebroker.model.instances.CreateServiceInstanceResponse;
@@ -32,12 +32,12 @@ import org.springframework.cloud.servicebroker.service.ServiceInstanceService;
 import org.springframework.stereotype.Service;
 
 @Service
-public class KeyValueServiceInstanceService implements ServiceInstanceService {
+public class BookStoreServiceInstanceService implements ServiceInstanceService {
+	private final BookStoreService storeService;
 	private final ServiceInstanceRepository instanceRepository;
-	private final KeyValueStore store;
 
-	public KeyValueServiceInstanceService(KeyValueStore store, ServiceInstanceRepository instanceRepository) {
-		this.store = store;
+	public BookStoreServiceInstanceService(BookStoreService storeService, ServiceInstanceRepository instanceRepository) {
+		this.storeService = storeService;
 		this.instanceRepository = instanceRepository;
 	}
 
@@ -50,7 +50,7 @@ public class KeyValueServiceInstanceService implements ServiceInstanceService {
 		if (instanceRepository.existsById(instanceId)) {
 			responseBuilder.instanceExisted(true);
 		} else {
-			store.createMap(instanceId);
+			storeService.createBookStore(instanceId);
 			instanceRepository.save(new ServiceInstance(instanceId, request.getContext()));
 		}
 
@@ -67,7 +67,7 @@ public class KeyValueServiceInstanceService implements ServiceInstanceService {
 		String instanceId = request.getServiceInstanceId();
 
 		if (instanceRepository.existsById(instanceId)) {
-			store.deleteMap(instanceId);
+			storeService.deleteBookStore(instanceId);
 			instanceRepository.deleteById(instanceId);
 
 			return DeleteServiceInstanceResponse.builder().build();

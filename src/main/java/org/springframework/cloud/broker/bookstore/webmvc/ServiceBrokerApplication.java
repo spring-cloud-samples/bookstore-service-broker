@@ -14,30 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.broker.keyvalue.webmvc.model;
+package org.springframework.cloud.broker.bookstore.webmvc;
 
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import org.springframework.cloud.servicebroker.model.Context;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.keyvalue.annotation.KeySpace;
-
-@KeySpace("serviceInstances")
-public class ServiceInstance {
-	@Id
-	private final String instanceId;
-
-	private final Context context;
-
-	public ServiceInstance(String instanceId, Context context) {
-		this.instanceId = instanceId;
-		this.context = context;
-	}
-
-	public String getInstanceId() {
-		return instanceId;
-	}
-
-	public Context getContext() {
-		return context;
+@SpringBootApplication
+public class ServiceBrokerApplication {
+	public static void main(String[] args) {
+		SpringApplication.run(ServiceBrokerApplication.class, args);
 	}
 }

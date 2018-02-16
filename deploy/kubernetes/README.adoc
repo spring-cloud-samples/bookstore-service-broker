@@ -67,35 +67,35 @@ $ ./gradlew assemble dockerPush -PdockerGroup=[username]
 Create a namespace for the service broker application:
 
 ----
-$ kubectl create namespace keyvalue-broker
-namespace "keyvalue-broker" created
+$ kubectl create namespace bookstore-broker
+namespace "bookstore-broker" created
 ----
 
 Deploy the service broker application Docker image:
 
 ----
 $ kubectl create -f deploy/kubernetes/deployment.yml
-deployment "keyvalue-broker" created
+deployment "bookstore-broker" created
 ----
 
 Show the details of the deployed application:
 
 ----
-$ kubectl describe deployment keyvalue-broker -n keyvalue-broker
-Name:                   keyvalue-broker
-Namespace:              keyvalue-broker
-Labels:                 run=keyvalue-broker
+$ kubectl describe deployment bookstore-broker -n bookstore-broker
+Name:                   bookstore-broker
+Namespace:              bookstore-broker
+Labels:                 run=bookstore-broker
 Annotations:            deployment.kubernetes.io/revision=1
-Selector:               run=keyvalue-broker
+Selector:               run=bookstore-broker
 Replicas:               1 desired | 1 updated | 1 total | 1 available | 0 unavailable
 StrategyType:           RollingUpdate
 MinReadySeconds:        0
 RollingUpdateStrategy:  1 max unavailable, 1 max surge
 Pod Template:
-  Labels:  run=keyvalue-broker
+  Labels:  run=bookstore-broker
   Containers:
-   keyvalue-broker:
-    Image:        keyvalue-broker/keyvalue-broker:0.0.1.BUILD-SNAPSHOT
+   bookstore-broker:
+    Image:        sample/bookstore-service-broker:0.0.1.BUILD-SNAPSHOT
     Port:         8080/TCP
     Environment:  <none>
     Mounts:       <none>
@@ -105,11 +105,11 @@ Conditions:
   ----           ------  ------
   Available      True    MinimumReplicasAvailable
 OldReplicaSets:  <none>
-NewReplicaSet:   keyvalue-broker-6797f89fcb (1/1 replicas created)
+NewReplicaSet:   bookstore-broker-6797f89fcb (1/1 replicas created)
 Events:
   Type    Reason             Age   From                   Message
   ----    ------             ----  ----                   -------
-  Normal  ScalingReplicaSet  48s   deployment-controller  Scaled up replica set keyvalue-broker-6797f89fcb to 1
+  Normal  ScalingReplicaSet  48s   deployment-controller  Scaled up replica set bookstore-broker-6797f89fcb to 1
 ----
 
 It may take some time for the application to start. When it has started successfully, the `Replicas` row of the output should show `1 available`.
@@ -120,21 +120,21 @@ Create a Kubernetes service that exposes the service broker application outside 
 
 ----
 $ kubectl create -f deploy/kubernetes/service.yml
-service "keyvalue-broker" created
+service "bookstore-broker" created
 ----
 
 Show the details of the created service:
 
 ----
-$ kubectl describe service keyvalue-broker -n keyvalue-broker
-Name:                     keyvalue-broker
-Namespace:                keyvalue-broker
-Labels:                   run=keyvalue-broker
+$ kubectl describe service bookstore-broker -n bookstore-broker
+Name:                     bookstore-broker
+Namespace:                bookstore-broker
+Labels:                   run=bookstore-broker
 Annotations:              <none>
-Selector:                 run=keyvalue-broker
+Selector:                 run=bookstore-broker
 Type:                     NodePort
 IP:                       10.107.161.81
-Port:                     <unset>  8080/TCP
+Port:                     <unset>  80/TCP
 TargetPort:               8080/TCP
 NodePort:                 <unset>  32248/TCP
 Endpoints:
@@ -152,7 +152,7 @@ In order to verify that the service broker application is running, you will need
 When using `minikube`, the following command will show the URL that can be used to access the deployed application:
 
 ----
-$ minikube service keyvalue-broker --url
+$ minikube service bookstore-broker --url
 http://192.168.99.100:31742
 ----
 
@@ -160,7 +160,7 @@ Use the provided URL to access the `/v2/catalog` endpoint of the service broker 
 
 ----
 $ curl http://192.168.99.100:31742/v2/catalog -u admin:supersecret
-{"services":[{"id":"bdb1be2e-360b-495c-8115-d7697f9c6a9e","name":"key-value","description":"A simple key-value service","bindable":true,"plan_updateable":false,"plans":[{"id":"b973fb78-82f3-49ef-9b8b-c1876974a6cd","name":"standard","description":"A simple key-value plan","free":true}],"tags":["key-value","sample"]}]}
+{"services":[{"id":"bdb1be2e-360b-495c-8115-d7697f9c6a9e","name":"bookstore","description":"A simple book store service","bindable":true,"plan_updateable":false,"plans":[{"id":"b973fb78-82f3-49ef-9b8b-c1876974a6cd","name":"standard","description":"A simple book store plan","free":true}],"tags":["book-store","books","sample"]}]}
 ----
 
 === kubectl
@@ -168,15 +168,15 @@ $ curl http://192.168.99.100:31742/v2/catalog -u admin:supersecret
 Show the details of the service broker application service again:
 
 ----
-$ kubectl describe service keyvalue-broker -n keyvalue-broker
-Name:                     keyvalue-broker
-Namespace:                keyvalue-broker
-Labels:                   run=keyvalue-broker
+$ kubectl describe service bookstore-broker -n bookstore-broker
+Name:                     bookstore-broker
+Namespace:                bookstore-broker
+Labels:                   run=bookstore-broker
 Annotations:              <none>
-Selector:                 run=keyvalue-broker
+Selector:                 run=bookstore-broker
 Type:                     NodePort
 IP:                       10.107.161.81
-Port:                     <unset>  8080/TCP
+Port:                     <unset>  80/TCP
 TargetPort:               8080/TCP
 NodePort:                 <unset>  32248/TCP
 Endpoints:
@@ -190,30 +190,30 @@ Note the value of the `NodePort` row.
 Show a list of Kubernetes pods running in the cluster:
 
 ----
-$ kubectl get pods -n keyvalue-broker -o=wide
+$ kubectl get pods -n bookstore-broker -o=wide
 NAME                               READY     STATUS    IP            NODE
-keyvalue-broker-68f88cbbfb-vvmn4   1/1       Running   10.200.37.3   8ce76de4-4cfc-4bcd-b860-043a69cd2402
+bookstore-broker-68f88cbbfb-vvmn4   1/1       Running   10.200.37.3   8ce76de4-4cfc-4bcd-b860-043a69cd2402
 ----
 
-Note the value in the `NODE` column for the `keyvalue-broker` pod.
+Note the value in the `NODE` column for the `bookstore-broker` pod.
 
 Show a list of Kubernetes nodes running in the cluster:
 
 ----
-$ kubectl get nodes -n keyvalue-broker -o=wide
+$ kubectl get nodes -n bookstore-broker -o=wide
 NAME                                   STATUS    AGE       VERSION   EXTERNAL-IP
 2e45b4e3-1f9a-439e-b830-e051135f9e52   Ready     1d        v1.9.2    192.168.1.236
 8ce76de4-4cfc-4bcd-b860-043a69cd2402   Ready     1d        v1.9.2    192.168.1.235
 cf353f58-bb1a-45cf-8b18-96976f818c5f   Ready     1d        v1.9.2    192.168.1.234
 ----
 
-Note the value in the `EXTERNAL-IP` column of the node whose `NAME` matches the node for the `keyvalue-broker` pod.
+Note the value in the `EXTERNAL-IP` column of the node whose `NAME` matches the node for the `bookstore-broker` pod.
 
 Construct a URL using the IP address of the node and the port of the service, and use the this URL to access the `/v2/catalog` endpoint of the service broker application:
 
 ----
 $ curl http://192.168.1.235:32248/v2/catalog -u admin:supersecret
-{"services":[{"id":"bdb1be2e-360b-495c-8115-d7697f9c6a9e","name":"key-value","description":"A simple key-value service","bindable":true,"plan_updateable":false,"plans":[{"id":"b973fb78-82f3-49ef-9b8b-c1876974a6cd","name":"standard","description":"A simple key-value plan","free":true}],"tags":["key-value","sample"]}]}
+{"services":[{"id":"bdb1be2e-360b-495c-8115-d7697f9c6a9e","name":"bookstore","description":"A simple book store service","bindable":true,"plan_updateable":false,"plans":[{"id":"b973fb78-82f3-49ef-9b8b-c1876974a6cd","name":"standard","description":"A simple book store plan","free":true}],"tags":["book-store","books","sample"]}]}
 ----
 
 = Register and test the service broker
@@ -226,21 +226,21 @@ The Open Service Broker API endpoints in the service broker application are secu
 
 ----
 $ kubectl create -f deploy/kubernetes/service-broker-secret.yml
-secret "keyvalue-broker-secret" created
+secret "bookstore-broker-secret" created
 ----
 
 Register the service broker to the Service Catalog:     
 
 ----
 $ kubectl create -f deploy/kubernetes/service-broker.yml
-clusterservicebroker "keyvalue-broker" created
+clusterservicebroker "bookstore-broker" created
 ----
 
 Show the details of the registration:
 
 ----
-$ kubectl describe clusterservicebrokers keyvalue-broker
-Name:         keyvalue-broker
+$ kubectl describe clusterservicebrokers bookstore-broker
+Name:         bookstore-broker
 Namespace:
 Labels:       <none>
 Annotations:  <none>
@@ -251,18 +251,18 @@ Metadata:
     kubernetes-incubator/service-catalog
   Generation:        1
   Resource Version:  233
-  Self Link:         /apis/servicecatalog.k8s.io/v1beta1/clusterservicebrokers/keyvalue-broker
+  Self Link:         /apis/servicecatalog.k8s.io/v1beta1/clusterservicebrokers/bookstore-broker
   UID:               d36778a6-0ab1-11e8-aa16-0242ac110005
 Spec:
   Auth Info:
     Basic:
       Secret Ref:
-        Name:       keyvalue-broker-secret
-        Namespace:  keyvalue-broker
+        Name:       bookstore-broker-secret
+        Namespace:  bookstore-broker
   Relist Behavior:  Duration
   Relist Duration:  15m0s
   Relist Requests:  0
-  URL:              http://keyvalue-broker.keyvalue-broker.svc.cluster.local
+  URL:              http://bookstore-broker.bookstore-broker.svc.cluster.local
 Status:
   Conditions:
     Message: Successfully fetched catalog entries from broker.
@@ -282,7 +282,7 @@ Show the list of brokered service offerings advertised by the service broker:
 ----
 $ kubectl get clusterserviceclasses -o=custom-columns=NAME:.metadata.name,EXTERNAL\ NAME:.spec.externalName
 NAME                                   EXTERNAL NAME
-bdb1be2e-360b-495c-8115-d7697f9c6a9e   key-value
+bdb1be2e-360b-495c-8115-d7697f9c6a9e   bookstore
 ----
 
 Show the details of the brokered service offering:
@@ -299,13 +299,14 @@ metadata:
 spec:
   bindable: true
   bindingRetrievable: false
-  clusterServiceBrokerName: keyvalue-broker
-  description: A simple key-value service
+  clusterServiceBrokerName: bookstore-broker
+  description: A simple book store service
   externalID: bdb1be2e-360b-495c-8115-d7697f9c6a9e
-  externalName: key-value
+  externalName: bookstore
   planUpdatable: false
   tags:
-  - key-value
+  - book-store
+  - books
   - sample
 status:
   removedFromBrokerCatalog: false
@@ -333,10 +334,10 @@ metadata:
   selfLink: /apis/servicecatalog.k8s.io/v1beta1/clusterserviceplans/b973fb78-82f3-49ef-9b8b-c1876974a6cd
   uid: 427ca7e7-0acb-11e8-aa16-0242ac110005
 spec:
-  clusterServiceBrokerName: keyvalue-broker
+  clusterServiceBrokerName: bookstore-broker
   clusterServiceClassRef:
     name: bdb1be2e-360b-495c-8115-d7697f9c6a9e
-  description: A simple key-value plan
+  description: A simple book store plan
   externalID: b973fb78-82f3-49ef-9b8b-c1876974a6cd
   externalName: standard
   free: true
@@ -359,14 +360,14 @@ Create an instance of a brokered service from the sample service broker:
 
 ----
 $ kubectl create -f deploy/kubernetes/service-instance.yml
-serviceinstance "keyvalue-instance" created
+serviceinstance "bookstore-instance" created
 ----
 
 Show the details of the created service instance:
 
 ----
-$ kubectl describe serviceinstance keyvalue-instance -n test
-Name:         keyvalue-instance
+$ kubectl describe serviceinstance bookstore-instance -n test
+Name:         bookstore-instance
 Namespace:    test
 Labels:       <none>
 Annotations:  <none>
@@ -377,10 +378,10 @@ Metadata:
     kubernetes-incubator/service-catalog
   Generation:        1
   Resource Version:  2364
-  Self Link:         /apis/servicecatalog.k8s.io/v1beta1/namespaces/test/serviceinstances/keyvalue-instance
+  Self Link:         /apis/servicecatalog.k8s.io/v1beta1/namespaces/test/serviceinstances/bookstore-instance
   UID:               3f533993-0acd-11e8-aa16-0242ac110005
 Spec:
-  Cluster Service Class External Name:  key-value
+  Cluster Service Class External Name:  bookstore
   Cluster Service Class Ref:
     Name:                              bdb1be2e-360b-495c-8115-d7697f9c6a9e
   Cluster Service Plan External Name:  standard
@@ -418,14 +419,14 @@ Create a service binding for the service instance:
 
 ----
 $ kubectl create -f deploy/kubernetes/service-binding.yml
-servicebinding "keyvalue-binding" created
+servicebinding "bookstore-binding" created
 ----
 
 Show the details of the created service binding:
 
 ----
-$ kubectl describe servicebinding keyvalue-binding -n test
-Name:         keyvalue-binding
+$ kubectl describe servicebinding bookstore-binding -n test
+Name:         bookstore-binding
 Namespace:    test
 Labels:       <none>
 Annotations:  <none>
@@ -436,13 +437,13 @@ Metadata:
     kubernetes-incubator/service-catalog
   Generation:        1
   Resource Version:  2427
-  Self Link:         /apis/servicecatalog.k8s.io/v1beta1/namespaces/test/servicebindings/keyvalue-binding
+  Self Link:         /apis/servicecatalog.k8s.io/v1beta1/namespaces/test/servicebindings/bookstore-binding
   UID:               d2aa53b4-0acd-11e8-aa16-0242ac110005
 Spec:
   External ID:  2464fe07-fc7f-489e-a508-e47370f69eb1
   Instance Ref:
-    Name:       keyvalue-instance
-  Secret Name:  keyvalue-binding
+    Name:       bookstore-instance
+  Secret Name:  bookstore-binding
 Status:
   Async Op In Progress:  false
   Conditions:
@@ -463,8 +464,8 @@ Events:
 Service bindings are exposed via Kubernetes secret objects. Show the details of the secret containing the binding credentials:
 
 ----
-$ kubectl describe secret keyvalue-binding -n test
-Name:         keyvalue-binding
+$ kubectl describe secret bookstore-binding -n test
+Name:         bookstore-binding
 Namespace:    test
 Labels:       <none>
 Annotations:  <none>

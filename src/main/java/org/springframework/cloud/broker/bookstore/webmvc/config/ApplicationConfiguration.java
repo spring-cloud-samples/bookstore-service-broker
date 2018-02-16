@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.broker.keyvalue.webmvc.config;
+package org.springframework.cloud.broker.bookstore.webmvc.config;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnCloudPlatform;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.cloud.CloudPlatform;
-import org.springframework.cloud.broker.keyvalue.webmvc.model.ApplicationInformation;
+import org.springframework.cloud.broker.bookstore.webmvc.model.ApplicationInformation;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;

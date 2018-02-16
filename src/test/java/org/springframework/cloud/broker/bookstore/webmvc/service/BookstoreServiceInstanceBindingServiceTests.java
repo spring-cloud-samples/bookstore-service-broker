@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.broker.keyvalue.webmvc.service;
+package org.springframework.cloud.broker.bookstore.webmvc.service;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.springframework.cloud.broker.keyvalue.webmvc.model.ApplicationInformation;
-import org.springframework.cloud.broker.keyvalue.webmvc.model.ServiceBinding;
-import org.springframework.cloud.broker.keyvalue.webmvc.repository.ServiceBindingRepository;
+import org.springframework.cloud.broker.bookstore.webmvc.model.ApplicationInformation;
+import org.springframework.cloud.broker.bookstore.webmvc.model.ServiceBinding;
+import org.springframework.cloud.broker.bookstore.webmvc.repository.ServiceBindingRepository;
 import org.springframework.cloud.servicebroker.exception.ServiceInstanceBindingDoesNotExistException;
 import org.springframework.cloud.servicebroker.model.Context;
 import org.springframework.cloud.servicebroker.model.bindings.CreateServiceInstanceAppBindingResponse;
@@ -42,7 +42,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-public class KeyValueServiceInstanceBindingServiceTests {
+public class BookstoreServiceInstanceBindingServiceTests {
 	private static final String SERVICE_INSTANCE_ID = "instance-id";
 	private static final String SERVICE_BINDING_ID = "binding-id";
 	private static final String BASE_URL = "https://localhost:8080";
@@ -50,7 +50,7 @@ public class KeyValueServiceInstanceBindingServiceTests {
 	@Mock
 	private ServiceBindingRepository repository;
 
-	private KeyValueServiceInstanceBindingService service;
+	private BookStoreServiceInstanceBindingService service;
 
 	@Before
 	public void setUp() {
@@ -60,7 +60,7 @@ public class KeyValueServiceInstanceBindingServiceTests {
 
 		User user = new User("testuser", "testpassword", Collections.emptyList());
 
-		service = new KeyValueServiceInstanceBindingService(repository, appInfo, user);
+		service = new BookStoreServiceInstanceBindingService(repository, appInfo, user);
 	}
 	
 	@Test
@@ -87,7 +87,7 @@ public class KeyValueServiceInstanceBindingServiceTests {
 
 		assertThat(credentials.get("uri").toString())
 			.startsWith(BASE_URL)
-			.endsWith("keyvalue/" + SERVICE_INSTANCE_ID);
+			.endsWith("bookstore/" + SERVICE_INSTANCE_ID);
 
 		assertThat(credentials.get("username").toString()).isEqualTo("testuser");
 		assertThat(credentials.get("password").toString()).isEqualTo("testpassword");

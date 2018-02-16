@@ -14,16 +14,10 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.broker.keyvalue.webmvc.model;
+package org.springframework.cloud.broker.bookstore.webmvc.repository;
 
-public class ApplicationInformation {
-	private final String baseUrl;
+import org.springframework.cloud.broker.bookstore.webmvc.model.ServiceBinding;
+import org.springframework.data.repository.CrudRepository;
 
-	public ApplicationInformation(String baseUrl) {
-		this.baseUrl = baseUrl;
-	}
-
-	public String getBaseUrl() {
-		return baseUrl;
-	}
+public interface ServiceBindingRepository extends CrudRepository<ServiceBinding, String> {
 }

@@ -1,12 +1,12 @@
 apiVersion: servicecatalog.k8s.io/v1beta1
 kind: ServiceInstance
 metadata:
-  name: keyvalue-instance
+  name: bookstore-instance
   namespace: test
   labels:
-    run: keyvalue-broker
+    run: bookstore-broker
 spec:
-  clusterServiceClassExternalName: key-value
+  clusterServiceClassExternalName: bookstore
   clusterServicePlanExternalName: standard
   parameters:
     max: 10

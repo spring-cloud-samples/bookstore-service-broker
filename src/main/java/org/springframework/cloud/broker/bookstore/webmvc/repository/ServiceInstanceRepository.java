@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.broker.keyvalue.webmvc.repository;
+package org.springframework.cloud.broker.bookstore.webmvc.repository;
 
-import org.springframework.cloud.broker.keyvalue.webmvc.model.ServiceInstance;
+import org.springframework.cloud.broker.bookstore.webmvc.model.ServiceInstance;
 import org.springframework.data.repository.CrudRepository;
 
 public interface ServiceInstanceRepository extends CrudRepository<ServiceInstance, String> {

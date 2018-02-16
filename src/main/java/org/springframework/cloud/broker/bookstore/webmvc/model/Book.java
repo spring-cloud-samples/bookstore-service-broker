@@ -14,10 +14,34 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.broker.keyvalue.webmvc.repository;
+package org.springframework.cloud.broker.bookstore.webmvc.model;
 
-import org.springframework.cloud.broker.keyvalue.webmvc.model.ServiceBinding;
-import org.springframework.data.repository.CrudRepository;
+public class Book {
+	private final String id;
+	private final String isbn;
+	private final String title;
+	private final String author;
 
-public interface ServiceBindingRepository extends CrudRepository<ServiceBinding, String> {
+	public Book(String id, String isbn, String title, String author) {
+		this.id = id;
+		this.isbn = isbn;
+		this.title = title;
+		this.author = author;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public String getIsbn() {
+		return isbn;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public String getAuthor() {
+		return author;
+	}
 }

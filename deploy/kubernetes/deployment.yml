@@ -1,22 +1,22 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: keyvalue-broker
-  namespace: keyvalue-broker
+  name: bookstore-broker
+  namespace: bookstore-broker
   labels:
-    run: keyvalue-broker
+    run: bookstore-broker
 spec:
   replicas: 1
   selector:
     matchLabels:
-      run: keyvalue-broker
+      run: bookstore-broker
   template:
     metadata:
       labels:
-        run: keyvalue-broker
+        run: bookstore-broker
     spec:
       containers:
-      - image: scottyfred/keyvalue-broker:0.0.1.BUILD-SNAPSHOT
-        name: keyvalue-broker
+      - image: sample/bookstore-service-broker:0.0.1.BUILD-SNAPSHOT
+        name: bookstore-broker
         ports:
         - containerPort: 8080

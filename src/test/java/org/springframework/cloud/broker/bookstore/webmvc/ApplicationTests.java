@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.broker.keyvalue.webmvc;
+package org.springframework.cloud.broker.bookstore.webmvc;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
