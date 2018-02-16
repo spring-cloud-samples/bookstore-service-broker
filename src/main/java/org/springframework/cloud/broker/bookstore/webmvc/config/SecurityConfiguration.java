@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.broker.bookstore.webmvc.config;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,7 +24,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
 @Configuration
@@ -47,18 +45,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
-	public UserDetailsService userDetailsService() {
-		return new InMemoryUserDetailsManager(adminUser(), defaultUser());
-	}
-
-	@Bean
-	@Qualifier("defaultUser")
-	public UserDetails defaultUser() {
-		return User.withDefaultPasswordEncoder()
-				.username("user")
-				.password("secret")
-				.roles("USER")
-				.build();
+	public InMemoryUserDetailsManager userDetailsService() {
+		return new InMemoryUserDetailsManager(adminUser());
 	}
 
 	private UserDetails adminUser() {

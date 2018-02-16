@@ -17,20 +17,14 @@
 package org.springframework.cloud.broker.bookstore.webmvc.model;
 
 public class Book {
-	private final String id;
 	private final String isbn;
 	private final String title;
 	private final String author;
 
-	public Book(String id, String isbn, String title, String author) {
-		this.id = id;
+	public Book(String isbn, String title, String author) {
 		this.isbn = isbn;
 		this.title = title;
 		this.author = author;
-	}
-
-	public String getId() {
-		return id;
 	}
 
 	public String getIsbn() {

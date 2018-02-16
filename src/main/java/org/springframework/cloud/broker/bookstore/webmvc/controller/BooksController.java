@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/bookstore")
@@ -41,14 +42,20 @@ public class BooksController {
 		this.bookStoreService = bookStoreService;
 	}
 
-	@GetMapping("/{bookStoreId}/books/{bookId}")
-	public Map<String, Book> get(@PathVariable String bookStoreId, @PathVariable String bookId) {
+	@PutMapping("/{bookStoreId}/books")
+	public Map<String, Book> put(@PathVariable String bookStoreId, @RequestBody Book book) {
+		String bookId = UUID.randomUUID().toString();
+		bookStoreService.putBookInStore(bookStoreId, bookId, book);
 		return Collections.singletonMap(bookId, bookStoreService.getBookFromStore(bookStoreId, bookId));
 	}
 
-	@PutMapping("/{bookStoreId}/books/{bookId}")
-	public Map<String, Book> put(@PathVariable String bookStoreId, @PathVariable String bookId, @RequestBody Book book) {
-		bookStoreService.putBookInStore(bookStoreId, bookId, book);
+	@GetMapping("/{bookStoreId}/books")
+	public Map<String, Book> getAll(@PathVariable String bookStoreId) {
+		return bookStoreService.getBookStore(bookStoreId);
+	}
+
+	@GetMapping("/{bookStoreId}/books/{bookId}")
+	public Map<String, Book> get(@PathVariable String bookStoreId, @PathVariable String bookId) {
 		return Collections.singletonMap(bookId, bookStoreService.getBookFromStore(bookStoreId, bookId));
 	}
 
@@ -58,7 +65,7 @@ public class BooksController {
 	}
 
 	@ExceptionHandler(IllegalArgumentException.class)
-	public ResponseEntity<Map<String, String>> badInstanceId(IllegalArgumentException e) {
+	public ResponseEntity<Map<String, String>> badBookStoreId(IllegalArgumentException e) {
 		Map<String, String> responseBody = Collections.singletonMap("errorMessage", e.getMessage());
 		return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
 	}

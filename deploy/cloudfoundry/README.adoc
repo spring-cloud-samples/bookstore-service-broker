@@ -1,3 +1,5 @@
+= Deploy to Cloud Foundry
+
 This document contains instructions for deploying the sample service broker to a Cloud Foundry foundation.
 
 All instructions below assume that the commands are being run from the root of the project repository.
@@ -175,10 +177,34 @@ $ cf service-key my-bookstore my-bookstore-binding
 Getting key my-bookstore-binding for service instance my-bookstore as user@example.com...
 
 {
- "password": "{bcrypt}$2a$10$gJqlA/YKBKzCMBgfSlvr3OGyrbLvBVPWi/pgYrEHOTQEpN7FO.hvq",
- "uri": "https://bookstore-service-broker.apps.example.com/bookstore/ccd45032-5ac9-487a-a37a-506eb65b0cf9",
- "username": "user"
+ "password": "b371a19a-cab3-4ee1-9675-6b6cd9493952",
+ "uri": "https://bookstore-service-broker.apps.example.com/bookstore/ccd45032-5ac9-487a-a37a-506eb65b0cf9/books",
+ "username": "55519803-3d8a-4fd4-a17e-e2096ebed9b7"
 }
 ----
 
+== Use a service instance
 
+Using the URI and credentials from the service binding, you can access the book store provisioned for the service instance:
+
+----
+# add a book
+$ curl https://bookstore-service-broker.apps.example.com/bookstore/ccd45032-5ac9-487a-a37a-506eb65b0cf9/books -u 55519803-3d8a-4fd4-a17e-e2096ebed9b7:b371a19a-cab3-4ee1-9675-6b6cd9493952 -H "Content-Type: application/json" -X PUT -d '{"isbn":"978-1617292545","title":"Spring Boot in Action", "author":"Craig Walls"}'
+
+{"e44db6d7-506a-48e4-9446-44301dd559e6":{"isbn":"978-1617292545","title":"Spring Boot in Action","author":"Craig Walls"}}%
+
+# add another book
+$ curl https://bookstore-service-broker.apps.example.com/bookstore/ccd45032-5ac9-487a-a37a-506eb65b0cf9/books -u 55519803-3d8a-4fd4-a17e-e2096ebed9b7:b371a19a-cab3-4ee1-9675-6b6cd9493952 -H "Content-Type: application/json" -X PUT -d '{"isbn":"978-1784393021","title":"Learning Spring Boot", "author":"Greg L. Turnquist"}'
+
+{"67370877-e55d-4c6a-92ed-700551d55910":{"isbn":"978-1784393021","title":"Learning Spring Boot","author":"Greg L. Turnquist"}}%
+
+# add a list of book
+$ curl https://bookstore-service-broker.apps.example.com/bookstore/ccd45032-5ac9-487a-a37a-506eb65b0cf9/books -u 55519803-3d8a-4fd4-a17e-e2096ebed9b7:b371a19a-cab3-4ee1-9675-6b6cd9493952 -H "Content-Type: application/json"
+
+{"e44db6d7-506a-48e4-9446-44301dd559e6":{"isbn":"978-1617292545","title":"Spring Boot in Action","author":"Craig Walls"},"67370877-e55d-4c6a-92ed-700551d55910":{"isbn":"978-1784393021","title":"Learning Spring Boot","author":"Greg L. Turnquist"}}%
+
+# remove a book
+$ curl -k https://bookstore-service-broker.apps.example.com/bookstore/ccd45032-5ac9-487a-a37a-506eb65b0cf9/books/e44db6d7-506a-48e4-9446-44301dd559e6 -u 55519803-3d8a-4fd4-a17e-e2096ebed9b7:b371a19a-cab3-4ee1-9675-6b6cd9493952 -H "Content-Type: application/json" -X DELETE
+
+{"e44db6d7-506a-48e4-9446-44301dd559e6":{"isbn":"978-1617292545","title":"Spring Boot in Action","author":"Craig Walls"}}%
+----

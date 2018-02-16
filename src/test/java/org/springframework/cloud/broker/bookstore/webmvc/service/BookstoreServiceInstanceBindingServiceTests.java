@@ -30,8 +30,8 @@ import org.springframework.cloud.servicebroker.model.bindings.CreateServiceInsta
 import org.springframework.cloud.servicebroker.model.bindings.CreateServiceInstanceBindingResponse;
 import org.springframework.cloud.servicebroker.model.bindings.DeleteServiceInstanceBindingRequest;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -50,6 +50,9 @@ public class BookstoreServiceInstanceBindingServiceTests {
 	@Mock
 	private ServiceBindingRepository repository;
 
+	@Mock
+	private InMemoryUserDetailsManager userService;
+
 	private BookStoreServiceInstanceBindingService service;
 
 	@Before
@@ -58,9 +61,7 @@ public class BookstoreServiceInstanceBindingServiceTests {
 
 		ApplicationInformation appInfo = new ApplicationInformation(BASE_URL);
 
-		User user = new User("testuser", "testpassword", Collections.emptyList());
-
-		service = new BookStoreServiceInstanceBindingService(repository, appInfo, user);
+		service = new BookStoreServiceInstanceBindingService(repository, appInfo, userService);
 	}
 	
 	@Test
@@ -87,18 +88,20 @@ public class BookstoreServiceInstanceBindingServiceTests {
 
 		assertThat(credentials.get("uri").toString())
 			.startsWith(BASE_URL)
-			.endsWith("bookstore/" + SERVICE_INSTANCE_ID);
+			.endsWith("bookstore/" + SERVICE_INSTANCE_ID + "/books");
 
-		assertThat(credentials.get("username").toString()).isEqualTo("testuser");
-		assertThat(credentials.get("password").toString()).isEqualTo("testpassword");
+		ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+		verify(userService).createUser(userCaptor.capture());
+		User actualUser = userCaptor.getValue();
+		assertThat(actualUser.getUsername()).isEqualTo(SERVICE_BINDING_ID);
 
 		verify(repository).findById(SERVICE_BINDING_ID);
 
-		ArgumentCaptor<ServiceBinding> argumentCaptor = ArgumentCaptor.forClass(ServiceBinding.class);
-		verify(repository).save(argumentCaptor.capture());
-		ServiceBinding actual = argumentCaptor.getValue();
-		assertThat(actual.getBindingId()).isEqualTo(SERVICE_BINDING_ID);
-		assertThat(actual.getCredentials()).isEqualTo(credentials);
+		ArgumentCaptor<ServiceBinding> repositoryCaptor = ArgumentCaptor.forClass(ServiceBinding.class);
+		verify(repository).save(repositoryCaptor.capture());
+		ServiceBinding actualBinding = repositoryCaptor.getValue();
+		assertThat(actualBinding.getBindingId()).isEqualTo(SERVICE_BINDING_ID);
+		assertThat(actualBinding.getCredentials()).isEqualTo(credentials);
 
 		verifyNoMoreInteractions(repository);
 	}
@@ -147,6 +150,9 @@ public class BookstoreServiceInstanceBindingServiceTests {
 		verify(repository).existsById(SERVICE_BINDING_ID);
 		verify(repository).deleteById(SERVICE_BINDING_ID);
 		verifyNoMoreInteractions(repository);
+
+		verify(userService).deleteUser(SERVICE_BINDING_ID);
+		verifyNoMoreInteractions(userService);
 	}
 
 	@Test(expected = ServiceInstanceBindingDoesNotExistException.class)

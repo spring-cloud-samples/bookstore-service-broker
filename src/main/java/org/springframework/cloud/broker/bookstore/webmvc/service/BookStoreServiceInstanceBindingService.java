@@ -16,54 +16,62 @@
 
 package org.springframework.cloud.broker.bookstore.webmvc.service;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.broker.bookstore.webmvc.model.ApplicationInformation;
 import org.springframework.cloud.broker.bookstore.webmvc.model.ServiceBinding;
 import org.springframework.cloud.broker.bookstore.webmvc.repository.ServiceBindingRepository;
 import org.springframework.cloud.servicebroker.exception.ServiceInstanceBindingDoesNotExistException;
 import org.springframework.cloud.servicebroker.model.bindings.CreateServiceInstanceAppBindingResponse;
+import org.springframework.cloud.servicebroker.model.bindings.CreateServiceInstanceAppBindingResponse.CreateServiceInstanceAppBindingResponseBuilder;
 import org.springframework.cloud.servicebroker.model.bindings.CreateServiceInstanceBindingRequest;
 import org.springframework.cloud.servicebroker.model.bindings.CreateServiceInstanceBindingResponse;
 import org.springframework.cloud.servicebroker.model.bindings.DeleteServiceInstanceBindingRequest;
 import org.springframework.cloud.servicebroker.service.ServiceInstanceBindingService;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class BookStoreServiceInstanceBindingService implements ServiceInstanceBindingService {
 	private final ServiceBindingRepository repository;
 	private final ApplicationInformation applicationInformation;
-	private final UserDetails defaultUser;
+	private final InMemoryUserDetailsManager userService;
 
 	public BookStoreServiceInstanceBindingService(ServiceBindingRepository repository,
 												  ApplicationInformation applicationInformation,
-												  @Qualifier("defaultUser") UserDetails defaultUser) {
+												  InMemoryUserDetailsManager userService) {
 		this.repository = repository;
 		this.applicationInformation = applicationInformation;
-		this.defaultUser = defaultUser;
+		this.userService = userService;
 	}
 
 	@Override
 	public CreateServiceInstanceBindingResponse createServiceInstanceBinding(CreateServiceInstanceBindingRequest request) {
+		CreateServiceInstanceAppBindingResponseBuilder responseBuilder =
+				CreateServiceInstanceAppBindingResponse.builder();
+
 		Optional<ServiceBinding> binding = repository.findById(request.getBindingId());
 
-		Map<String, Object> credentials;
 		if (binding.isPresent()) {
-			credentials = binding.get().getCredentials();
+			responseBuilder
+					.bindingExisted(true)
+					.credentials(binding.get().getCredentials());
 		} else {
-			credentials = buildCredentials(request.getServiceInstanceId());
+			Map<String, Object> credentials = buildCredentials(request.getServiceInstanceId(), request.getBindingId());
+			
+			responseBuilder
+					.bindingExisted(false)
+					.credentials(credentials);
+
 			persistBinding(request, credentials);
 		}
 
-		return CreateServiceInstanceAppBindingResponse.builder()
-				.bindingExisted(binding.isPresent())
-				.credentials(credentials)
-				.build();
+		return responseBuilder.build();
 	}
 
 	@Override
@@ -71,30 +79,51 @@ public class BookStoreServiceInstanceBindingService implements ServiceInstanceBi
 		String bindingId = request.getBindingId();
 
 		if (repository.existsById(bindingId)) {
+			userService.deleteUser(bindingId);
 			repository.deleteById(bindingId);
 		} else {
 			throw new ServiceInstanceBindingDoesNotExistException(bindingId);
 		}
 	}
 
-	private Map<String, Object> buildCredentials(String id) {
-		String uri = UriComponentsBuilder
-				.fromUriString(applicationInformation.getBaseUrl())
-				.pathSegment("bookstore", id)
-				.build()
-				.toUriString();
+	private Map<String, Object> buildCredentials(String instanceId, String bindingId) {
+		String uri = buildUri(instanceId);
+
+		String password = createUser(bindingId);
 
 		Map<String, Object> credentials = new HashMap<>();
 		credentials.put("uri", uri);
-		credentials.put("username", defaultUser.getUsername());
-		credentials.put("password", defaultUser.getPassword());
+		credentials.put("username", bindingId);
+		credentials.put("password", password);
 
 		return credentials;
 	}
 
+	private String buildUri(String instanceId) {
+		return UriComponentsBuilder
+					.fromUriString(applicationInformation.getBaseUrl())
+					.pathSegment("bookstore", instanceId)
+					.pathSegment("books")
+					.build()
+					.toUriString();
+	}
+
+	private String createUser(String username) {
+		String password = UUID.randomUUID().toString();
+
+		userService.createUser(
+				User.withDefaultPasswordEncoder()
+						.username(username)
+						.password(password)
+						.roles("USER")
+						.build());
+
+		return password;
+	}
+
 	private void persistBinding(CreateServiceInstanceBindingRequest request, Map<String, Object> credentials) {
-		ServiceBinding serviceBinding = new ServiceBinding(request.getBindingId(), request.getContext(),
-				credentials);
+		ServiceBinding serviceBinding =
+				new ServiceBinding(request.getBindingId(), request.getContext(), credentials);
 		repository.save(serviceBinding);
 	}
 }

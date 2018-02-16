@@ -31,7 +31,7 @@ public class BookStoreService {
 		maps.put(id, new BookStore());
 	}
 
-	private BookStore getBookStore(String storeId) {
+	public BookStore getBookStore(String storeId) {
 		BookStore store = maps.get(storeId);
 		if (store == null) {
 			throw new IllegalArgumentException("Invalid book store ID " + storeId + ".");
