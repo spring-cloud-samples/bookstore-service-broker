@@ -21,10 +21,10 @@ import org.springframework.cloud.broker.keyvalue.webmvc.model.ApplicationInforma
 import org.springframework.cloud.broker.keyvalue.webmvc.model.ServiceBinding;
 import org.springframework.cloud.broker.keyvalue.webmvc.repository.ServiceBindingRepository;
 import org.springframework.cloud.servicebroker.exception.ServiceInstanceBindingDoesNotExistException;
-import org.springframework.cloud.servicebroker.model.CreateServiceInstanceAppBindingResponse;
-import org.springframework.cloud.servicebroker.model.CreateServiceInstanceBindingRequest;
-import org.springframework.cloud.servicebroker.model.CreateServiceInstanceBindingResponse;
-import org.springframework.cloud.servicebroker.model.DeleteServiceInstanceBindingRequest;
+import org.springframework.cloud.servicebroker.model.bindings.CreateServiceInstanceAppBindingResponse;
+import org.springframework.cloud.servicebroker.model.bindings.CreateServiceInstanceBindingRequest;
+import org.springframework.cloud.servicebroker.model.bindings.CreateServiceInstanceBindingResponse;
+import org.springframework.cloud.servicebroker.model.bindings.DeleteServiceInstanceBindingRequest;
 import org.springframework.cloud.servicebroker.service.ServiceInstanceBindingService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
