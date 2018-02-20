@@ -22,17 +22,24 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class BookStoreService {
-	private final Map<String, BookStore> maps = new HashMap<>();
+	private final Map<String, BookStore> bookStoreById = new HashMap<>();
 
-	public void createBookStore(String id) {
-		maps.put(id, new BookStore());
+	public BookStore createBookStore(String storeId) {
+		BookStore bookStore = new BookStore(storeId);
+		bookStoreById.put(storeId, bookStore);
+		return bookStore;
+	}
+
+	public BookStore createBookStore() {
+		return createBookStore(generateRandomId());
 	}
 
 	public BookStore getBookStore(String storeId) {
-		BookStore store = maps.get(storeId);
+		BookStore store = bookStoreById.get(storeId);
 		if (store == null) {
 			throw new IllegalArgumentException("Invalid book store ID " + storeId + ".");
 		}
@@ -40,12 +47,15 @@ public class BookStoreService {
 	}
 
 	public void deleteBookStore(String id) {
-		maps.remove(id);
+		bookStoreById.remove(id);
 	}
 
-	public Book putBookInStore(String storeId, String bookId, Book book) {
+	public Book putBookInStore(String storeId, Book book) {
+		String bookId = generateRandomId();
+		Book bookWithId = new Book(bookId, book);
+
 		BookStore store = getBookStore(storeId);
-		return store.put(bookId, book);
+		return store.put(bookId, bookWithId);
 	}
 
 	public Book getBookFromStore(String storeId, String bookId) {
@@ -56,5 +66,9 @@ public class BookStoreService {
 	public Book removeBookFromStore(String storeId, String bookId) {
 		BookStore store = getBookStore(storeId);
 		return store.remove(bookId);
+	}
+
+	private String generateRandomId() {
+		return UUID.randomUUID().toString();
 	}
 }

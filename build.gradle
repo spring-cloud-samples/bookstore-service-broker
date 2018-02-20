@@ -53,6 +53,8 @@ dependencies {
 	compile('org.springframework.boot:spring-boot-starter-web')
 	compile('org.springframework.boot:spring-boot-starter-actuator')
 	compile('org.springframework.boot:spring-boot-starter-security')
+	compile('org.springframework.hateoas:spring-hateoas:0.24.0.RELEASE')
+
 	runtime('org.springframework.boot:spring-boot-devtools')
 
 	compile('org.springframework.cloud:spring-cloud-open-service-broker-starter-webmvc:2.0.0.BUILD-SNAPSHOT')

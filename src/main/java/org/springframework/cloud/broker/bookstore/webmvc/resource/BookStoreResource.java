@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.broker.bookstore.webmvc.model;
+package org.springframework.cloud.broker.bookstore.webmvc.resource;
 
-import org.springframework.hateoas.Identifiable;
+import org.springframework.hateoas.ResourceSupport;
 
-import java.util.HashMap;
+import java.util.Collection;
 
-public class BookStore extends HashMap<String, Book> implements Identifiable<String> {
-	private final String id;
+@SuppressWarnings("unused")
+public class BookStoreResource extends ResourceSupport {
+	private final Collection<BookResource> bookResources;
 
-	public BookStore(String id) {
-		this.id = id;
+	BookStoreResource(Collection<BookResource> bookResources) {
+		this.bookResources = bookResources;
 	}
 
-	@Override
-	public String getId() {
-		return this.id;
+	public Collection<BookResource> getBookResources() {
+		return bookResources;
 	}
 }

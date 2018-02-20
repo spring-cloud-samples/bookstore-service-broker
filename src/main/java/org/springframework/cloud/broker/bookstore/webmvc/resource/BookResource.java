@@ -14,45 +14,28 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.broker.bookstore.webmvc.model;
+package org.springframework.cloud.broker.bookstore.webmvc.resource;
 
-import org.springframework.hateoas.Identifiable;
+import org.springframework.cloud.broker.bookstore.webmvc.model.Book;
+import org.springframework.hateoas.ResourceSupport;
 
-public class Book implements Identifiable<String> {
-	private final String id;
-	private final String isbn;
-	private final String title;
-	private final String author;
+@SuppressWarnings("unused")
+public class BookResource extends ResourceSupport {
+	private final Book book;
 
-	@SuppressWarnings("unused")
-	private Book() {
-		this.id = null;
-		this.isbn = null;
-		this.title = null;
-		this.author = null;
-	}
-
-	public Book(String id, Book book) {
-		this.id = id;
-		this.isbn = book.getIsbn();
-		this.title = book.getTitle();
-		this.author = book.getAuthor();
-	}
-
-	@Override
-	public String getId() {
-		return this.id;
+	BookResource(Book book) {
+		this.book = book;
 	}
 
 	public String getIsbn() {
-		return this.isbn;
+		return book.getIsbn();
 	}
 
 	public String getTitle() {
-		return this.title;
+		return book.getTitle();
 	}
 
 	public String getAuthor() {
-		return this.author;
+		return book.getAuthor();
 	}
 }

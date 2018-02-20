@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.broker.bookstore.webmvc.model;
+package org.springframework.cloud.broker.bookstore.webmvc.controller;
 
-import org.springframework.hateoas.Identifiable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.Map;
 
-public class BookStore extends HashMap<String, Book> implements Identifiable<String> {
-	private final String id;
-
-	public BookStore(String id) {
-		this.id = id;
-	}
-
-	@Override
-	public String getId() {
-		return this.id;
+public class BaseController {
+	@ExceptionHandler(IllegalArgumentException.class)
+	public ResponseEntity<Map<String, String>> badBookStoreId(IllegalArgumentException e) {
+		Map<String, String> responseBody = Collections.singletonMap("errorMessage", e.getMessage());
+		return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
 	}
 }

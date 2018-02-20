@@ -16,57 +16,49 @@
 
 package org.springframework.cloud.broker.bookstore.webmvc.controller;
 
-import org.springframework.cloud.broker.bookstore.webmvc.model.Book;
+import org.springframework.cloud.broker.bookstore.webmvc.model.BookStore;
+import org.springframework.cloud.broker.bookstore.webmvc.resource.BookStoreResource;
+import org.springframework.cloud.broker.bookstore.webmvc.resource.BookStoreResourceAssembler;
 import org.springframework.cloud.broker.bookstore.webmvc.service.BookStoreService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collections;
 import java.util.Map;
-import java.util.UUID;
 
 @RestController
-@RequestMapping("/bookstore")
-public class BooksController {
+@RequestMapping("/bookstores")
+public class BookStoreController extends BaseController {
 	private final BookStoreService bookStoreService;
 
-	public BooksController(BookStoreService bookStoreService) {
+	public BookStoreController(BookStoreService bookStoreService) {
 		this.bookStoreService = bookStoreService;
 	}
 
-	@PutMapping("/{bookStoreId}/books")
-	public Map<String, Book> put(@PathVariable String bookStoreId, @RequestBody Book book) {
-		String bookId = UUID.randomUUID().toString();
-		bookStoreService.putBookInStore(bookStoreId, bookId, book);
-		return Collections.singletonMap(bookId, bookStoreService.getBookFromStore(bookStoreId, bookId));
+	@PutMapping
+	public ResponseEntity<BookStoreResource> addBooks() {
+		BookStore bookStore = bookStoreService.createBookStore();
+		return createResponse(bookStore);
 	}
 
-	@GetMapping("/{bookStoreId}/books")
-	public Map<String, Book> getAll(@PathVariable String bookStoreId) {
-		return bookStoreService.getBookStore(bookStoreId);
-	}
-
-	@GetMapping("/{bookStoreId}/books/{bookId}")
-	public Map<String, Book> get(@PathVariable String bookStoreId, @PathVariable String bookId) {
-		return Collections.singletonMap(bookId, bookStoreService.getBookFromStore(bookStoreId, bookId));
-	}
-
-	@DeleteMapping("/{bookStoreId}/books/{bookId}")
-	public Map<String, Book> delete(@PathVariable String bookStoreId, @PathVariable String bookId) {
-		return Collections.singletonMap(bookId, bookStoreService.removeBookFromStore(bookStoreId, bookId));
+	@GetMapping("/{bookStoreId}")
+	public ResponseEntity<BookStoreResource> getBooks(@PathVariable String bookStoreId) {
+		BookStore bookStore = bookStoreService.getBookStore(bookStoreId);
+		return createResponse(bookStore);
 	}
 
 	@ExceptionHandler(IllegalArgumentException.class)
 	public ResponseEntity<Map<String, String>> badBookStoreId(IllegalArgumentException e) {
-		Map<String, String> responseBody = Collections.singletonMap("errorMessage", e.getMessage());
-		return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+		return super.badBookStoreId(e);
+	}
+
+	private ResponseEntity<BookStoreResource> createResponse(BookStore bookStore) {
+		BookStoreResource bookStoreResource = new BookStoreResourceAssembler().toResource(bookStore);
+		return new ResponseEntity<>(bookStoreResource, HttpStatus.OK);
 	}
 }
