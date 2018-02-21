@@ -28,7 +28,7 @@ public class BookStoreResource extends ResourceSupport {
 		this.bookResources = bookResources;
 	}
 
-	public Collection<BookResource> getBookResources() {
+	public Collection<BookResource> getBooks() {
 		return bookResources;
 	}
 }

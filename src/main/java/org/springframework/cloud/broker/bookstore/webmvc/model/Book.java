@@ -32,6 +32,13 @@ public class Book implements Identifiable<String> {
 		this.author = null;
 	}
 
+	public Book(String isbn, String title, String author) {
+		this.id = null;
+		this.isbn = isbn;
+		this.title = title;
+		this.author = author;
+	}
+
 	public Book(String id, Book book) {
 		this.id = id;
 		this.isbn = book.getIsbn();

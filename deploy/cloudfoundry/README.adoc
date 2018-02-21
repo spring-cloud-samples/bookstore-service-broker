@@ -189,22 +189,22 @@ Using the URI and credentials from the service binding, you can access the book 
 
 ----
 # add a book
-$ curl https://bookstore-service-broker.apps.example.com/bookstore/ccd45032-5ac9-487a-a37a-506eb65b0cf9/books -u 55519803-3d8a-4fd4-a17e-e2096ebed9b7:b371a19a-cab3-4ee1-9675-6b6cd9493952 -H "Content-Type: application/json" -X PUT -d '{"isbn":"978-1617292545","title":"Spring Boot in Action", "author":"Craig Walls"}'
+$ curl https://bookstore-service-broker.apps.example.com/bookstores/ccd45032-5ac9-487a-a37a-506eb65b0cf9/books -u 55519803-3d8a-4fd4-a17e-e2096ebed9b7:b371a19a-cab3-4ee1-9675-6b6cd9493952 -H "Content-Type: application/json" -X PUT -d '{"isbn":"978-1617292545","title":"Spring Boot in Action", "author":"Craig Walls"}'
 
-{"e44db6d7-506a-48e4-9446-44301dd559e6":{"isbn":"978-1617292545","title":"Spring Boot in Action","author":"Craig Walls"}}%
+{"isbn":"978-1617292545","title":"Spring Boot in Action","author":"Craig Walls","links":{...}}%
 
 # add another book
-$ curl https://bookstore-service-broker.apps.example.com/bookstore/ccd45032-5ac9-487a-a37a-506eb65b0cf9/books -u 55519803-3d8a-4fd4-a17e-e2096ebed9b7:b371a19a-cab3-4ee1-9675-6b6cd9493952 -H "Content-Type: application/json" -X PUT -d '{"isbn":"978-1784393021","title":"Learning Spring Boot", "author":"Greg L. Turnquist"}'
+$ curl https://bookstore-service-broker.apps.example.com/bookstores/ccd45032-5ac9-487a-a37a-506eb65b0cf9/books -u 55519803-3d8a-4fd4-a17e-e2096ebed9b7:b371a19a-cab3-4ee1-9675-6b6cd9493952 -H "Content-Type: application/json" -X PUT -d '{"isbn":"978-1784393021","title":"Learning Spring Boot", "author":"Greg L. Turnquist"}'
 
-{"67370877-e55d-4c6a-92ed-700551d55910":{"isbn":"978-1784393021","title":"Learning Spring Boot","author":"Greg L. Turnquist"}}%
+{"isbn":"978-1784393021","title":"Learning Spring Boot","author":"Greg L. Turnquist","links":{...}}%
 
-# add a list of book
-$ curl https://bookstore-service-broker.apps.example.com/bookstore/ccd45032-5ac9-487a-a37a-506eb65b0cf9/books -u 55519803-3d8a-4fd4-a17e-e2096ebed9b7:b371a19a-cab3-4ee1-9675-6b6cd9493952 -H "Content-Type: application/json"
+# get a list of books
+$ curl https://bookstore-service-broker.apps.example.com/bookstores/ccd45032-5ac9-487a-a37a-506eb65b0cf9/books -u 55519803-3d8a-4fd4-a17e-e2096ebed9b7:b371a19a-cab3-4ee1-9675-6b6cd9493952 -H "Content-Type: application/json"
 
-{"e44db6d7-506a-48e4-9446-44301dd559e6":{"isbn":"978-1617292545","title":"Spring Boot in Action","author":"Craig Walls"},"67370877-e55d-4c6a-92ed-700551d55910":{"isbn":"978-1784393021","title":"Learning Spring Boot","author":"Greg L. Turnquist"}}%
+{books:[{"isbn":"978-1617292545","title":"Spring Boot in Action","author":"Craig Walls","links":{...}},{"isbn":"978-1784393021","title":"Learning Spring Boot","author":"Greg L. Turnquist","links":{...}},"links":{...}}%
 
 # remove a book
-$ curl -k https://bookstore-service-broker.apps.example.com/bookstore/ccd45032-5ac9-487a-a37a-506eb65b0cf9/books/e44db6d7-506a-48e4-9446-44301dd559e6 -u 55519803-3d8a-4fd4-a17e-e2096ebed9b7:b371a19a-cab3-4ee1-9675-6b6cd9493952 -H "Content-Type: application/json" -X DELETE
+$ curl -k https://bookstore-service-broker.apps.example.com/bookstores/ccd45032-5ac9-487a-a37a-506eb65b0cf9/books/e44db6d7-506a-48e4-9446-44301dd559e6 -u 55519803-3d8a-4fd4-a17e-e2096ebed9b7:b371a19a-cab3-4ee1-9675-6b6cd9493952 -H "Content-Type: application/json" -X DELETE
 
-{"e44db6d7-506a-48e4-9446-44301dd559e6":{"isbn":"978-1617292545","title":"Spring Boot in Action","author":"Craig Walls"}}%
+{"isbn":"978-1617292545","title":"Spring Boot in Action","author":"Craig Walls","links":{...}}%
 ----

@@ -102,7 +102,7 @@ public class BookStoreServiceInstanceBindingService implements ServiceInstanceBi
 	private String buildUri(String instanceId) {
 		return UriComponentsBuilder
 					.fromUriString(applicationInformation.getBaseUrl())
-					.pathSegment("bookstore", instanceId)
+					.pathSegment("bookstores", instanceId)
 					.pathSegment("books")
 					.build()
 					.toUriString();

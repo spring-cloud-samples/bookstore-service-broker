@@ -18,7 +18,9 @@ package org.springframework.cloud.broker.bookstore.webmvc.model;
 
 import org.springframework.hateoas.Identifiable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class BookStore extends HashMap<String, Book> implements Identifiable<String> {
 	private final String id;
@@ -30,5 +32,9 @@ public class BookStore extends HashMap<String, Book> implements Identifiable<Str
 	@Override
 	public String getId() {
 		return this.id;
+	}
+
+	public List<Book> getBooks() {
+		return new ArrayList<>(values());
 	}
 }

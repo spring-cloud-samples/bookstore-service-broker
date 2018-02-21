@@ -55,7 +55,9 @@ public class BookStoreService {
 		Book bookWithId = new Book(bookId, book);
 
 		BookStore store = getBookStore(storeId);
-		return store.put(bookId, bookWithId);
+		store.put(bookId, bookWithId);
+
+		return bookWithId;
 	}
 
 	public Book getBookFromStore(String storeId, String bookId) {
