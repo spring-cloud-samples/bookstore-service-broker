@@ -24,6 +24,13 @@ Pivotal Container Service (PKS) can be used to deploy and manage production-qual
 
 *NOTE*: Ensure that post-deploy scripts have been enabled in PCF Ops Manager as described on the https://docs.pivotal.io/runtimes/pks/1-0/troubleshoot-issues.html#timeouts[PKS Troubleshooting page].
 
+=== Google Kubernetes Engine (GKE)
+
+Google Cloud Platform provides a Kubernetes Engine (GKE) and installer tool for setting up the Service Catalog extension API.
+
+The process of setting up GKE is documented at https://cloud.google.com/kubernetes-engine/docs/quickstart
+The service catalog installation tool can be installed here https://github.com/GoogleCloudPlatform/k8s-service-catalog#installation
+
 == Service Catalog
 
 Kubernetes support for service brokers via the Open Service Broker API is provided by the https://kubernetes.io/docs/concepts/service-catalog/[Service Catalog] project. Follow the https://github.com/kubernetes-incubator/service-catalog/blob/master/docs/install.md[project documentation] to install the service catalog into your Kubernetes cluster.
@@ -128,18 +135,18 @@ service "bookstore-broker" created
 Show the details of the created service:
 
 ----
-$ kubectl describe service bookstore-broker -n bookstore-broker
-Name:                     bookstore-broker
+$ kubectl describe service bookstore-broker -n bookstore-brokerName:                     bookstore-broker
 Namespace:                bookstore-broker
 Labels:                   run=bookstore-broker
 Annotations:              <none>
 Selector:                 run=bookstore-broker
-Type:                     NodePort
-IP:                       10.107.161.81
+Type:                     LoadBalancer
+IP:                       10.47.247.7
+LoadBalancer Ingress:     35.197.249.208
 Port:                     <unset>  80/TCP
 TargetPort:               8080/TCP
-NodePort:                 <unset>  32248/TCP
-Endpoints:
+NodePort:                 <unset>  30789/TCP
+Endpoints:                10.44.4.8:8080
 Session Affinity:         None
 External Traffic Policy:  Cluster
 Events:                   <none>
@@ -171,50 +178,29 @@ Show the details of the service broker application service again:
 
 ----
 $ kubectl describe service bookstore-broker -n bookstore-broker
-Name:                     bookstore-broker
 Namespace:                bookstore-broker
 Labels:                   run=bookstore-broker
 Annotations:              <none>
 Selector:                 run=bookstore-broker
-Type:                     NodePort
-IP:                       10.107.161.81
+Type:                     LoadBalancer
+IP:                       10.47.247.7
+LoadBalancer Ingress:     35.197.249.208
 Port:                     <unset>  80/TCP
 TargetPort:               8080/TCP
-NodePort:                 <unset>  32248/TCP
-Endpoints:
+NodePort:                 <unset>  30789/TCP
+Endpoints:                10.44.4.8:8080
 Session Affinity:         None
 External Traffic Policy:  Cluster
 Events:                   <none>
 ----
 
-Note the value of the `NodePort` row.
 
-Show a list of Kubernetes pods running in the cluster:
-
-----
-$ kubectl get pods -n bookstore-broker -o=wide
-NAME                               READY     STATUS    IP            NODE
-bookstore-broker-68f88cbbfb-vvmn4   1/1       Running   10.200.37.3   8ce76de4-4cfc-4bcd-b860-043a69cd2402
-----
-
-Note the value in the `NODE` column for the `bookstore-broker` pod.
-
-Show a list of Kubernetes nodes running in the cluster:
-
-----
-$ kubectl get nodes -n bookstore-broker -o=wide
-NAME                                   STATUS    AGE       VERSION   EXTERNAL-IP
-2e45b4e3-1f9a-439e-b830-e051135f9e52   Ready     1d        v1.9.2    192.168.1.236
-8ce76de4-4cfc-4bcd-b860-043a69cd2402   Ready     1d        v1.9.2    192.168.1.235
-cf353f58-bb1a-45cf-8b18-96976f818c5f   Ready     1d        v1.9.2    192.168.1.234
-----
-
-Note the value in the `EXTERNAL-IP` column of the node whose `NAME` matches the node for the `bookstore-broker` pod.
+Note the value in the `LoadBalancer Ingress` column and the `Port` column below.
 
 Construct a URL using the IP address of the node and the port of the service, and use the this URL to access the `/v2/catalog` endpoint of the service broker application:
 
 ----
-$ curl http://192.168.1.235:32248/v2/catalog -u admin:supersecret
+$ curl http://35.197.249.208/v2/catalog -u admin:supersecret
 {"services":[{"id":"bdb1be2e-360b-495c-8115-d7697f9c6a9e","name":"bookstore","description":"A simple book store service","bindable":true,"plan_updateable":false,"plans":[{"id":"b973fb78-82f3-49ef-9b8b-c1876974a6cd","name":"standard","description":"A simple book store plan","free":true}],"tags":["book-store","books","sample"]}]}
 ----
 
@@ -227,7 +213,7 @@ Now that the application has been deployed and verified, it can be registered to
 The Open Service Broker API endpoints in the service broker application are secured with a basic auth username and password. Create a Kubernetes secret to store these credentials:
 
 ----
-$ kubectl create -f deploy/kubernetes/service-broker-secret.yml
+$ kubectl create secret generic -n bookstore-broker bookstore-broker-secret --from-literal=username='admin' --from-literal=password='supersecret'
 secret "bookstore-broker-secret" created
 ----
 
@@ -480,5 +466,20 @@ password:  68 bytes
 uri:       67 bytes
 username:  4 bytes
 ----
+
+To test the Service Instance API, the URL can be constructed from the binding credentials;
+
+---
+export SI_URI=$(kubectl get secret bookstore-binding -n test -o json | jq -r '.data.uri' | base64 --decode)
+export SI_USER=$($ kubectl get secret bookstore-binding -n test -o json | jq -r '.data.username' | base64 --decode)
+export SI_PASSWORD=$(kubectl get secret bookstore-binding -n test -o json | jq -r '.data.password' | base64 --decode)
+
+export GET_BOOKS_URI=$(curl ${SI_URI} -u ${SI_USER}:${SI_PASSWORD} -H "Content-Type: application/json" -X PUT -d '{"isbn":"978-1617292545","title":"Spring Boot in Action", "author":"Craig Walls"}' | jq -r '.links | first | .href')
+curl ${GET_BOOKS_URI} -u ${SI_USER}:${SI_PASSWORD}
+---
+
+== Current Issues
+* On GKE with a service catalog installed using `sc`, the service instance API only works when no authentication is provided
+* The service binding returns `localhost:8080` for the URI instead of the External IP address from the LoadBalancer service
 
 

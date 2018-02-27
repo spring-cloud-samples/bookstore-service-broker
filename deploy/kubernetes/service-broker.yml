@@ -5,10 +5,10 @@ metadata:
   labels:
     run: bookstore-broker
 spec:
-  url: http://bookstore-broker.bookstore-broker.svc.cluster.local
+  url: http://35.197.249.208
   authInfo:
     basic:
       secretRef:
         name: bookstore-broker-secret
-        namespace: bookstore-broker
+        namespace: service-catalog
 
