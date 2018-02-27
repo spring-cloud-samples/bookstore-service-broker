@@ -25,10 +25,10 @@ import org.springframework.cloud.broker.bookstore.webmvc.model.ServiceBinding;
 import org.springframework.cloud.broker.bookstore.webmvc.repository.ServiceBindingRepository;
 import org.springframework.cloud.servicebroker.exception.ServiceInstanceBindingDoesNotExistException;
 import org.springframework.cloud.servicebroker.model.Context;
-import org.springframework.cloud.servicebroker.model.bindings.CreateServiceInstanceAppBindingResponse;
-import org.springframework.cloud.servicebroker.model.bindings.CreateServiceInstanceBindingRequest;
-import org.springframework.cloud.servicebroker.model.bindings.CreateServiceInstanceBindingResponse;
-import org.springframework.cloud.servicebroker.model.bindings.DeleteServiceInstanceBindingRequest;
+import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceAppBindingResponse;
+import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceBindingRequest;
+import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceBindingResponse;
+import org.springframework.cloud.servicebroker.model.binding.DeleteServiceInstanceBindingRequest;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 

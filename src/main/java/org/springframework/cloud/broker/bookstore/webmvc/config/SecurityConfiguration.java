@@ -17,8 +17,10 @@
 package org.springframework.cloud.broker.bookstore.webmvc.config;
 
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
+import org.springframework.cloud.broker.bookstore.webmvc.model.SecurityRoles;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -28,6 +30,7 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(securedEnabled = true)
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Override
@@ -35,11 +38,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		http
 				.csrf().disable()
 				.authorizeRequests()
-					.antMatchers("/bookstores/**").hasRole("USER")
-					.antMatchers("/v2/**").hasRole("ADMIN")
+					.antMatchers("/bookstores/**").authenticated()
+					.antMatchers("/v2/**").hasRole(SecurityRoles.ADMIN)
 					.requestMatchers(EndpointRequest.to("info", "health")).permitAll()
-					.requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole("ADMIN")
-					.anyRequest().anonymous()
+					.requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole(SecurityRoles.ADMIN)
 				.and()
 					.httpBasic();
 	}
@@ -53,7 +55,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		return User.withDefaultPasswordEncoder()
 				.username("admin")
 				.password("supersecret")
-				.roles("ADMIN", "USER")
+				.roles(SecurityRoles.ADMIN)
 				.build();
 	}
 }

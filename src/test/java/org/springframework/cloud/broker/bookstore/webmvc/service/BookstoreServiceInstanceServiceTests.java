@@ -26,10 +26,10 @@ import org.springframework.cloud.broker.bookstore.webmvc.model.ServiceInstance;
 import org.springframework.cloud.broker.bookstore.webmvc.repository.ServiceInstanceRepository;
 import org.springframework.cloud.servicebroker.exception.ServiceInstanceDoesNotExistException;
 import org.springframework.cloud.servicebroker.model.Context;
-import org.springframework.cloud.servicebroker.model.instances.CreateServiceInstanceRequest;
-import org.springframework.cloud.servicebroker.model.instances.CreateServiceInstanceResponse;
-import org.springframework.cloud.servicebroker.model.instances.DeleteServiceInstanceRequest;
-import org.springframework.cloud.servicebroker.model.instances.DeleteServiceInstanceResponse;
+import org.springframework.cloud.servicebroker.model.instance.CreateServiceInstanceRequest;
+import org.springframework.cloud.servicebroker.model.instance.CreateServiceInstanceResponse;
+import org.springframework.cloud.servicebroker.model.instance.DeleteServiceInstanceRequest;
+import org.springframework.cloud.servicebroker.model.instance.DeleteServiceInstanceResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;

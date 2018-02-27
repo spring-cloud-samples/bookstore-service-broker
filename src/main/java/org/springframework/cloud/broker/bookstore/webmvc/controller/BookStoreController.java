@@ -22,6 +22,7 @@ import org.springframework.cloud.broker.bookstore.webmvc.resource.BookStoreResou
 import org.springframework.cloud.broker.bookstore.webmvc.service.BookStoreService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,6 +30,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
+
+import static org.springframework.cloud.broker.bookstore.webmvc.model.SecurityRoles.ROLE_ADMIN;
+import static org.springframework.cloud.broker.bookstore.webmvc.model.SecurityRoles.ROLE_FULL_ACCESS;
+import static org.springframework.cloud.broker.bookstore.webmvc.model.SecurityRoles.ROLE_READ_ONLY;
 
 @RestController
 @RequestMapping("/bookstores")
@@ -40,6 +45,7 @@ public class BookStoreController extends BaseController {
 	}
 
 	@GetMapping("/{bookStoreId}")
+	@Secured({ROLE_ADMIN, ROLE_FULL_ACCESS, ROLE_READ_ONLY})
 	public ResponseEntity<BookStoreResource> getBooks(@PathVariable String bookStoreId) {
 		BookStore bookStore = bookStoreService.getBookStore(bookStoreId);
 		return createResponse(bookStore);

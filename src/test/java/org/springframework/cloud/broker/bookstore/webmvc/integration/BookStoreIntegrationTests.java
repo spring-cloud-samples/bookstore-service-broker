@@ -56,6 +56,10 @@ public class BookStoreIntegrationTests {
 
 		mockMvc = MockMvcBuilders
 				.standaloneSetup(bookStoreController, bookController)
+				.defaultRequest(get("/")
+						.accept(MediaType.APPLICATION_JSON)
+						.contentType(MediaType.APPLICATION_JSON))
+				.alwaysExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 				.setMessageConverters(new MappingJackson2HttpMessageConverter())
 				.build();
 
@@ -69,10 +73,8 @@ public class BookStoreIntegrationTests {
 	@Test
 	public void bookStoreIsRetrieved() throws Exception {
 
-		this.mockMvc.perform(get("/bookstores/{bookStoreId}", bookStore.getId())
-				.accept(MediaType.APPLICATION_JSON))
+		this.mockMvc.perform(get("/bookstores/{bookStoreId}", bookStore.getId()))
 				.andExpect(status().isOk())
-				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.books", hasSize(2)))
 
 				.andExpect(jsonPath("$.books[*].isbn", hasSize(2)))
@@ -96,10 +98,8 @@ public class BookStoreIntegrationTests {
 	public void bookIsRetrieved() throws Exception {
 		Book book = bookStore.getBooks().get(0);
 
-		this.mockMvc.perform(get("/bookstores/{bookStoreId}/books/{bookId}", bookStore.getId(), book.getId())
-				.accept(MediaType.APPLICATION_JSON))
+		this.mockMvc.perform(get("/bookstores/{bookStoreId}/books/{bookId}", bookStore.getId(), book.getId()))
 				.andExpect(status().isOk())
-				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 
 				.andExpect(jsonPath("$.isbn", equalTo(book.getIsbn())))
 
@@ -111,11 +111,8 @@ public class BookStoreIntegrationTests {
 	@Test
 	public void bookIsAdded() throws Exception {
 		this.mockMvc.perform(put("/bookstores/{bookStoreId}/books", bookStore.getId())
-				.content("{\"isbn\":\"978-1785284151\", \"title\":\"Spring Boot Cookbook\", \"author\":\"Alex Antonov\"}")
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON))
+				.content("{\"isbn\":\"978-1785284151\", \"title\":\"Spring Boot Cookbook\", \"author\":\"Alex Antonov\"}"))
 				.andExpect(status().isCreated())
-				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 
 				.andExpect(jsonPath("$.isbn", equalTo("978-1785284151")))
 
@@ -130,10 +127,8 @@ public class BookStoreIntegrationTests {
 	public void bookIsDeleted() throws Exception {
 		Book book = bookStore.getBooks().get(0);
 
-		this.mockMvc.perform(delete("/bookstores/{bookStoreId}/books/{bookId}", bookStore.getId(), book.getId())
-				.accept(MediaType.APPLICATION_JSON))
+		this.mockMvc.perform(delete("/bookstores/{bookStoreId}/books/{bookId}", bookStore.getId(), book.getId()))
 				.andExpect(status().isOk())
-				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 
 				.andExpect(jsonPath("$.isbn", equalTo(book.getIsbn())))
 
