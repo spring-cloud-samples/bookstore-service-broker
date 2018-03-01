@@ -1,6 +1,8 @@
 = Overview
 
-This project implements a sample service broker that adheres to the https://www.openservicebrokerapi.org/[Open Service Broker API] using the https://cloud.spring.io/spring-cloud-open-service-broker/[Spring Cloud Open Service Broker] framework. It can be deployed to either Cloud Foundry or Kubernetes, and can be registered as a service broker to either platform.
+This project demonstrates how the https://cloud.spring.io/spring-cloud-open-service-broker/[Spring Cloud Open Service Broker] 
+framework can be used to easily build an https://www.openservicebrokerapi.org/[Open Service Broker API] compliant service broker. 
+It can be deployed and registered as a service broker using either Cloud Foundry or Kubernetes.
 
 == Compatibility
 
@@ -27,7 +29,7 @@ The project is built with Gradle. The https://docs.gradle.org/current/userguide/
     ./gradlew build
 
 == Deploy
-
+  
 Once the project is built, it can be deployed and registered to either Cloud Foundry or Kubernetes.
 
 * link:deploy/cloudfoundry/README.adoc[deploy to Cloud Foundry]

@@ -58,7 +58,7 @@ dependencies {
 	runtime('org.springframework.boot:spring-boot-devtools')
 
 	compile('org.springframework.cloud:spring-cloud-open-service-broker-starter-webmvc:2.0.0.BUILD-SNAPSHOT')
-	
+
 	compile('org.springframework.data:spring-data-keyvalue')
 
 	testCompile('org.springframework.boot:spring-boot-starter-test')
@@ -75,4 +75,5 @@ docker {
 	dockerfile file('deploy/docker/Dockerfile')
 	files jar.archivePath
 	buildArgs(['JAR_FILE': "${jar.archiveName}"])
+
 }
