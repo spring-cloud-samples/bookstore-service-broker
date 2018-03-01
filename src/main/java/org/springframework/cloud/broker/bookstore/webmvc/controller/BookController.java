@@ -22,7 +22,7 @@ import org.springframework.cloud.broker.bookstore.webmvc.resource.BookResourceAs
 import org.springframework.cloud.broker.bookstore.webmvc.service.BookStoreService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,10 +30,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import static org.springframework.cloud.broker.bookstore.webmvc.model.SecurityRoles.ROLE_ADMIN;
-import static org.springframework.cloud.broker.bookstore.webmvc.model.SecurityRoles.ROLE_FULL_ACCESS;
-import static org.springframework.cloud.broker.bookstore.webmvc.model.SecurityRoles.ROLE_READ_ONLY;
 
 @RestController
 @RequestMapping("/bookstores/{bookStoreId}/books")
@@ -45,21 +41,21 @@ public class BookController extends BaseController {
 	}
 
 	@PutMapping
-	@Secured({ROLE_ADMIN, ROLE_FULL_ACCESS})
+	@PreAuthorize("hasRole('ROLE_FULL_ACCESS') and hasPermission(#bookStoreId, '')")
 	public ResponseEntity<BookResource> addBook(@PathVariable String bookStoreId, @RequestBody Book book) {
 		Book savedBook = bookStoreService.putBookInStore(bookStoreId, book);
 		return createResponse(bookStoreId, savedBook, HttpStatus.CREATED);
 	}
 
 	@GetMapping("/{bookId}")
-	@Secured({ROLE_ADMIN, ROLE_FULL_ACCESS, ROLE_READ_ONLY})
+	@PreAuthorize("hasAnyRole('ROLE_FULL_ACCESS','ROLE_READ_ONLY') and hasPermission(#bookStoreId, '')")
 	public ResponseEntity<BookResource> getBook(@PathVariable String bookStoreId, @PathVariable String bookId) {
 		Book book = bookStoreService.getBookFromStore(bookStoreId, bookId);
 		return createResponse(bookStoreId, book, HttpStatus.OK);
 	}
 
 	@DeleteMapping("/{bookId}")
-	@Secured({ROLE_ADMIN, ROLE_FULL_ACCESS})
+	@PreAuthorize("hasRole('ROLE_FULL_ACCESS') and hasPermission(#bookStoreId, '')")
 	public ResponseEntity<BookResource> deleteBook(@PathVariable String bookStoreId, @PathVariable String bookId) {
 		Book book = bookStoreService.removeBookFromStore(bookStoreId, bookId);
 		return createResponse(bookStoreId, book, HttpStatus.OK);

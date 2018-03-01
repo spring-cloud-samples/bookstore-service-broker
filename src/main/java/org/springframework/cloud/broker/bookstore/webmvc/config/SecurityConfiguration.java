@@ -17,10 +17,9 @@
 package org.springframework.cloud.broker.bookstore.webmvc.config;
 
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
-import org.springframework.cloud.broker.bookstore.webmvc.model.SecurityRoles;
+import org.springframework.cloud.broker.bookstore.webmvc.security.SecurityAuthorities;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -30,20 +29,21 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(securedEnabled = true)
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
+		// @formatter:off
 		http
 				.csrf().disable()
 				.authorizeRequests()
 					.antMatchers("/bookstores/**").authenticated()
-					.antMatchers("/v2/**").hasRole(SecurityRoles.ADMIN)
+					.antMatchers("/v2/**").hasRole(SecurityAuthorities.ADMIN)
 					.requestMatchers(EndpointRequest.to("info", "health")).permitAll()
-					.requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole(SecurityRoles.ADMIN)
+					.requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole(SecurityAuthorities.ADMIN)
 				.and()
 					.httpBasic();
+		// @formatter:on
 	}
 
 	@Bean
@@ -51,11 +51,12 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		return new InMemoryUserDetailsManager(adminUser());
 	}
 
+	@SuppressWarnings("deprecation")
 	private UserDetails adminUser() {
 		return User.withDefaultPasswordEncoder()
 				.username("admin")
 				.password("supersecret")
-				.roles(SecurityRoles.ADMIN)
+				.roles(SecurityAuthorities.ADMIN, SecurityAuthorities.FULL_ACCESS)
 				.build();
 	}
 }

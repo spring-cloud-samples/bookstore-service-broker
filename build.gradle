@@ -16,12 +16,10 @@
 
 buildscript {
 	ext {
-		springBootVersion = '2.0.0.RC1'
+		springBootVersion = '2.0.0.RELEASE'
 	}
 	repositories {
 		mavenCentral()
-		maven { url "https://repo.spring.io/snapshot" }
-		maven { url "https://repo.spring.io/milestone" }
 		maven { url "https://plugins.gradle.org/m2/" }
 	}
 	dependencies {
@@ -46,7 +44,6 @@ repositories {
 	mavenCentral()
 	mavenLocal()
 	maven { url "https://repo.spring.io/snapshot" }
-	maven { url "https://repo.spring.io/milestone" }
 }
 
 dependencies {
@@ -63,7 +60,7 @@ dependencies {
 
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 	testCompile('org.springframework.security:spring-security-test')
-	testCompile("org.assertj:assertj-core:3.9.0")
+	testCompile('org.assertj:assertj-core:3.9.1')
 }
 
 if (!project.hasProperty("dockerGroup")) {

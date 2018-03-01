@@ -88,7 +88,7 @@ public class BookstoreServiceInstanceBindingServiceTests {
 
 		assertThat(credentials.get("uri").toString())
 			.startsWith(BASE_URL)
-			.endsWith("bookstores/" + SERVICE_INSTANCE_ID + "/books");
+			.endsWith("bookstores/" + SERVICE_INSTANCE_ID);
 
 		ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
 		verify(userService).createUser(userCaptor.capture());

@@ -17,7 +17,6 @@
 package org.springframework.cloud.broker.bookstore.webmvc.service;
 
 import org.springframework.cloud.broker.bookstore.webmvc.model.ApplicationInformation;
-import org.springframework.cloud.broker.bookstore.webmvc.model.SecurityRoles;
 import org.springframework.cloud.broker.bookstore.webmvc.model.ServiceBinding;
 import org.springframework.cloud.broker.bookstore.webmvc.repository.ServiceBindingRepository;
 import org.springframework.cloud.servicebroker.exception.ServiceInstanceBindingDoesNotExistException;
@@ -36,6 +35,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+
+import static org.springframework.cloud.broker.bookstore.webmvc.security.SecurityAuthorities.ROLE_FULL_ACCESS;
+import static org.springframework.cloud.broker.bookstore.webmvc.security.SecurityAuthorities.SERVICE_INSTANCE_PREFIX;
 
 @Service
 public class BookStoreServiceInstanceBindingService implements ServiceInstanceBindingService {
@@ -90,7 +92,7 @@ public class BookStoreServiceInstanceBindingService implements ServiceInstanceBi
 	private Map<String, Object> buildCredentials(String instanceId, String bindingId) {
 		String uri = buildUri(instanceId);
 
-		String password = createUser(bindingId);
+		String password = createUser(instanceId, bindingId);
 
 		Map<String, Object> credentials = new HashMap<>();
 		credentials.put("uri", uri);
@@ -104,19 +106,19 @@ public class BookStoreServiceInstanceBindingService implements ServiceInstanceBi
 		return UriComponentsBuilder
 					.fromUriString(applicationInformation.getBaseUrl())
 					.pathSegment("bookstores", instanceId)
-					.pathSegment("books")
 					.build()
 					.toUriString();
 	}
 
-	private String createUser(String username) {
+	@SuppressWarnings("deprecation")
+	private String createUser(String instanceId, String bindingId) {
 		String password = UUID.randomUUID().toString();
 
 		userService.createUser(
 				User.withDefaultPasswordEncoder()
-						.username(username)
+						.username(bindingId)
 						.password(password)
-						.roles(SecurityRoles.FULL_ACCESS)
+						.authorities(ROLE_FULL_ACCESS, SERVICE_INSTANCE_PREFIX + instanceId)
 						.build());
 
 		return password;

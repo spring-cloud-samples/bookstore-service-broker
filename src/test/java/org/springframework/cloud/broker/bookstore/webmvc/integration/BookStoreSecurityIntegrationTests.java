@@ -23,7 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.broker.bookstore.webmvc.ServiceBrokerApplication;
 import org.springframework.cloud.broker.bookstore.webmvc.model.Book;
 import org.springframework.cloud.broker.bookstore.webmvc.model.BookStore;
-import org.springframework.cloud.broker.bookstore.webmvc.model.SecurityRoles;
+import org.springframework.cloud.broker.bookstore.webmvc.security.SecurityAuthorities;
 import org.springframework.cloud.broker.bookstore.webmvc.service.BookStoreService;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -45,6 +45,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration(classes = {ServiceBrokerApplication.class})
 @WebAppConfiguration
 public class BookStoreSecurityIntegrationTests {
+	private static final String BOOKSTORE_INSTANCE_ID = "1111-1111-1111-1111";
+	private static final String OTHER_INSTANCE_ID = "2222-2222-2222-2222";
+
 	@Autowired
 	private WebApplicationContext context;
 
@@ -65,7 +68,7 @@ public class BookStoreSecurityIntegrationTests {
 				.apply(springSecurity())
 				.build();
 
-		bookStore = bookStoreService.createBookStore();
+		bookStore = bookStoreService.createBookStore(BOOKSTORE_INSTANCE_ID);
 		bookStoreService.putBookInStore(bookStore.getId(),
 				new Book("978-1617292545", "Spring Boot in Action", "Craig Walls"));
 	}
@@ -80,8 +83,8 @@ public class BookStoreSecurityIntegrationTests {
 	}
 
 	@Test
-	@WithMockUser(roles = SecurityRoles.ADMIN)
-	public void adminIsAllowed() throws Exception {
+	@WithMockUser(authorities = {SecurityAuthorities.ROLE_FULL_ACCESS})
+	public void fullAccessWithoutInstanceIdIsAllowed() throws Exception {
 		assertExpectedResponseStatus(
 				status().isOk(),
 				status().isOk(),
@@ -90,8 +93,8 @@ public class BookStoreSecurityIntegrationTests {
 	}
 
 	@Test
-	@WithMockUser(roles = SecurityRoles.FULL_ACCESS)
-	public void fullAccessIsAllowed() throws Exception {
+	@WithMockUser(authorities = {SecurityAuthorities.ROLE_FULL_ACCESS, "SERVICE_INSTANCE_" + BOOKSTORE_INSTANCE_ID})
+	public void fullAccessWithInstanceIdIsAllowed() throws Exception {
 		assertExpectedResponseStatus(
 				status().isOk(),
 				status().isOk(),
@@ -100,8 +103,18 @@ public class BookStoreSecurityIntegrationTests {
 	}
 
 	@Test
-	@WithMockUser(roles = SecurityRoles.READ_ONLY)
-	public void readOnlyIsAllowed() throws Exception {
+	@WithMockUser(authorities = {SecurityAuthorities.ROLE_FULL_ACCESS, "SERVICE_INSTANCE_" + OTHER_INSTANCE_ID})
+	public void fullAccessWithOtherInstanceIdIsForbidden() throws Exception {
+		assertExpectedResponseStatus(
+				status().isForbidden(),
+				status().isForbidden(),
+				status().isForbidden(),
+				status().isForbidden());
+	}
+
+	@Test
+	@WithMockUser(authorities = {SecurityAuthorities.ROLE_READ_ONLY})
+	public void readOnlyWithoutInstanceIdIsPartiallyAllowed() throws Exception {
 		assertExpectedResponseStatus(
 				status().isOk(),
 				status().isOk(),
@@ -109,23 +122,43 @@ public class BookStoreSecurityIntegrationTests {
 				status().isForbidden());
 	}
 
-	private void assertExpectedResponseStatus(ResultMatcher getAllstatus,
-											  ResultMatcher getstatus,
-											  ResultMatcher putstatus,
-											  ResultMatcher deletestatus) throws Exception {
+	@Test
+	@WithMockUser(authorities = {SecurityAuthorities.ROLE_READ_ONLY, "SERVICE_INSTANCE_" + BOOKSTORE_INSTANCE_ID})
+	public void readOnlyWithInstanceIdIsPartiallyAllowed() throws Exception {
+		assertExpectedResponseStatus(
+				status().isOk(),
+				status().isOk(),
+				status().isForbidden(),
+				status().isForbidden());
+	}
+
+	@Test
+	@WithMockUser(authorities = {SecurityAuthorities.ROLE_READ_ONLY, "SERVICE_INSTANCE_" + OTHER_INSTANCE_ID})
+	public void readOnlyWithOtherInstanceIdIsForbidden() throws Exception {
+		assertExpectedResponseStatus(
+				status().isForbidden(),
+				status().isForbidden(),
+				status().isForbidden(),
+				status().isForbidden());
+	}
+
+	private void assertExpectedResponseStatus(ResultMatcher getAllStatus,
+											  ResultMatcher getStatus,
+											  ResultMatcher putStatus,
+											  ResultMatcher deleteStatus) throws Exception {
 		this.mockMvc.perform(get("/bookstores/{bookStoreId}", bookStore.getId()))
-				.andExpect(getAllstatus);
+				.andExpect(getAllStatus);
 
 		this.mockMvc.perform(get("/bookstores/{bookStoreId}/books/{bookId}",
 				bookStore.getId(), bookStore.getBooks().get(0).getId()))
-				.andExpect(getstatus);
+				.andExpect(getStatus);
 
 		this.mockMvc.perform(put("/bookstores/{bookStoreId}/books", bookStore.getId())
 				.content("{\"isbn\":\"111-1111111111\", \"title\":\"test book\", \"author\":\"test author\"}"))
-				.andExpect(putstatus);
+				.andExpect(putStatus);
 
 		this.mockMvc.perform(delete("/bookstores/{bookStoreId}/books/{bookId}",
 				bookStore.getId(), bookStore.getBooks().get(0).getId()))
-				.andExpect(deletestatus);
+				.andExpect(deleteStatus);
 	}
 }

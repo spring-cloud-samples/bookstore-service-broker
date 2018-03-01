@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.broker.bookstore.webmvc.model;
+package org.springframework.cloud.broker.bookstore.webmvc.security;
 
-public class SecurityRoles {
+public class SecurityAuthorities {
 	public static final String ADMIN = "ADMIN";
 	public static final String FULL_ACCESS = "FULL_ACCESS";
 	public static final String READ_ONLY = "READ_ONLY";
@@ -24,4 +24,6 @@ public class SecurityRoles {
 	public static final String ROLE_ADMIN = "ROLE_ADMIN";
 	public static final String ROLE_FULL_ACCESS = "ROLE_FULL_ACCESS";
 	public static final String ROLE_READ_ONLY = "ROLE_READ_ONLY";
+
+	public static final String SERVICE_INSTANCE_PREFIX = "SERVICE_INSTANCE_";
 }

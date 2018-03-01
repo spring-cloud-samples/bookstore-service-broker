@@ -178,7 +178,7 @@ Getting key my-bookstore-binding for service instance my-bookstore as user@examp
 
 {
  "password": "b371a19a-cab3-4ee1-9675-6b6cd9493952",
- "uri": "https://bookstore-service-broker.apps.example.com/bookstore/ccd45032-5ac9-487a-a37a-506eb65b0cf9/books",
+ "uri": "https://bookstore-service-broker.apps.example.com/bookstore/ccd45032-5ac9-487a-a37a-506eb65b0cf9",
  "username": "55519803-3d8a-4fd4-a17e-e2096ebed9b7"
 }
 ----
@@ -199,7 +199,7 @@ $ curl https://bookstore-service-broker.apps.example.com/bookstores/ccd45032-5ac
 {"isbn":"978-1784393021","title":"Learning Spring Boot","author":"Greg L. Turnquist","links":{...}}%
 
 # get a list of books
-$ curl https://bookstore-service-broker.apps.example.com/bookstores/ccd45032-5ac9-487a-a37a-506eb65b0cf9/books -u 55519803-3d8a-4fd4-a17e-e2096ebed9b7:b371a19a-cab3-4ee1-9675-6b6cd9493952 -H "Content-Type: application/json"
+$ curl https://bookstore-service-broker.apps.example.com/bookstores/ccd45032-5ac9-487a-a37a-506eb65b0cf9 -u 55519803-3d8a-4fd4-a17e-e2096ebed9b7:b371a19a-cab3-4ee1-9675-6b6cd9493952 -H "Content-Type: application/json"
 
 {books:[{"isbn":"978-1617292545","title":"Spring Boot in Action","author":"Craig Walls","links":{...}},{"isbn":"978-1784393021","title":"Learning Spring Boot","author":"Greg L. Turnquist","links":{...}},"links":{...}}%
 
