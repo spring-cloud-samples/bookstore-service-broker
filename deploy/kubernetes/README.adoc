@@ -18,6 +18,10 @@ A Kubernetes cluster will be used to deploy the service broker application and r
 
 The `minikube` project can be used to run a small Kubernetes cluster on a development workstation. Follow the https://kubernetes.io/docs/getting-started-guides/minikube[Kubernetes documentation] to install `minikube`, start a cluster, and target the cluster with `kubectl`.
 
+=== jq (optional)
+
+`jq` is useful for extracting data from `kubecl` output, it can be downloaded from https://stedolan.github.io/jq/download/
+
 === Pivotal Container Service (PKS)
 
 Pivotal Container Service (PKS) can be used to deploy and manage production-quality Kubernetes clusters on Pivotal Cloud Foundry. Follow the https://docs.pivotal.io/runtimes/pks/[PKS documentation] to install the product, create a cluster, and target the cluster with `kubectl`.
@@ -135,14 +139,15 @@ service "bookstore-broker" created
 Show the details of the created service:
 
 ----
-$ kubectl describe service bookstore-broker -n bookstore-brokerName:                     bookstore-broker
+$ kubectl describe service bookstore-broker -n bookstore-broker
+Name:                     bookstore-broker
 Namespace:                bookstore-broker
 Labels:                   run=bookstore-broker
 Annotations:              <none>
 Selector:                 run=bookstore-broker
 Type:                     LoadBalancer
 IP:                       10.47.247.7
-LoadBalancer Ingress:     35.197.249.208
+LoadBalancer Ingress:     {{EXTERNAL_IP}}
 Port:                     <unset>  80/TCP
 TargetPort:               8080/TCP
 NodePort:                 <unset>  30789/TCP
@@ -168,7 +173,7 @@ http://192.168.99.100:31742
 Use the provided URL to access the `/v2/catalog` endpoint of the service broker application:
 
 ----
-$ curl http://192.168.99.100:31742/v2/catalog -u admin:supersecret
+$ curl http://{{EXTERNAL_IP}}/v2/catalog -u admin:supersecret
 {"services":[{"id":"bdb1be2e-360b-495c-8115-d7697f9c6a9e","name":"bookstore","description":"A simple book store service","bindable":true,"plan_updateable":false,"plans":[{"id":"b973fb78-82f3-49ef-9b8b-c1876974a6cd","name":"standard","description":"A simple book store plan","free":true}],"tags":["book-store","books","sample"]}]}
 ----
 
@@ -184,7 +189,7 @@ Annotations:              <none>
 Selector:                 run=bookstore-broker
 Type:                     LoadBalancer
 IP:                       10.47.247.7
-LoadBalancer Ingress:     35.197.249.208
+LoadBalancer Ingress:     {{EXTERNAL_IP}}
 Port:                     <unset>  80/TCP
 TargetPort:               8080/TCP
 NodePort:                 <unset>  30789/TCP
@@ -194,13 +199,12 @@ External Traffic Policy:  Cluster
 Events:                   <none>
 ----
 
-
-Note the value in the `LoadBalancer Ingress` column and the `Port` column below.
+Note the value for `LoadBalancer Ingress` column and `Port` in the output above.
 
 Construct a URL using the IP address of the node and the port of the service, and use the this URL to access the `/v2/catalog` endpoint of the service broker application:
 
 ----
-$ curl http://35.197.249.208/v2/catalog -u admin:supersecret
+$ curl http://{{EXTERNAL_IP}}:{{PORT}}/v2/catalog -u admin:supersecret
 {"services":[{"id":"bdb1be2e-360b-495c-8115-d7697f9c6a9e","name":"bookstore","description":"A simple book store service","bindable":true,"plan_updateable":false,"plans":[{"id":"b973fb78-82f3-49ef-9b8b-c1876974a6cd","name":"standard","description":"A simple book store plan","free":true}],"tags":["book-store","books","sample"]}]}
 ----
 
@@ -210,10 +214,11 @@ $ curl http://35.197.249.208/v2/catalog -u admin:supersecret
 
 Now that the application has been deployed and verified, it can be registered to the Service Catalog.
 
-The Open Service Broker API endpoints in the service broker application are secured with a basic auth username and password. Create a Kubernetes secret to store these credentials:
+The Open Service Broker API endpoints in the service broker application are secured with a basic auth username and password.
+Create a Kubernetes secret to store these credentials (the username and password values in the deployment file are base64 encoded):
 
 ----
-$ kubectl create secret generic -n bookstore-broker bookstore-broker-secret --from-literal=username='admin' --from-literal=password='supersecret'
+$ kubectl create -f deploy/kubernetes/service-broker-secret.yml
 secret "bookstore-broker-secret" created
 ----
 
@@ -469,14 +474,14 @@ username:  4 bytes
 
 To test the Service Instance API, the URL can be constructed from the binding credentials;
 
----
+----
 export SI_URI=$(kubectl get secret bookstore-binding -n test -o json | jq -r '.data.uri' | base64 --decode)
 export SI_USER=$($ kubectl get secret bookstore-binding -n test -o json | jq -r '.data.username' | base64 --decode)
 export SI_PASSWORD=$(kubectl get secret bookstore-binding -n test -o json | jq -r '.data.password' | base64 --decode)
 
 export GET_BOOKS_URI=$(curl ${SI_URI} -u ${SI_USER}:${SI_PASSWORD} -H "Content-Type: application/json" -X PUT -d '{"isbn":"978-1617292545","title":"Spring Boot in Action", "author":"Craig Walls"}' | jq -r '.links | first | .href')
 curl ${GET_BOOKS_URI} -u ${SI_USER}:${SI_PASSWORD}
----
+----
 
 == Current Issues
 * On GKE with a service catalog installed using `sc`, the service instance API only works when no authentication is provided

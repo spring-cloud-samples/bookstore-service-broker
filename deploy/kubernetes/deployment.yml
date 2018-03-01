@@ -2,7 +2,7 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: bookstore-broker
-  namespace: service-catalog
+  namespace: bookstore-broker
   labels:
     run: bookstore-broker
 spec:
@@ -16,7 +16,7 @@ spec:
         run: bookstore-broker
     spec:
       containers:
-      - image: eu.gcr.io/cf-sandbox-ohughes/bookstore-service-broker:0.0.1.BUILD-SNAPSHOT
+      - image: sample/bookstore-service-broker:0.0.1.BUILD-SNAPSHOT
         name: bookstore-broker
         ports:
         - containerPort: 8080

@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: bookstore-broker
-  namespace: service-catalog
+  namespace: bookstore-broker
   labels:
     run: bookstore-broker
 spec:
