@@ -27,10 +27,14 @@ import org.springframework.cloud.servicebroker.model.instance.DeleteServiceInsta
 import org.springframework.cloud.servicebroker.model.instance.DeleteServiceInstanceResponse;
 import org.springframework.cloud.servicebroker.model.instance.GetLastServiceOperationRequest;
 import org.springframework.cloud.servicebroker.model.instance.GetLastServiceOperationResponse;
+import org.springframework.cloud.servicebroker.model.instance.GetServiceInstanceRequest;
+import org.springframework.cloud.servicebroker.model.instance.GetServiceInstanceResponse;
 import org.springframework.cloud.servicebroker.model.instance.UpdateServiceInstanceRequest;
 import org.springframework.cloud.servicebroker.model.instance.UpdateServiceInstanceResponse;
 import org.springframework.cloud.servicebroker.service.ServiceInstanceService;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class BookStoreServiceInstanceService implements ServiceInstanceService {
@@ -52,10 +56,30 @@ public class BookStoreServiceInstanceService implements ServiceInstanceService {
 			responseBuilder.instanceExisted(true);
 		} else {
 			storeService.createBookStore(instanceId);
-			instanceRepository.save(new ServiceInstance(instanceId, request.getContext()));
+
+			ServiceInstance serviceInstance = new ServiceInstance(instanceId, request.getServiceDefinitionId(),
+					request.getPlanId(), request.getParameters());
+			instanceRepository.save(serviceInstance);
 		}
 
 		return responseBuilder.build();
+	}
+
+	@Override
+	public GetServiceInstanceResponse getServiceInstance(GetServiceInstanceRequest request) {
+		String instanceId = request.getServiceInstanceId();
+
+		Optional<ServiceInstance> serviceInstance = instanceRepository.findById(instanceId);
+
+		if (serviceInstance.isPresent()) {
+			return GetServiceInstanceResponse.builder()
+					.serviceDefinitionId(serviceInstance.get().getServiceDefinitionId())
+					.planId(serviceInstance.get().getPlanId())
+					.parameters(serviceInstance.get().getParameters())
+					.build();
+		} else {
+			throw new ServiceInstanceDoesNotExistException(instanceId);
+		}
 	}
 
 	@Override

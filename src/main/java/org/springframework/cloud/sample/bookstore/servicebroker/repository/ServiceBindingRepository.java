@@ -17,7 +17,7 @@
 package org.springframework.cloud.sample.bookstore.servicebroker.repository;
 
 import org.springframework.cloud.sample.bookstore.servicebroker.model.ServiceBinding;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ServiceBindingRepository extends CrudRepository<ServiceBinding, String> {
+public interface ServiceBindingRepository extends JpaRepository<ServiceBinding, String> {
 }

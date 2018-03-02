@@ -31,6 +31,11 @@ import org.springframework.cloud.servicebroker.model.instance.CreateServiceInsta
 import org.springframework.cloud.servicebroker.model.instance.CreateServiceInstanceResponse;
 import org.springframework.cloud.servicebroker.model.instance.DeleteServiceInstanceRequest;
 import org.springframework.cloud.servicebroker.model.instance.DeleteServiceInstanceResponse;
+import org.springframework.cloud.servicebroker.model.instance.GetServiceInstanceRequest;
+import org.springframework.cloud.servicebroker.model.instance.GetServiceInstanceResponse;
+
+import java.util.HashMap;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
@@ -108,10 +113,43 @@ public class BookstoreServiceInstanceServiceTests {
 
 		ServiceInstance actual = argumentCaptor.getValue();
 		assertThat(actual.getInstanceId()).isEqualTo(SERVICE_INSTANCE_ID);
-		assertThat(actual.getContext()).isEqualTo(context);
 
 		verify(store).createBookStore(SERVICE_INSTANCE_ID);
 		verifyNoMoreInteractions(store);
+	}
+
+	@Test
+	public void getServiceInstanceWhenInstanceExists() {
+		ServiceInstance serviceInstance = new ServiceInstance(SERVICE_INSTANCE_ID, "service-definition-id",
+				"plan-id", new HashMap<>());
+		
+		when(repository.findById(SERVICE_INSTANCE_ID))
+				.thenReturn(Optional.of(serviceInstance));
+
+		GetServiceInstanceRequest request = GetServiceInstanceRequest.builder()
+				.serviceInstanceId(SERVICE_INSTANCE_ID)
+				.build();
+
+		GetServiceInstanceResponse response = service.getServiceInstance(request);
+
+		assertThat(response.getServiceDefinitionId()).isEqualTo(serviceInstance.getServiceDefinitionId());
+		assertThat(response.getPlanId()).isEqualTo(serviceInstance.getPlanId());
+		assertThat(response.getParameters()).isEqualTo(serviceInstance.getParameters());
+
+		verify(repository).findById(SERVICE_INSTANCE_ID);
+		verifyNoMoreInteractions(repository);
+	}
+
+	@Test(expected = ServiceInstanceDoesNotExistException.class)
+	public void getServiceInstanceWhenInstanceDoesNotExists() {
+		when(repository.findById(SERVICE_INSTANCE_ID))
+				.thenReturn(Optional.empty());
+
+		GetServiceInstanceRequest request = GetServiceInstanceRequest.builder()
+				.serviceInstanceId(SERVICE_INSTANCE_ID)
+				.build();
+
+		service.getServiceInstance(request);
 	}
 
 	@Test

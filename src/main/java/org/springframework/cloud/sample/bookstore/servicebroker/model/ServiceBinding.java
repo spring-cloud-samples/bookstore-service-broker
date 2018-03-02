@@ -16,24 +16,47 @@
 
 package org.springframework.cloud.sample.bookstore.servicebroker.model;
 
-import org.springframework.cloud.servicebroker.model.Context;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.keyvalue.annotation.KeySpace;
-
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.MapKeyColumn;
+import javax.persistence.Table;
 import java.util.Map;
 
-@KeySpace("serviceBindings")
+@Entity
+@Table(name = "service_bindings")
 public class ServiceBinding {
 	@Id
 	private final String bindingId;
 
-	private final Context context;
+	@ElementCollection
+	@MapKeyColumn(name="parameter_name")
+	@Column(name="parameter_value")
+	@CollectionTable(name="service_binding_parameters", joinColumns = @JoinColumn(name = "instance_id"))
+	@Convert(converter = ObjectToStringConverter.class, attributeName = "value")
+	private final Map<String, Object> parameters;
 
+	@ElementCollection
+	@MapKeyColumn(name="credential_name")
+	@Column(name="credential_value")
+	@CollectionTable(name="service_binding_credentials", joinColumns = @JoinColumn(name = "instance_id"))
+	@Convert(converter = ObjectToStringConverter.class, attributeName = "value")
 	private final Map<String, Object> credentials;
 
-	public ServiceBinding(String bindingId, Context context, Map<String, Object> credentials) {
+	@SuppressWarnings("unused")
+	private ServiceBinding() {
+		bindingId = null;
+		parameters = null;
+		credentials = null;
+	}
+
+	public ServiceBinding(String bindingId, Map<String, Object> parameters, Map<String, Object> credentials) {
 		this.bindingId = bindingId;
-		this.context = context;
+		this.parameters = parameters;
 		this.credentials = credentials;
 	}
 
@@ -41,11 +64,11 @@ public class ServiceBinding {
 		return bindingId;
 	}
 
-	public Context getContext() {
-		return context;
-	}
-
 	public Map<String, Object> getCredentials() {
 		return credentials;
+	}
+
+	public Map<String, Object> getParameters() {
+		return parameters;
 	}
 }

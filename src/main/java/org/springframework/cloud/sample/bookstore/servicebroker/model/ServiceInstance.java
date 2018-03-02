@@ -16,27 +16,63 @@
 
 package org.springframework.cloud.sample.bookstore.servicebroker.model;
 
-import org.springframework.cloud.servicebroker.model.Context;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.keyvalue.annotation.KeySpace;
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.MapKeyColumn;
+import javax.persistence.Table;
+import java.util.Map;
 
-@KeySpace("serviceInstances")
+@Entity
+@Table(name = "service_instances")
 public class ServiceInstance {
 	@Id
 	private final String instanceId;
 
-	private final Context context;
+	private final String serviceDefinitionId;
 
-	public ServiceInstance(String instanceId, Context context) {
+	private final String planId;
+
+	@ElementCollection
+	@MapKeyColumn(name="parameter_name")
+	@Column(name = "parameter_value")
+	@CollectionTable(name="service_instance_parameters", joinColumns = @JoinColumn(name = "instance_id"))
+	@Convert(converter = ObjectToStringConverter.class, attributeName = "value")
+	private final Map<String, Object> parameters;
+
+	@SuppressWarnings("unused")
+	private ServiceInstance() {
+		instanceId = null;
+		serviceDefinitionId = null;
+		planId = null;
+		parameters = null;
+	}
+
+	public ServiceInstance(String instanceId, String serviceDefinitionId, String planId,
+						   Map<String, Object> parameters) {
 		this.instanceId = instanceId;
-		this.context = context;
+		this.serviceDefinitionId = serviceDefinitionId;
+		this.planId = planId;
+		this.parameters = parameters;
 	}
 
 	public String getInstanceId() {
 		return instanceId;
 	}
 
-	public Context getContext() {
-		return context;
+	public String getServiceDefinitionId() {
+		return serviceDefinitionId;
+	}
+
+	public String getPlanId() {
+		return planId;
+	}
+
+	public Map<String, Object> getParameters() {
+		return parameters;
 	}
 }

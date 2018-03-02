@@ -1,9 +1,11 @@
 management:
   endpoints:
     web:
-      expose: ["*"]
+      exposure:
+        include: "*"
 
-endpoints:
-  default:
-    web:
-      enabled: true
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true

@@ -25,6 +25,9 @@ import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstan
 import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceBindingRequest;
 import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceBindingResponse;
 import org.springframework.cloud.servicebroker.model.binding.DeleteServiceInstanceBindingRequest;
+import org.springframework.cloud.servicebroker.model.binding.GetServiceInstanceAppBindingResponse;
+import org.springframework.cloud.servicebroker.model.binding.GetServiceInstanceBindingRequest;
+import org.springframework.cloud.servicebroker.model.binding.GetServiceInstanceBindingResponse;
 import org.springframework.cloud.servicebroker.service.ServiceInstanceBindingService;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
@@ -78,6 +81,22 @@ public class BookStoreServiceInstanceBindingService implements ServiceInstanceBi
 	}
 
 	@Override
+	public GetServiceInstanceBindingResponse getServiceInstanceBinding(GetServiceInstanceBindingRequest request) {
+		String bindingId = request.getBindingId();
+
+		Optional<ServiceBinding> serviceBinding = repository.findById(bindingId);
+
+		if (serviceBinding.isPresent()) {
+			return GetServiceInstanceAppBindingResponse.builder()
+					.parameters(serviceBinding.get().getParameters())
+					.credentials(serviceBinding.get().getCredentials())
+					.build();
+		} else {
+			throw new ServiceInstanceBindingDoesNotExistException(bindingId);
+		}
+	}
+
+	@Override
 	public void deleteServiceInstanceBinding(DeleteServiceInstanceBindingRequest request) {
 		String bindingId = request.getBindingId();
 
@@ -126,7 +145,7 @@ public class BookStoreServiceInstanceBindingService implements ServiceInstanceBi
 
 	private void persistBinding(CreateServiceInstanceBindingRequest request, Map<String, Object> credentials) {
 		ServiceBinding serviceBinding =
-				new ServiceBinding(request.getBindingId(), request.getContext(), credentials);
+				new ServiceBinding(request.getBindingId(), request.getParameters(), credentials);
 		repository.save(serviceBinding);
 	}
 }

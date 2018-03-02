@@ -24,11 +24,13 @@ import org.springframework.cloud.sample.bookstore.webmvc.model.ApplicationInform
 import org.springframework.cloud.sample.bookstore.servicebroker.model.ServiceBinding;
 import org.springframework.cloud.sample.bookstore.servicebroker.repository.ServiceBindingRepository;
 import org.springframework.cloud.servicebroker.exception.ServiceInstanceBindingDoesNotExistException;
-import org.springframework.cloud.servicebroker.model.Context;
 import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceAppBindingResponse;
 import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceBindingRequest;
 import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceBindingResponse;
 import org.springframework.cloud.servicebroker.model.binding.DeleteServiceInstanceBindingRequest;
+import org.springframework.cloud.servicebroker.model.binding.GetServiceInstanceAppBindingResponse;
+import org.springframework.cloud.servicebroker.model.binding.GetServiceInstanceBindingRequest;
+import org.springframework.cloud.servicebroker.model.binding.GetServiceInstanceBindingResponse;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
@@ -54,6 +56,12 @@ public class BookstoreServiceInstanceBindingServiceTests {
 	private InMemoryUserDetailsManager userService;
 
 	private BookStoreServiceInstanceBindingService service;
+
+	private final Map<String, Object> credentials = new HashMap<String, Object>() {{
+		put("uri", "http://example.com");
+		put("username", "testuser");
+		put("password", "testpassword");
+	}};
 
 	@Before
 	public void setUp() {
@@ -108,12 +116,8 @@ public class BookstoreServiceInstanceBindingServiceTests {
 
 	@Test
 	public void createBindingWhenBindingExists() {
-		Map<String, Object> credentials = new HashMap<String, Object>() {{
-			put("uri", "http://example.com");
-			put("username", "testuser");
-			put("password", "testpassword");
-		}};
-		ServiceBinding binding = new ServiceBinding(SERVICE_BINDING_ID, Context.builder().build(), credentials);
+		ServiceBinding binding = new ServiceBinding(SERVICE_BINDING_ID, null, credentials);
+
 		when(repository.findById(SERVICE_BINDING_ID))
 				.thenReturn(Optional.of(binding));
 
@@ -133,6 +137,43 @@ public class BookstoreServiceInstanceBindingServiceTests {
 
 		verify(repository).findById(SERVICE_BINDING_ID);
 		verifyNoMoreInteractions(repository);
+	}
+
+	@Test
+	public void getBindingWhenBindingExists() {
+		HashMap<String, Object> parameters = new HashMap<>();
+		ServiceBinding serviceBinding = new ServiceBinding(SERVICE_BINDING_ID, parameters, credentials);
+
+		when(repository.findById(SERVICE_BINDING_ID))
+				.thenReturn(Optional.of(serviceBinding));
+
+		GetServiceInstanceBindingRequest request = GetServiceInstanceBindingRequest.builder()
+				.bindingId(SERVICE_BINDING_ID)
+				.build();
+
+		GetServiceInstanceBindingResponse response = service.getServiceInstanceBinding(request);
+
+		assertThat(response).isInstanceOf(GetServiceInstanceAppBindingResponse.class);
+
+		GetServiceInstanceAppBindingResponse appResponse = (GetServiceInstanceAppBindingResponse) response;
+
+		assertThat(appResponse.getParameters()).isEqualTo(parameters);
+		assertThat(appResponse.getCredentials()).isEqualTo(credentials);
+
+		verify(repository).findById(SERVICE_BINDING_ID);
+		verifyNoMoreInteractions(repository);
+	}
+
+	@Test(expected = ServiceInstanceBindingDoesNotExistException.class)
+	public void getBindingWhenBindingDoesNotExist() {
+		when(repository.findById(SERVICE_BINDING_ID))
+				.thenReturn(Optional.empty());
+
+		GetServiceInstanceBindingRequest request = GetServiceInstanceBindingRequest.builder()
+				.bindingId(SERVICE_BINDING_ID)
+				.build();
+
+		service.getServiceInstanceBinding(request);
 	}
 
 	@Test

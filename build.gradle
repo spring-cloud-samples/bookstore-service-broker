@@ -56,8 +56,11 @@ dependencies {
 
 	compile('org.springframework.cloud:spring-cloud-open-service-broker-starter-webmvc:2.0.0.BUILD-SNAPSHOT')
 	
-	compile('org.springframework.data:spring-data-keyvalue')
-
+	compile('org.springframework.boot:spring-boot-starter-cloud-connectors')
+	compile('org.springframework.boot:spring-boot-starter-data-jpa')
+	runtime('org.hsqldb:hsqldb')
+	runtime('mysql:mysql-connector-java')
+	
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 	testCompile('org.springframework.security:spring-security-test')
 	testCompile('org.assertj:assertj-core:3.9.1')

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.sample.bookstore.servicebroker.repository;
+package org.springframework.cloud.sample.bookstore.servicebroker.config;
 
-import org.springframework.cloud.sample.bookstore.servicebroker.model.ServiceInstance;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.cloud.sample.bookstore.servicebroker.repository.ServiceInstanceRepository;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-public interface ServiceInstanceRepository extends JpaRepository<ServiceInstance, String> {
+@Configuration
+@EnableJpaRepositories(basePackageClasses = ServiceInstanceRepository.class)
+public class ServicesRepositoryConfiguration {
 }

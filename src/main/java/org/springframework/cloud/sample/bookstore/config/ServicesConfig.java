@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.sample.bookstore.servicebroker.config;
+package org.springframework.cloud.sample.bookstore.config;
 
-import org.springframework.cloud.sample.bookstore.servicebroker.repository.ServiceInstanceRepository;
+import org.springframework.cloud.config.java.ServiceScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.map.repository.config.EnableMapRepositories;
+import org.springframework.context.annotation.Profile;
 
 @Configuration
-@EnableMapRepositories(basePackageClasses = ServiceInstanceRepository.class)
-public class RepositoryConfiguration {
+@Profile("cloud")
+@ServiceScan
+public class ServicesConfig {
 }
