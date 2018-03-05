@@ -26,7 +26,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 public class BookStoreResourceAssembler {
 	public BookStoreResource toResource(BookStore bookStore) {
 		BookResourceAssembler bookAssembler = new BookResourceAssembler();
-		List<BookResource> bookResources = bookAssembler.toResources(bookStore.values(), bookStore.getId());
+		List<BookResource> bookResources = bookAssembler.toResources(bookStore.getBooks(), bookStore.getId());
 
 		BookStoreResource bookStoreResource = new BookStoreResource(bookResources);
 		bookStoreResource.add(

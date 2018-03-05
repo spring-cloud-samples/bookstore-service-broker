@@ -18,18 +18,27 @@ package org.springframework.cloud.sample.bookstore.webmvc.integration;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.cloud.sample.bookstore.webmvc.controller.BookController;
 import org.springframework.cloud.sample.bookstore.webmvc.controller.BookStoreController;
 import org.springframework.cloud.sample.bookstore.webmvc.model.Book;
 import org.springframework.cloud.sample.bookstore.webmvc.model.BookStore;
+import org.springframework.cloud.sample.bookstore.webmvc.repository.BookStoreRepository;
 import org.springframework.cloud.sample.bookstore.webmvc.service.BookStoreService;
 import org.springframework.hateoas.Link;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.List;
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
@@ -42,14 +51,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@RunWith(SpringRunner.class)
+@DataJpaTest
 public class BookStoreIntegrationTests {
 	private MockMvc mockMvc;
 
-	private BookStore bookStore;
+	@Autowired
+	private BookStoreRepository repository;
+
+	private String bookStoreId;
 
 	@Before
 	public void setUp() {
-		BookStoreService service = new BookStoreService();
+		BookStoreService service = new BookStoreService(repository);
 
 		BookStoreController bookStoreController = new BookStoreController(service);
 		BookController bookController = new BookController(service);
@@ -63,15 +77,19 @@ public class BookStoreIntegrationTests {
 				.setMessageConverters(new MappingJackson2HttpMessageConverter())
 				.build();
 
-		bookStore = service.createBookStore();
+		BookStore bookStore = service.createBookStore();
 		service.putBookInStore(bookStore.getId(),
 				new Book("978-1617292545", "Spring Boot in Action", "Craig Walls"));
 		service.putBookInStore(bookStore.getId(),
 				new Book("978-1784393021", "Learning Spring Boot", "Greg L. Turnquist"));
+
+		bookStoreId = bookStore.getId();
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void bookStoreIsRetrieved() throws Exception {
+		BookStore bookStore = getBookStoreFromRepository();
 
 		this.mockMvc.perform(get("/bookstores/{bookStoreId}", bookStore.getId()))
 				.andExpect(status().isOk())
@@ -96,6 +114,7 @@ public class BookStoreIntegrationTests {
 
 	@Test
 	public void bookIsRetrieved() throws Exception {
+		BookStore bookStore = getBookStoreFromRepository();
 		Book book = bookStore.getBooks().get(0);
 
 		this.mockMvc.perform(get("/bookstores/{bookStoreId}/books/{bookId}", bookStore.getId(), book.getId()))
@@ -110,6 +129,8 @@ public class BookStoreIntegrationTests {
 
 	@Test
 	public void bookIsAdded() throws Exception {
+		BookStore bookStore = getBookStoreFromRepository();
+
 		this.mockMvc.perform(put("/bookstores/{bookStoreId}/books", bookStore.getId())
 				.content("{\"isbn\":\"978-1785284151\", \"title\":\"Spring Boot Cookbook\", \"author\":\"Alex Antonov\"}"))
 				.andExpect(status().isCreated())
@@ -120,11 +141,12 @@ public class BookStoreIntegrationTests {
 				.andExpect(jsonPath("$.links[0].href", containsString(buildBookRef(bookStore.getId()))))
 				.andExpect(jsonPath("$.links[0].rel", equalTo(Link.REL_SELF)));
 
-		assertThat(bookStore).size().isEqualTo(3);
+		assertThat(getBooksFromRepository()).size().isEqualTo(3);
 	}
 
 	@Test
 	public void bookIsDeleted() throws Exception {
+		BookStore bookStore = getBookStoreFromRepository();
 		Book book = bookStore.getBooks().get(0);
 
 		this.mockMvc.perform(delete("/bookstores/{bookStoreId}/books/{bookId}", bookStore.getId(), book.getId()))
@@ -136,7 +158,21 @@ public class BookStoreIntegrationTests {
 				.andExpect(jsonPath("$.links[0].href", endsWith(buildBookRef(bookStore.getId(), book.getId()))))
 				.andExpect(jsonPath("$.links[0].rel", equalTo(Link.REL_SELF)));
 
-		assertThat(bookStore).size().isEqualTo(1);
+		assertThat(getBooksFromRepository()).size().isEqualTo(1);
+	}
+
+	private List<Book> getBooksFromRepository() {
+		return getBookStoreFromRepository().getBooks();
+	}
+
+	private BookStore getBookStoreFromRepository() {
+		Optional<BookStore> bookStore = repository.findById(bookStoreId);
+
+		if (!bookStore.isPresent()) {
+			fail("bookstore not found in repository");
+		}
+
+		return bookStore.get();
 	}
 
 	private String buildBookStoreRef(String bookStoreId) {

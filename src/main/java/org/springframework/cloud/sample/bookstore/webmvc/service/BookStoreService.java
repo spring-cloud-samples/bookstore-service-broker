@@ -18,20 +18,24 @@ package org.springframework.cloud.sample.bookstore.webmvc.service;
 
 import org.springframework.cloud.sample.bookstore.webmvc.model.Book;
 import org.springframework.cloud.sample.bookstore.webmvc.model.BookStore;
+import org.springframework.cloud.sample.bookstore.webmvc.repository.BookStoreRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 public class BookStoreService {
-	private final Map<String, BookStore> bookStoreById = new HashMap<>();
+	private BookStoreRepository repository;
+
+	public BookStoreService(BookStoreRepository bookStoreRepository) {
+		this.repository = bookStoreRepository;
+	}
 
 	public BookStore createBookStore(String storeId) {
 		BookStore bookStore = new BookStore(storeId);
-		bookStoreById.put(storeId, bookStore);
-		return bookStore;
+
+		return repository.save(bookStore);
 	}
 
 	public BookStore createBookStore() {
@@ -39,15 +43,12 @@ public class BookStoreService {
 	}
 
 	public BookStore getBookStore(String storeId) {
-		BookStore store = bookStoreById.get(storeId);
-		if (store == null) {
-			throw new IllegalArgumentException("Invalid book store ID " + storeId + ".");
-		}
-		return store;
+		Optional<BookStore> store = repository.findById(storeId);
+		return store.orElseThrow(() -> new IllegalArgumentException("Invalid book store ID " + storeId + "."));
 	}
 
 	public void deleteBookStore(String id) {
-		bookStoreById.remove(id);
+		repository.deleteById(id);
 	}
 
 	public Book putBookInStore(String storeId, Book book) {
@@ -55,19 +56,23 @@ public class BookStoreService {
 		Book bookWithId = new Book(bookId, book);
 
 		BookStore store = getBookStore(storeId);
-		store.put(bookId, bookWithId);
+		store.addBook(bookWithId);
+		
+		repository.save(store);
 
 		return bookWithId;
 	}
 
 	public Book getBookFromStore(String storeId, String bookId) {
 		BookStore store = getBookStore(storeId);
-		return store.get(bookId);
+		return store.getBookById(bookId)
+				.orElseThrow(() -> new IllegalArgumentException("Invalid book ID " + storeId + ":" + bookId + "."));
 	}
 
 	public Book removeBookFromStore(String storeId, String bookId) {
 		BookStore store = getBookStore(storeId);
-		return store.remove(bookId);
+		return store.remove(bookId)
+				.orElseThrow(() -> new IllegalArgumentException("Invalid book ID " + storeId + ":" + bookId + "."));
 	}
 
 	private String generateRandomId() {

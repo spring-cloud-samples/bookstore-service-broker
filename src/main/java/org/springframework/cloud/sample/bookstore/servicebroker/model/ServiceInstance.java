@@ -31,14 +31,17 @@ import java.util.Map;
 @Table(name = "service_instances")
 public class ServiceInstance {
 	@Id
+	@Column(length = 50)
 	private final String instanceId;
 
+	@Column(length = 50)
 	private final String serviceDefinitionId;
 
+	@Column(length = 50)
 	private final String planId;
 
 	@ElementCollection
-	@MapKeyColumn(name="parameter_name")
+	@MapKeyColumn(name="parameter_name", length = 100)
 	@Column(name = "parameter_value")
 	@CollectionTable(name="service_instance_parameters", joinColumns = @JoinColumn(name = "instance_id"))
 	@Convert(converter = ObjectToStringConverter.class, attributeName = "value")

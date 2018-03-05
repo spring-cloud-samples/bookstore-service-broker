@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.sample.bookstore.config;
+package org.springframework.cloud.sample.bookstore.webmvc.config;
 
-import org.springframework.cloud.config.java.ServiceScan;
+import org.springframework.cloud.sample.bookstore.webmvc.repository.BookStoreRepository;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @Configuration
-@Profile("cloud")
-@ServiceScan
-public class ServicesConfig {
+@EnableJpaRepositories(basePackageClasses = BookStoreRepository.class)
+public class BookstoreRepositoryConfiguration {
 }

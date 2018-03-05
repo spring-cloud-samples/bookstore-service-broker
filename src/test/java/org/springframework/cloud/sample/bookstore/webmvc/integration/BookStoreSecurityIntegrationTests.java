@@ -20,16 +20,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.sample.bookstore.ServiceBrokerApplication;
 import org.springframework.cloud.sample.bookstore.webmvc.model.Book;
 import org.springframework.cloud.sample.bookstore.webmvc.model.BookStore;
-import org.springframework.cloud.sample.bookstore.webmvc.security.SecurityAuthorities;
 import org.springframework.cloud.sample.bookstore.webmvc.service.BookStoreService;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -44,9 +43,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {ServiceBrokerApplication.class})
-@WebAppConfiguration
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = {ServiceBrokerApplication.class})
+@AutoConfigureTestDatabase
 public class BookStoreSecurityIntegrationTests {
 	private static final String BOOKSTORE_INSTANCE_ID = "1111-1111-1111-1111";
 	private static final String OTHER_INSTANCE_ID = "2222-2222-2222-2222";
@@ -57,9 +56,10 @@ public class BookStoreSecurityIntegrationTests {
 	@Autowired
 	private BookStoreService bookStoreService;
 
-	private BookStore bookStore;
-
 	private MockMvc mockMvc;
+	
+	private String bookStoreId;
+	private String bookId;
 
 	@Before
 	public void setUp() {
@@ -71,9 +71,12 @@ public class BookStoreSecurityIntegrationTests {
 				.apply(springSecurity())
 				.build();
 
-		bookStore = bookStoreService.createBookStore(BOOKSTORE_INSTANCE_ID);
-		bookStoreService.putBookInStore(bookStore.getId(),
+		BookStore bookStore = bookStoreService.createBookStore(BOOKSTORE_INSTANCE_ID);
+		bookStoreId = bookStore.getId();
+		
+		Book book = bookStoreService.putBookInStore(bookStoreId,
 				new Book("978-1617292545", "Spring Boot in Action", "Craig Walls"));
+		bookId = book.getId(); 
 	}
 
 	@Test
@@ -149,19 +152,19 @@ public class BookStoreSecurityIntegrationTests {
 											  ResultMatcher getStatus,
 											  ResultMatcher putStatus,
 											  ResultMatcher deleteStatus) throws Exception {
-		this.mockMvc.perform(get("/bookstores/{bookStoreId}", bookStore.getId()))
+		this.mockMvc.perform(get("/bookstores/{bookStoreId}", bookStoreId))
 				.andExpect(getAllStatus);
 
 		this.mockMvc.perform(get("/bookstores/{bookStoreId}/books/{bookId}",
-				bookStore.getId(), bookStore.getBooks().get(0).getId()))
+				bookStoreId, bookId))
 				.andExpect(getStatus);
 
-		this.mockMvc.perform(put("/bookstores/{bookStoreId}/books", bookStore.getId())
+		this.mockMvc.perform(put("/bookstores/{bookStoreId}/books", bookStoreId)
 				.content("{\"isbn\":\"111-1111111111\", \"title\":\"test book\", \"author\":\"test author\"}"))
 				.andExpect(putStatus);
 
 		this.mockMvc.perform(delete("/bookstores/{bookStoreId}/books/{bookId}",
-				bookStore.getId(), bookStore.getBooks().get(0).getId()))
+				bookStoreId, bookId))
 				.andExpect(deleteStatus);
 	}
 }
