@@ -50,7 +50,7 @@ The VMware Harbor product can be used to deploy a Docker registry in the same in
 
 The Gradle build file for the service broker sample project can be used to build a Docker image and push it to a repository.
 
-When using a private Docker repository, the following command can be used to build the image and push it with the default `sample` group. This isn't likely to work with a public Docker repository unless you own the group named `demo` in that repository.
+When using a private Docker repository, the following command can be used to build the image and push it with the default `sample` group. This isn't likely to work with a public Docker repository unless you own the group named `sample` in that repository.
 
 ----
 $ ./gradlew assemble dockerPush
@@ -154,7 +154,7 @@ In order to verify that the service broker application is running, you will need
 When using `minikube`, the following command will show the URL that can be used to access the deployed application:
 
 ----
-$ minikube service bookstore-broker --url
+$ minikube service bookstore-broker -n bookstore-broker --url
 http://192.168.99.100:31742
 ----
 
@@ -466,19 +466,27 @@ Events:
 Service bindings are exposed via Kubernetes secret objects. Show the details of the secret containing the binding credentials:
 
 ----
-$ kubectl describe secret bookstore-binding -n test
-Name:         bookstore-binding
-Namespace:    test
-Labels:       <none>
-Annotations:  <none>
-
-Type:  Opaque
-
-Data
-====
-password:  68 bytes
-uri:       67 bytes
-username:  4 bytes
+$ kubectl get secret bookstore-binding -n test -o yaml
+apiVersion: v1
+data:
+  password: ....
+  uri: .....
+  username: ....
+kind: Secret
+metadata:
+  name: bookstore-binding
+  namespace: test
+  ownerReferences:
+  - apiVersion: servicecatalog.k8s.io/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: ServiceBinding
+    name: bookstore-binding
+    uid: 39b3e0c2-2248-11e8-a920-0242ac110002
+  resourceVersion: "106062"
+  selfLink: /api/v1/namespaces/test/secrets/bookstore-binding
+  uid: 3a4416d8-2248-11e8-95fd-080027d19bb3
+type: Opaque
 ----
 
-
+Refer to the https://kubernetes.io/docs/concepts/configuration/secret/#decoding-a-secret[Kubernetes documentation] to decode the `password`, `uri`, and `username` values.

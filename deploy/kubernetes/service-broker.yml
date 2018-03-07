@@ -10,5 +10,5 @@ spec:
     basic:
       secretRef:
         name: bookstore-broker-secret
-        namespace: bookstore-broker
+        namespace: catalog
 
