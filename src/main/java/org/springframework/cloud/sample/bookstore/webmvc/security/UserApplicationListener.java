@@ -16,10 +16,21 @@
 
 package org.springframework.cloud.sample.bookstore.webmvc.security;
 
-public class SecurityAuthorities {
-	public static final String ADMIN = "ROLE_ADMIN";
-	public static final String FULL_ACCESS = "ROLE_FULL_ACCESS";
-	public static final String READ_ONLY = "ROLE_READ_ONLY";
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.cloud.sample.bookstore.webmvc.service.UserService;
+import org.springframework.context.ApplicationListener;
+import org.springframework.stereotype.Component;
 
-	public static final String BOOK_STORE_ID_PREFIX = "BOOK_STORE_";
+@Component
+public class UserApplicationListener implements ApplicationListener<ApplicationReadyEvent> {
+	private UserService userService;
+
+	public UserApplicationListener(UserService userService) {
+		this.userService = userService;
+	}
+
+	@Override
+	public void onApplicationEvent(ApplicationReadyEvent event) {
+		userService.initializeUsers();
+	}
 }

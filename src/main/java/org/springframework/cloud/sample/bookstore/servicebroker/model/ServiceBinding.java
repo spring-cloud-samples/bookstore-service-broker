@@ -50,9 +50,9 @@ public class ServiceBinding {
 
 	@SuppressWarnings("unused")
 	private ServiceBinding() {
-		bindingId = null;
-		parameters = null;
-		credentials = null;
+		this.bindingId = null;
+		this.parameters = null;
+		this.credentials = null;
 	}
 
 	public ServiceBinding(String bindingId, Map<String, Object> parameters, Map<String, Object> credentials) {

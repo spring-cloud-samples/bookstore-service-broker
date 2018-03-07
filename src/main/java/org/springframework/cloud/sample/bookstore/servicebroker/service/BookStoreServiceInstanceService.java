@@ -57,9 +57,7 @@ public class BookStoreServiceInstanceService implements ServiceInstanceService {
 		} else {
 			storeService.createBookStore(instanceId);
 
-			ServiceInstance serviceInstance = new ServiceInstance(instanceId, request.getServiceDefinitionId(),
-					request.getPlanId(), request.getParameters());
-			instanceRepository.save(serviceInstance);
+			saveInstance(request, instanceId);
 		}
 
 		return responseBuilder.build();
@@ -104,5 +102,11 @@ public class BookStoreServiceInstanceService implements ServiceInstanceService {
 	@Override
 	public UpdateServiceInstanceResponse updateServiceInstance(UpdateServiceInstanceRequest request) {
 		return null;
+	}
+
+	private void saveInstance(CreateServiceInstanceRequest request, String instanceId) {
+		ServiceInstance serviceInstance = new ServiceInstance(instanceId, request.getServiceDefinitionId(),
+				request.getPlanId(), request.getParameters());
+		instanceRepository.save(serviceInstance);
 	}
 }

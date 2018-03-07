@@ -35,8 +35,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.springframework.cloud.sample.bookstore.webmvc.security.SecurityAuthorities.BOOK_STORE_ID_PREFIX;
-import static org.springframework.cloud.sample.bookstore.webmvc.security.SecurityAuthorities.ROLE_FULL_ACCESS;
-import static org.springframework.cloud.sample.bookstore.webmvc.security.SecurityAuthorities.ROLE_READ_ONLY;
+import static org.springframework.cloud.sample.bookstore.webmvc.security.SecurityAuthorities.FULL_ACCESS;
+import static org.springframework.cloud.sample.bookstore.webmvc.security.SecurityAuthorities.READ_ONLY;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -89,7 +89,7 @@ public class BookStoreSecurityIntegrationTests {
 	}
 
 	@Test
-	@WithMockUser(authorities = {ROLE_FULL_ACCESS})
+	@WithMockUser(authorities = {FULL_ACCESS})
 	public void fullAccessWithoutInstanceIdIsAllowed() throws Exception {
 		assertExpectedResponseStatus(
 				status().isOk(),
@@ -99,7 +99,7 @@ public class BookStoreSecurityIntegrationTests {
 	}
 
 	@Test
-	@WithMockUser(authorities = {ROLE_FULL_ACCESS, BOOK_STORE_ID_PREFIX + BOOKSTORE_INSTANCE_ID})
+	@WithMockUser(authorities = {FULL_ACCESS, BOOK_STORE_ID_PREFIX + BOOKSTORE_INSTANCE_ID})
 	public void fullAccessWithInstanceIdIsAllowed() throws Exception {
 		assertExpectedResponseStatus(
 				status().isOk(),
@@ -109,7 +109,7 @@ public class BookStoreSecurityIntegrationTests {
 	}
 
 	@Test
-	@WithMockUser(authorities = {ROLE_FULL_ACCESS, BOOK_STORE_ID_PREFIX + OTHER_INSTANCE_ID})
+	@WithMockUser(authorities = {FULL_ACCESS, BOOK_STORE_ID_PREFIX + OTHER_INSTANCE_ID})
 	public void fullAccessWithOtherInstanceIdIsForbidden() throws Exception {
 		assertExpectedResponseStatus(
 				status().isForbidden(),
@@ -119,7 +119,7 @@ public class BookStoreSecurityIntegrationTests {
 	}
 
 	@Test
-	@WithMockUser(authorities = {ROLE_READ_ONLY})
+	@WithMockUser(authorities = {READ_ONLY})
 	public void readOnlyWithoutInstanceIdIsPartiallyAllowed() throws Exception {
 		assertExpectedResponseStatus(
 				status().isOk(),
@@ -129,7 +129,7 @@ public class BookStoreSecurityIntegrationTests {
 	}
 
 	@Test
-	@WithMockUser(authorities = {ROLE_READ_ONLY, BOOK_STORE_ID_PREFIX + BOOKSTORE_INSTANCE_ID})
+	@WithMockUser(authorities = {READ_ONLY, BOOK_STORE_ID_PREFIX + BOOKSTORE_INSTANCE_ID})
 	public void readOnlyWithInstanceIdIsPartiallyAllowed() throws Exception {
 		assertExpectedResponseStatus(
 				status().isOk(),
@@ -139,7 +139,7 @@ public class BookStoreSecurityIntegrationTests {
 	}
 
 	@Test
-	@WithMockUser(authorities = {ROLE_READ_ONLY, BOOK_STORE_ID_PREFIX + OTHER_INSTANCE_ID})
+	@WithMockUser(authorities = {READ_ONLY, BOOK_STORE_ID_PREFIX + OTHER_INSTANCE_ID})
 	public void readOnlyWithOtherInstanceIdIsForbidden() throws Exception {
 		assertExpectedResponseStatus(
 				status().isForbidden(),

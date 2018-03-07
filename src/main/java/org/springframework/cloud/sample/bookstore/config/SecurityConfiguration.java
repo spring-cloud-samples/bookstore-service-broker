@@ -16,20 +16,24 @@
 
 package org.springframework.cloud.sample.bookstore.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
+import org.springframework.cloud.sample.bookstore.webmvc.security.RepositoryUserDetailsService;
 import org.springframework.cloud.sample.bookstore.webmvc.security.SecurityAuthorities;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+	@Autowired
+	private RepositoryUserDetailsService userDetailsService;
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -38,25 +42,25 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.csrf().disable()
 				.authorizeRequests()
 					.antMatchers("/bookstores/**").authenticated()
-					.antMatchers("/v2/**").hasRole(SecurityAuthorities.ADMIN)
+					.antMatchers("/v2/**").hasAuthority(SecurityAuthorities.ADMIN)
 					.requestMatchers(EndpointRequest.to("info", "health")).permitAll()
-					.requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole(SecurityAuthorities.ADMIN)
+					.requestMatchers(EndpointRequest.toAnyEndpoint()).hasAuthority(SecurityAuthorities.ADMIN)
 				.and()
 					.httpBasic();
 		// @formatter:on
 	}
 
-	@Bean
-	public InMemoryUserDetailsManager userDetailsService() {
-		return new InMemoryUserDetailsManager(adminUser());
+	@Override
+	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+		// @formatter:off
+		auth
+				.userDetailsService(userDetailsService)
+				.passwordEncoder(passwordEncoder());
+		// @formatter:on
 	}
 
-	@SuppressWarnings("deprecation")
-	private UserDetails adminUser() {
-		return User.withDefaultPasswordEncoder()
-				.username("admin")
-				.password("supersecret")
-				.roles(SecurityAuthorities.ADMIN, SecurityAuthorities.FULL_ACCESS)
-				.build();
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
 	}
 }

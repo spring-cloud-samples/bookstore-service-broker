@@ -23,6 +23,8 @@ import org.mockito.Mock;
 import org.springframework.cloud.sample.bookstore.webmvc.model.ApplicationInformation;
 import org.springframework.cloud.sample.bookstore.servicebroker.model.ServiceBinding;
 import org.springframework.cloud.sample.bookstore.servicebroker.repository.ServiceBindingRepository;
+import org.springframework.cloud.sample.bookstore.webmvc.model.User;
+import org.springframework.cloud.sample.bookstore.webmvc.service.UserService;
 import org.springframework.cloud.servicebroker.exception.ServiceInstanceBindingDoesNotExistException;
 import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceAppBindingResponse;
 import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceBindingRequest;
@@ -31,8 +33,6 @@ import org.springframework.cloud.servicebroker.model.binding.DeleteServiceInstan
 import org.springframework.cloud.servicebroker.model.binding.GetServiceInstanceAppBindingResponse;
 import org.springframework.cloud.servicebroker.model.binding.GetServiceInstanceBindingRequest;
 import org.springframework.cloud.servicebroker.model.binding.GetServiceInstanceBindingResponse;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -43,6 +43,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.springframework.cloud.sample.bookstore.webmvc.security.SecurityAuthorities.BOOK_STORE_ID_PREFIX;
+import static org.springframework.cloud.sample.bookstore.webmvc.security.SecurityAuthorities.FULL_ACCESS;
 
 public class BookstoreServiceInstanceBindingServiceTests {
 	private static final String SERVICE_INSTANCE_ID = "instance-id";
@@ -53,7 +55,7 @@ public class BookstoreServiceInstanceBindingServiceTests {
 	private ServiceBindingRepository repository;
 
 	@Mock
-	private InMemoryUserDetailsManager userService;
+	private UserService userService;
 
 	private BookStoreServiceInstanceBindingService service;
 
@@ -69,13 +71,16 @@ public class BookstoreServiceInstanceBindingServiceTests {
 
 		ApplicationInformation appInfo = new ApplicationInformation(BASE_URL);
 
-		service = new BookStoreServiceInstanceBindingService(repository, appInfo, userService);
+		service = new BookStoreServiceInstanceBindingService(repository, userService, appInfo);
 	}
 	
 	@Test
 	public void createBindingWhenBindingDoesNotExist() {
 		when(repository.findById(SERVICE_BINDING_ID))
 				.thenReturn(Optional.empty());
+
+		when(userService.createUser(SERVICE_BINDING_ID, FULL_ACCESS, BOOK_STORE_ID_PREFIX + SERVICE_INSTANCE_ID))
+			.thenReturn(new User(SERVICE_BINDING_ID, "password", FULL_ACCESS, BOOK_STORE_ID_PREFIX + SERVICE_INSTANCE_ID));
 
 		CreateServiceInstanceBindingRequest request = CreateServiceInstanceBindingRequest.builder()
 				.serviceInstanceId(SERVICE_INSTANCE_ID)
@@ -97,11 +102,6 @@ public class BookstoreServiceInstanceBindingServiceTests {
 		assertThat(credentials.get("uri").toString())
 			.startsWith(BASE_URL)
 			.endsWith("bookstores/" + SERVICE_INSTANCE_ID);
-
-		ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-		verify(userService).createUser(userCaptor.capture());
-		User actualUser = userCaptor.getValue();
-		assertThat(actualUser.getUsername()).isEqualTo(SERVICE_BINDING_ID);
 
 		verify(repository).findById(SERVICE_BINDING_ID);
 
