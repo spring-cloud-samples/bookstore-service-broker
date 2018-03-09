@@ -17,18 +17,17 @@
 package org.springframework.cloud.sample.bookstore.web.config;
 
 import org.springframework.cloud.sample.bookstore.web.security.BookStorePermissionEvaluator;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
-
+import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 
 @Configuration
-@EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
-public class MethodSecurityConfiguration extends GlobalMethodSecurityConfiguration {
-	@Override
-	protected MethodSecurityExpressionHandler createExpressionHandler() {
+@EnableReactiveMethodSecurity
+public class MethodSecurityConfiguration {
+	@Bean
+	public MethodSecurityExpressionHandler methodSecurityExpressionHandler() {
 		DefaultMethodSecurityExpressionHandler expressionHandler =
 				new DefaultMethodSecurityExpressionHandler();
 		expressionHandler.setPermissionEvaluator(new BookStorePermissionEvaluator());

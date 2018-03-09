@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/bookstores")
@@ -42,7 +43,7 @@ public class BookStoreController extends BaseController {
 
 	@GetMapping("/{bookStoreId}")
 	@PreAuthorize("hasAnyRole('ROLE_FULL_ACCESS','ROLE_READ_ONLY') and hasPermission(#bookStoreId, '')")
-	public ResponseEntity<BookStoreResource> getBooks(@PathVariable String bookStoreId) {
+	public Mono<ResponseEntity<BookStoreResource>> getBooks(@PathVariable String bookStoreId) {
 		BookStore bookStore = bookStoreService.getBookStore(bookStoreId);
 		return createResponse(bookStore);
 	}
@@ -52,8 +53,8 @@ public class BookStoreController extends BaseController {
 		return super.badBookStoreId(e);
 	}
 
-	private ResponseEntity<BookStoreResource> createResponse(BookStore bookStore) {
+	private Mono<ResponseEntity<BookStoreResource>> createResponse(BookStore bookStore) {
 		BookStoreResource bookStoreResource = new BookStoreResourceAssembler().toResource(bookStore);
-		return new ResponseEntity<>(bookStoreResource, HttpStatus.OK);
+		return Mono.just(new ResponseEntity<>(bookStoreResource, HttpStatus.OK));
 	}
 }

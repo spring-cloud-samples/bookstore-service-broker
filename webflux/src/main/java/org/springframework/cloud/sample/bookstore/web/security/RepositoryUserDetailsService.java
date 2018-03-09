@@ -48,10 +48,7 @@ public class RepositoryUserDetailsService implements UserDetailsService, Reactiv
 			throw new UsernameNotFoundException(username);
 		}
 
-		CustomUserDetails userDetails = new CustomUserDetails(user);
-
-		System.out.println("loaded userDetails = " + userDetails);
-		return userDetails;
+		return new CustomUserDetails(user);
 	}
 
 	@Override

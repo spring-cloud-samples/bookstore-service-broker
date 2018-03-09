@@ -44,10 +44,7 @@ public class RepositoryUserDetailsService implements UserDetailsService {
 			throw new UsernameNotFoundException(username);
 		}
 
-		CustomUserDetails userDetails = new CustomUserDetails(user);
-
-		System.out.println("loaded userDetails = " + userDetails);
-		return userDetails;
+		return new CustomUserDetails(user);
 	}
 
 	private class CustomUserDetails implements UserDetails {
