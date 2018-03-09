@@ -37,7 +37,7 @@ Using manifest file deploy/cloudfoundry/manifest.yml
 Getting app info...
 Creating app with these attributes...
 + name:       bookstore-service-broker
-  path:       build/libs/bookstore-service-broker-0.0.1.BUILD-SNAPSHOT.jar
+  path:       build/libs/bookstore-service-broker-webmvc-0.0.1.BUILD-SNAPSHOT.jar
 + memory:     1G
   routes:
 +   bookstore-service-broker.apps.example.com

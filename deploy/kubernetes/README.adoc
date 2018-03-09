@@ -53,13 +53,17 @@ The Gradle build file for the service broker sample project can be used to build
 When using a private Docker repository, the following command can be used to build the image and push it with the default `sample` group. This isn't likely to work with a public Docker repository unless you own the group named `sample` in that repository.
 
 ----
+$ cd webmvc
 $ ./gradlew assemble dockerPush
+$ cd ..
 ----
 
 When using a public Docker repository, provide your repository username to the Gradle command. 
 
 ----
+$ cd webmvc
 $ ./gradlew assemble dockerPush -PdockerGroup=[username]
+$ cd ..
 ----
 
 = Deploy and test the service broker
@@ -73,10 +77,11 @@ $ kubectl create namespace bookstore-broker
 namespace "bookstore-broker" created
 ----
 
-Deploy the service broker application Docker image:
+Deploy the service broker application Docker image and expose the application outside of the container:
 
 ----
 $ kubectl create -f deploy/kubernetes/deployment.yml
+service "bookstore-broker" created
 deployment "bookstore-broker" created
 ----
 
@@ -116,15 +121,6 @@ Events:
 
 It may take some time for the application to start. When it has started successfully, the `Replicas` row of the output should show `1 available`.
 
-== Expose the service broker application
-
-Create a Kubernetes service that exposes the service broker application outside of the container:
-
-----
-$ kubectl create -f deploy/kubernetes/service.yml
-service "bookstore-broker" created
-----
-
 Show the details of the created service:
 
 ----
@@ -134,12 +130,13 @@ Namespace:                bookstore-broker
 Labels:                   run=bookstore-broker
 Annotations:              <none>
 Selector:                 run=bookstore-broker
-Type:                     NodePort
+Type:                     LoadBalanced
 IP:                       10.107.161.81
+LoadBalancer Ingress:     192.168.1.238
 Port:                     <unset>  80/TCP
 TargetPort:               8080/TCP
 NodePort:                 <unset>  32248/TCP
-Endpoints:
+Endpoints:                10.8.1.7:8080
 Session Affinity:         None
 External Traffic Policy:  Cluster
 Events:                   <none>
@@ -176,45 +173,22 @@ Namespace:                bookstore-broker
 Labels:                   run=bookstore-broker
 Annotations:              <none>
 Selector:                 run=bookstore-broker
-Type:                     NodePort
+Type:                     LoadBalanced
 IP:                       10.107.161.81
+LoadBalancer Ingress:     192.168.1.238
 Port:                     <unset>  80/TCP
 TargetPort:               8080/TCP
 NodePort:                 <unset>  32248/TCP
-Endpoints:
+Endpoints:                10.8.1.7:8080
 Session Affinity:         None
 External Traffic Policy:  Cluster
 Events:                   <none>
 ----
 
-Note the value of the `NodePort` row.
-
-Show a list of Kubernetes pods running in the cluster:
+Note the value of the `LoadBalancer Ingress` IP address and `NodePort` rows. Construct a URL using these two values, and use the this URL to access the `/v2/catalog` endpoint of the service broker application:
 
 ----
-$ kubectl get pods -n bookstore-broker -o=wide
-NAME                               READY     STATUS    IP            NODE
-bookstore-broker-68f88cbbfb-vvmn4   1/1       Running   10.200.37.3   8ce76de4-4cfc-4bcd-b860-043a69cd2402
-----
-
-Note the value in the `NODE` column for the `bookstore-broker` pod.
-
-Show a list of Kubernetes nodes running in the cluster:
-
-----
-$ kubectl get nodes -n bookstore-broker -o=wide
-NAME                                   STATUS    AGE       VERSION   EXTERNAL-IP
-2e45b4e3-1f9a-439e-b830-e051135f9e52   Ready     1d        v1.9.2    192.168.1.236
-8ce76de4-4cfc-4bcd-b860-043a69cd2402   Ready     1d        v1.9.2    192.168.1.235
-cf353f58-bb1a-45cf-8b18-96976f818c5f   Ready     1d        v1.9.2    192.168.1.234
-----
-
-Note the value in the `EXTERNAL-IP` column of the node whose `NAME` matches the node for the `bookstore-broker` pod.
-
-Construct a URL using the IP address of the node and the port of the service, and use the this URL to access the `/v2/catalog` endpoint of the service broker application:
-
-----
-$ curl http://192.168.1.235:32248/v2/catalog -u admin:supersecret
+$ curl http://192.168.1.238:32248/v2/catalog -u admin:supersecret
 {"services":[{"id":"bdb1be2e-360b-495c-8115-d7697f9c6a9e","name":"bookstore","description":"A simple book store service","bindable":true,"plan_updateable":false,"plans":[{"id":"b973fb78-82f3-49ef-9b8b-c1876974a6cd","name":"standard","description":"A simple book store plan","free":true}],"tags":["book-store","books","sample"]}]}
 ----
 
