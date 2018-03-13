@@ -40,6 +40,9 @@ public class ServiceCatalogConfiguration {
 				.bindable(true)
 				.tags("book-store", "books", "sample")
 				.plans(plan)
+				.metadata("displayName", "bookstore")
+				.metadata("longDescription", "A simple book store service")
+				.metadata("providerDisplayName", "Acme Books")
 				.build();
 
 		return Catalog.builder()
