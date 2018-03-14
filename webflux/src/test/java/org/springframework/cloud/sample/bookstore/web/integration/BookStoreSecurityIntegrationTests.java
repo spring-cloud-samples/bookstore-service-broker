@@ -23,6 +23,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebTestClientBuilderCustomizer;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.sample.bookstore.ServiceBrokerApplication;
 import org.springframework.cloud.sample.bookstore.web.model.Book;
@@ -30,6 +31,9 @@ import org.springframework.cloud.sample.bookstore.web.model.BookStore;
 import org.springframework.cloud.sample.bookstore.web.model.User;
 import org.springframework.cloud.sample.bookstore.web.service.BookStoreService;
 import org.springframework.cloud.sample.bookstore.web.service.UserService;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -42,7 +46,7 @@ import static org.springframework.cloud.sample.bookstore.web.security.SecurityAu
 import static org.springframework.web.reactive.function.client.ExchangeFilterFunctions.basicAuthentication;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = ServiceBrokerApplication.class)
+@SpringBootTest(classes = {ServiceBrokerApplication.class, BookStoreSecurityIntegrationTests.TestConfiguration.class})
 @AutoConfigureTestDatabase
 @AutoConfigureWebTestClient
 public class BookStoreSecurityIntegrationTests {
@@ -152,29 +156,35 @@ public class BookStoreSecurityIntegrationTests {
 
 		this.client
 				.get().uri("/bookstores/{bookStoreId}", bookStoreId)
-				.accept(MediaType.APPLICATION_JSON)
 				.exchange()
 				.expectStatus().isEqualTo(getAllStatus);
 
 		this.client
 				.get().uri("/bookstores/{bookStoreId}/books/{bookId}", bookStoreId, bookId)
-				.accept(MediaType.APPLICATION_JSON)
 				.exchange()
 				.expectStatus().isEqualTo(getStatus);
 
 		this.client
 				.put().uri("/bookstores/{bookStoreId}/books", bookStoreId)
-				.accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON)
 				.syncBody("{\"isbn\":\"111-1111111111\", \"title\":\"test book\", \"author\":\"test author\"}")
 				.exchange()
 				.expectStatus().isEqualTo(putStatus);
 
 		this.client
 				.delete().uri("/bookstores/{bookStoreId}/books/{bookId}", bookStoreId, bookId)
-				.accept(MediaType.APPLICATION_JSON)
 				.exchange()
 				.expectStatus().isEqualTo(deleteStatus);
+	}
+
+	@Configuration
+	static class TestConfiguration {
+		@Bean
+		WebTestClientBuilderCustomizer webTestClientBuilderCustomizer() {
+			return b -> {
+				b.defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+				b.defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
+			};
+		}
 	}
 
 }
