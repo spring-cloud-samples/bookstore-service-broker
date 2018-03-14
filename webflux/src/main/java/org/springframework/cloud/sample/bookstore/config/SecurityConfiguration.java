@@ -33,14 +33,14 @@ public class SecurityConfiguration {
 	@Bean
 	public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
 		http
-				.csrf().disable()
-				.authorizeExchange()
-					.pathMatchers("/bookstores/**").authenticated()
-					.pathMatchers("/v2/**").hasAuthority(SecurityAuthorities.ADMIN)
-					.matchers(EndpointRequest.to("info", "health")).permitAll()
-					.matchers(EndpointRequest.toAnyEndpoint()).hasAuthority(SecurityAuthorities.ADMIN)
+			.csrf().disable()
+			.authorizeExchange()
+				.pathMatchers("/bookstores/**").authenticated()
+				.pathMatchers("/v2/**").hasAuthority(SecurityAuthorities.ADMIN)
+				.matchers(EndpointRequest.to("info", "health")).permitAll()
+				.matchers(EndpointRequest.toAnyEndpoint()).hasAuthority(SecurityAuthorities.ADMIN)
 				.and()
-					.httpBasic();
+			.httpBasic();
 		return http.build();
 	}
 
