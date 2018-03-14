@@ -16,13 +16,10 @@
 
 package org.springframework.cloud.sample.bookstore.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.security.reactive.EndpointRequest;
-import org.springframework.cloud.sample.bookstore.web.security.RepositoryUserDetailsService;
 import org.springframework.cloud.sample.bookstore.web.security.SecurityAuthorities;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -33,17 +30,9 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 @EnableWebFluxSecurity
 public class SecurityConfiguration {
 
-	@Autowired
-	private RepositoryUserDetailsService userDetailsService;
-
 	@Bean
 	public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
-		UserDetailsRepositoryReactiveAuthenticationManager auth =
-				new UserDetailsRepositoryReactiveAuthenticationManager(userDetailsService);
-		auth.setPasswordEncoder(passwordEncoder());
-
 		http
-				.authenticationManager(auth)
 				.csrf().disable()
 				.authorizeExchange()
 					.pathMatchers("/bookstores/**").authenticated()
