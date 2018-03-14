@@ -33,14 +33,14 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception {
 		// @formatter:off
 		http
-				.csrf().disable()
-				.authorizeRequests()
-					.antMatchers("/bookstores/**").authenticated()
-					.antMatchers("/v2/**").hasAuthority(SecurityAuthorities.ADMIN)
-					.requestMatchers(EndpointRequest.to("info", "health")).permitAll()
-					.requestMatchers(EndpointRequest.toAnyEndpoint()).hasAuthority(SecurityAuthorities.ADMIN)
+			.csrf().disable()
+			.authorizeRequests()
+				.antMatchers("/bookstores/**").authenticated()
+				.antMatchers("/v2/**").hasAuthority(SecurityAuthorities.ADMIN)
+				.requestMatchers(EndpointRequest.to("info", "health")).permitAll()
+				.requestMatchers(EndpointRequest.toAnyEndpoint()).hasAuthority(SecurityAuthorities.ADMIN)
 				.and()
-					.httpBasic();
+			.httpBasic();
 		// @formatter:on
 	}
 
