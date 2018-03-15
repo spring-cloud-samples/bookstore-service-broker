@@ -28,9 +28,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.sample.bookstore.ServiceBrokerApplication;
 import org.springframework.cloud.sample.bookstore.web.model.Book;
 import org.springframework.cloud.sample.bookstore.web.model.BookStore;
-import org.springframework.cloud.sample.bookstore.web.model.User;
 import org.springframework.cloud.sample.bookstore.web.service.BookStoreService;
-import org.springframework.cloud.sample.bookstore.web.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -43,39 +41,37 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import static org.springframework.cloud.sample.bookstore.web.security.SecurityAuthorities.BOOK_STORE_ID_PREFIX;
 import static org.springframework.cloud.sample.bookstore.web.security.SecurityAuthorities.FULL_ACCESS;
 import static org.springframework.cloud.sample.bookstore.web.security.SecurityAuthorities.READ_ONLY;
-import static org.springframework.web.reactive.function.client.ExchangeFilterFunctions.basicAuthentication;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {ServiceBrokerApplication.class, BookStoreSecurityIntegrationTests.TestConfiguration.class})
-@AutoConfigureTestDatabase
+@SpringBootTest(classes = {ServiceBrokerApplication.class,
+		BookStoreSecurityIntegrationTests.TestConfiguration.class})
 @AutoConfigureWebTestClient
+@AutoConfigureTestDatabase
 public class BookStoreSecurityIntegrationTests {
-
 	private static final String BOOKSTORE_INSTANCE_ID = "1111-1111-1111-1111";
 	private static final String OTHER_INSTANCE_ID = "2222-2222-2222-2222";
-	private String bookId;
-	private String bookStoreId;
+	
 	@Autowired
 	private BookStoreService bookStoreService;
+
 	@Autowired
 	private WebTestClient client;
-	@Autowired
-	private UserService userService;
+
+	private String bookId;
+	private String bookStoreId;
 
 	@Before
 	public void setUp() {
-
 		BookStore bookStore = bookStoreService.createBookStore(BOOKSTORE_INSTANCE_ID);
 		bookStoreId = bookStore.getId();
 
 		Book book = bookStoreService.putBookInStore(bookStoreId,
 				new Book("978-1617292545", "Spring Boot in Action", "Craig Walls"));
 		bookId = book.getId();
-
 	}
 
 	@Test
-	public void anonymousAccessIsUnauthorized() throws Exception {
+	public void anonymousAccessIsUnauthorized() {
 
 		assertExpectedResponseStatus(
 				HttpStatus.UNAUTHORIZED,
@@ -86,7 +82,7 @@ public class BookStoreSecurityIntegrationTests {
 
 	@Test
 	@WithMockUser(authorities = {FULL_ACCESS})
-	public void fullAccessWithInstanceIdIsAllowed() throws Exception {
+	public void fullAccessWithInstanceIdIsAllowed() {
 
 		assertExpectedResponseStatus(
 				HttpStatus.OK,
@@ -97,7 +93,7 @@ public class BookStoreSecurityIntegrationTests {
 
 	@Test
 	@WithMockUser(username = "fullAccessUserWithOtherId", authorities = {FULL_ACCESS, BOOK_STORE_ID_PREFIX + OTHER_INSTANCE_ID})
-	public void fullAccessWithOtherInstanceIdIsForbidden() throws Exception {
+	public void fullAccessWithOtherInstanceIdIsForbidden() {
 
 		assertExpectedResponseStatus(
 				HttpStatus.FORBIDDEN,
@@ -108,7 +104,7 @@ public class BookStoreSecurityIntegrationTests {
 
 	@Test
 	@WithMockUser(username = "fullAccessUser", authorities = {FULL_ACCESS})
-	public void fullAccessWithoutInstanceIdIsAllowed() throws Exception {
+	public void fullAccessWithoutInstanceIdIsAllowed() {
 
 		assertExpectedResponseStatus(
 				HttpStatus.OK,
@@ -119,7 +115,7 @@ public class BookStoreSecurityIntegrationTests {
 
 	@Test
 	@WithMockUser(username = "readOnlyUserwithInstanceId", authorities = {READ_ONLY, BOOK_STORE_ID_PREFIX + BOOKSTORE_INSTANCE_ID})
-	public void readOnlyWithInstanceIdIsPartiallyAllowed() throws Exception {
+	public void readOnlyWithInstanceIdIsPartiallyAllowed() {
 
 		assertExpectedResponseStatus(
 				HttpStatus.OK,
@@ -130,7 +126,7 @@ public class BookStoreSecurityIntegrationTests {
 
 	@Test
 	@WithMockUser(username = "readOnlyUserOtherInstanceId", authorities = {READ_ONLY, BOOK_STORE_ID_PREFIX + OTHER_INSTANCE_ID})
-	public void readOnlyWithOtherInstanceIdIsForbidden() throws Exception {
+	public void readOnlyWithOtherInstanceIdIsForbidden() {
 
 		assertExpectedResponseStatus(
 				HttpStatus.FORBIDDEN,
@@ -141,7 +137,7 @@ public class BookStoreSecurityIntegrationTests {
 
 	@Test
 	@WithMockUser(username = "readonlyUserNoScope", authorities = {READ_ONLY})
-	public void readOnlyWithoutInstanceIdIsPartiallyAllowed() throws Exception {
+	public void readOnlyWithoutInstanceIdIsPartiallyAllowed() {
 
 		assertExpectedResponseStatus(
 				HttpStatus.OK,
