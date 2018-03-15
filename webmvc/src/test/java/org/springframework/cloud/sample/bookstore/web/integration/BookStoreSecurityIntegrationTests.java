@@ -21,41 +21,42 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.MockMvcBuilderCustomizer;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.sample.bookstore.ServiceBrokerApplication;
 import org.springframework.cloud.sample.bookstore.web.model.Book;
 import org.springframework.cloud.sample.bookstore.web.model.BookStore;
 import org.springframework.cloud.sample.bookstore.web.service.BookStoreService;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 import static org.springframework.cloud.sample.bookstore.web.security.SecurityAuthorities.BOOK_STORE_ID_PREFIX;
 import static org.springframework.cloud.sample.bookstore.web.security.SecurityAuthorities.FULL_ACCESS;
 import static org.springframework.cloud.sample.bookstore.web.security.SecurityAuthorities.READ_ONLY;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {ServiceBrokerApplication.class})
+@SpringBootTest(classes = {ServiceBrokerApplication.class,
+		BookStoreSecurityIntegrationTests.TestConfiguration.class})
+@AutoConfigureMockMvc
 @AutoConfigureTestDatabase
 public class BookStoreSecurityIntegrationTests {
 	private static final String BOOKSTORE_INSTANCE_ID = "1111-1111-1111-1111";
 	private static final String OTHER_INSTANCE_ID = "2222-2222-2222-2222";
 
 	@Autowired
-	private WebApplicationContext context;
-
-	@Autowired
 	private BookStoreService bookStoreService;
 
+	@Autowired
 	private MockMvc mockMvc;
 
 	private String bookStoreId;
@@ -63,14 +64,6 @@ public class BookStoreSecurityIntegrationTests {
 
 	@Before
 	public void setUp() {
-		mockMvc = MockMvcBuilders
-				.webAppContextSetup(context)
-				.defaultRequest(get("/")
-						.accept(MediaType.APPLICATION_JSON)
-						.contentType(MediaType.APPLICATION_JSON))
-				.apply(springSecurity())
-				.build();
-
 		BookStore bookStore = bookStoreService.createBookStore(BOOKSTORE_INSTANCE_ID);
 		bookStoreId = bookStore.getId();
 
@@ -166,5 +159,17 @@ public class BookStoreSecurityIntegrationTests {
 		this.mockMvc.perform(delete("/bookstores/{bookStoreId}/books/{bookId}",
 				bookStoreId, bookId))
 				.andExpect(deleteStatus);
+	}
+
+	@Configuration
+	static class TestConfiguration {
+		@Bean
+		MockMvcBuilderCustomizer mockMvcBuilderCustomizer() {
+			return b -> b.defaultRequest(
+				get("/")
+					.accept(MediaType.APPLICATION_JSON)
+					.contentType(MediaType.APPLICATION_JSON)
+			);
+		}
 	}
 }

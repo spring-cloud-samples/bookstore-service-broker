@@ -22,6 +22,8 @@ import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebTestClientBuilderCustomizer;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.sample.bookstore.ServiceBrokerApplication;
 import org.springframework.cloud.sample.bookstore.web.model.Book;
@@ -29,8 +31,12 @@ import org.springframework.cloud.sample.bookstore.web.model.BookStore;
 import org.springframework.cloud.sample.bookstore.web.model.User;
 import org.springframework.cloud.sample.bookstore.web.service.BookStoreService;
 import org.springframework.cloud.sample.bookstore.web.service.UserService;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
@@ -40,8 +46,9 @@ import static org.springframework.cloud.sample.bookstore.web.security.SecurityAu
 import static org.springframework.web.reactive.function.client.ExchangeFilterFunctions.basicAuthentication;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {ServiceBrokerApplication.class, }, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes = {ServiceBrokerApplication.class, BookStoreSecurityIntegrationTests.TestConfiguration.class})
 @AutoConfigureTestDatabase
+@AutoConfigureWebTestClient
 public class BookStoreSecurityIntegrationTests {
 
 	private static final String BOOKSTORE_INSTANCE_ID = "1111-1111-1111-1111";
@@ -70,126 +77,114 @@ public class BookStoreSecurityIntegrationTests {
 	@Test
 	public void anonymousAccessIsUnauthorized() throws Exception {
 
-		User dummyUser = new User("dummyuser", "dummypassword", "NO_AUTHORITY");
 		assertExpectedResponseStatus(
 				HttpStatus.UNAUTHORIZED,
 				HttpStatus.UNAUTHORIZED,
 				HttpStatus.UNAUTHORIZED,
-				HttpStatus.UNAUTHORIZED,
-				dummyUser);
+				HttpStatus.UNAUTHORIZED);
 	}
 
 	@Test
+	@WithMockUser(authorities = {FULL_ACCESS})
 	public void fullAccessWithInstanceIdIsAllowed() throws Exception {
 
-		User fullAccessUserWithInstanceId = userService
-				.createUser("fullAccessUserWithInstanceId", FULL_ACCESS, BOOK_STORE_ID_PREFIX + BOOKSTORE_INSTANCE_ID);
-
 		assertExpectedResponseStatus(
 				HttpStatus.OK,
 				HttpStatus.OK,
 				HttpStatus.CREATED,
-				HttpStatus.OK,
-				fullAccessUserWithInstanceId);
+				HttpStatus.OK);
 	}
 
 	@Test
+	@WithMockUser(username = "fullAccessUserWithOtherId", authorities = {FULL_ACCESS, BOOK_STORE_ID_PREFIX + OTHER_INSTANCE_ID})
 	public void fullAccessWithOtherInstanceIdIsForbidden() throws Exception {
-		User fullAccessUserWithOtherId = userService
-				.createUser("fullAccessUserWithOtherId", FULL_ACCESS, BOOK_STORE_ID_PREFIX + OTHER_INSTANCE_ID);
 
 		assertExpectedResponseStatus(
 				HttpStatus.FORBIDDEN,
 				HttpStatus.FORBIDDEN,
 				HttpStatus.FORBIDDEN,
-				HttpStatus.FORBIDDEN,
-				fullAccessUserWithOtherId);
+				HttpStatus.FORBIDDEN);
 	}
 
 	@Test
+	@WithMockUser(username = "fullAccessUser", authorities = {FULL_ACCESS})
 	public void fullAccessWithoutInstanceIdIsAllowed() throws Exception {
-		User fullAccessUser = userService.createUser("fullAccessUser", FULL_ACCESS);
 
 		assertExpectedResponseStatus(
 				HttpStatus.OK,
 				HttpStatus.OK,
 				HttpStatus.CREATED,
-				HttpStatus.OK,
-				fullAccessUser);
+				HttpStatus.OK);
 	}
 
 	@Test
+	@WithMockUser(username = "readOnlyUserwithInstanceId", authorities = {READ_ONLY, BOOK_STORE_ID_PREFIX + BOOKSTORE_INSTANCE_ID})
 	public void readOnlyWithInstanceIdIsPartiallyAllowed() throws Exception {
-		User readOnlyUserwithInstanceId = userService
-				.createUser("readOnlyUserwithInstanceId", READ_ONLY, BOOK_STORE_ID_PREFIX + BOOKSTORE_INSTANCE_ID);
 
 		assertExpectedResponseStatus(
 				HttpStatus.OK,
 				HttpStatus.OK,
 				HttpStatus.FORBIDDEN,
-				HttpStatus.FORBIDDEN,
-				readOnlyUserwithInstanceId);
+				HttpStatus.FORBIDDEN);
 	}
 
 	@Test
+	@WithMockUser(username = "readOnlyUserOtherInstanceId", authorities = {READ_ONLY, BOOK_STORE_ID_PREFIX + OTHER_INSTANCE_ID})
 	public void readOnlyWithOtherInstanceIdIsForbidden() throws Exception {
-		User readOnlyUserOtherInstanceId = userService
-				.createUser("readOnlyUserOtherInstanceId", READ_ONLY, BOOK_STORE_ID_PREFIX + OTHER_INSTANCE_ID);
 
 		assertExpectedResponseStatus(
 				HttpStatus.FORBIDDEN,
 				HttpStatus.FORBIDDEN,
 				HttpStatus.FORBIDDEN,
-				HttpStatus.FORBIDDEN,
-				readOnlyUserOtherInstanceId);
+				HttpStatus.FORBIDDEN);
 	}
 
 	@Test
+	@WithMockUser(username = "readonlyUserNoScope", authorities = {READ_ONLY})
 	public void readOnlyWithoutInstanceIdIsPartiallyAllowed() throws Exception {
-		User readonlyUserNoScope = userService.createUser("readonlyUserNoScope", READ_ONLY);
 
 		assertExpectedResponseStatus(
 				HttpStatus.OK,
 				HttpStatus.OK,
 				HttpStatus.FORBIDDEN,
-				HttpStatus.FORBIDDEN,
-				readonlyUserNoScope);
+				HttpStatus.FORBIDDEN);
 	}
 
 
 	private void assertExpectedResponseStatus(HttpStatus getAllStatus, HttpStatus getStatus, HttpStatus putStatus,
-			HttpStatus deleteStatus, User user) {
+			HttpStatus deleteStatus) {
 
-		WebTestClient authenticatedClient = this.client
-				.mutate()
-				.filter(basicAuthentication(user.getUsername(), user.getPassword()))
-				.build();
-
-		authenticatedClient
+		this.client
 				.get().uri("/bookstores/{bookStoreId}", bookStoreId)
-				.accept(MediaType.APPLICATION_JSON)
 				.exchange()
 				.expectStatus().isEqualTo(getAllStatus);
 
-		authenticatedClient
+		this.client
 				.get().uri("/bookstores/{bookStoreId}/books/{bookId}", bookStoreId, bookId)
-				.accept(MediaType.APPLICATION_JSON)
 				.exchange()
 				.expectStatus().isEqualTo(getStatus);
 
-		authenticatedClient
+		this.client
 				.put().uri("/bookstores/{bookStoreId}/books", bookStoreId)
-				.accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON)
 				.syncBody("{\"isbn\":\"111-1111111111\", \"title\":\"test book\", \"author\":\"test author\"}")
 				.exchange()
 				.expectStatus().isEqualTo(putStatus);
 
-		authenticatedClient
+		this.client
 				.delete().uri("/bookstores/{bookStoreId}/books/{bookId}", bookStoreId, bookId)
-				.accept(MediaType.APPLICATION_JSON)
 				.exchange()
 				.expectStatus().isEqualTo(deleteStatus);
+	}
+
+	@Configuration
+	static class TestConfiguration {
+		@Bean
+		WebTestClientBuilderCustomizer webTestClientBuilderCustomizer() {
+			return b -> {
+				b.defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+				b.defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
+			};
+		}
 	}
 
 }
