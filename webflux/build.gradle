@@ -54,7 +54,7 @@ dependencies {
 
 	runtime('org.springframework.boot:spring-boot-devtools')
 
-	compile('org.springframework.cloud:spring-cloud-open-service-broker-starter-webflux:2.0.0.M1')
+	compile('org.springframework.cloud:spring-cloud-open-service-broker-starter-webflux:2.0.0.M2')
 
 	compile('org.springframework.boot:spring-boot-starter-data-jpa')
 	runtime('org.hsqldb:hsqldb')
