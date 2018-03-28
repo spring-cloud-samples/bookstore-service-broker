@@ -71,7 +71,7 @@ if (!project.hasProperty("dockerGroup")) {
 
 docker {
 	name "${dockerGroup}/bookstore-service-broker:${version}"
-	dockerfile file('deploy/docker/Dockerfile')
+	dockerfile file('../deploy/docker/Dockerfile')
 	files jar.archivePath
 	buildArgs(['JAR_FILE': "${jar.archiveName}"])
 }
