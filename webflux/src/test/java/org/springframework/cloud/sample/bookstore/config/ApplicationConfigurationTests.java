@@ -47,6 +47,18 @@ public class ApplicationConfigurationTests {
 	}
 
 	@Test
+	public void kubernetesApplicationInfo() {
+		this.contextRunner
+			.withPropertyValues("KUBERNETES_SERVICE_HOST=10.10.10.10",
+				"KUBERNETES_SERVICE_PORT=443")
+			.run((context) ->
+				assertThat(context)
+					.getBean(ApplicationInformation.class)
+					.hasFieldOrPropertyWithValue("baseUrl", "https://10.10.10.10:443")
+			);
+	}
+
+	@Test
 	public void localApplicationInfo() {
 		this.contextRunner
 				.run((context) ->

@@ -443,9 +443,9 @@ Service bindings are exposed via Kubernetes secret objects. Show the details of 
 $ kubectl get secret bookstore-binding -n test -o yaml
 apiVersion: v1
 data:
-  password: ....
-  uri: .....
-  username: ....
+  password: [encoded password]
+  uri: [encoded URI]
+  username: [encoded username]
 kind: Secret
 metadata:
   name: bookstore-binding
@@ -464,3 +464,5 @@ type: Opaque
 ----
 
 Refer to the https://kubernetes.io/docs/concepts/configuration/secret/#decoding-a-secret[Kubernetes documentation] to decode the `password`, `uri`, and `username` values.
+
+*NOTE*: The URI provided in the service binding credentials will only be accessible from within the Kubernetes cluster.
