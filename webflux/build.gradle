@@ -16,7 +16,7 @@
 
 buildscript {
 	ext {
-		springBootVersion = '2.0.0.RELEASE'
+		springBootVersion = '2.0.1.RELEASE'
 	}
 	repositories {
 		mavenCentral()
@@ -43,6 +43,7 @@ sourceCompatibility = 1.8
 
 repositories {
 	mavenCentral()
+	maven { url "https://repo.spring.io/snapshot" }
 	maven { url "https://repo.spring.io/milestone" }
 }
 
@@ -54,7 +55,7 @@ dependencies {
 
 	runtime('org.springframework.boot:spring-boot-devtools')
 
-	compile('org.springframework.cloud:spring-cloud-open-service-broker-starter-webflux:2.0.0.M2')
+	compile('org.springframework.cloud:spring-cloud-open-service-broker-starter-webflux:2.0.0.BUILD-SNAPSHOT')
 
 	compile('org.springframework.boot:spring-boot-starter-data-jpa')
 	runtime('org.hsqldb:hsqldb')
