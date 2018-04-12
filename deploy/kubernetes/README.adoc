@@ -8,7 +8,8 @@ All instructions below assume that the commands are being run from the root of t
 
 == Kubernetes CLI
 
-These instructions use the `kubectl` CLI to interact with a running Kubernetes cluster. Follow the https://kubernetes.io/docs/reference/kubectl/overview/[`kubectl` documentation] to install and verify the CLI.
+These instructions use the `kubectl` CLI to interact with a running Kubernetes cluster.
+Follow the https://kubernetes.io/docs/reference/kubectl/overview/[`kubectl` documentation] to install and verify the CLI.
 
 == Kubernetes cluster
 
@@ -16,13 +17,15 @@ A Kubernetes cluster will be used to deploy the service broker application and r
 
 === minikube
 
-The `minikube` project can be used to run a small Kubernetes cluster on a development workstation. Follow the https://kubernetes.io/docs/getting-started-guides/minikube[Kubernetes documentation] to install `minikube`, start a cluster, and target the cluster with `kubectl`.
+The `minikube` project can be used to run a small Kubernetes cluster on a development workstation.
+Follow the https://kubernetes.io/docs/getting-started-guides/minikube[Kubernetes documentation] to install `minikube`, start a cluster, and target the cluster with `kubectl`.
 
 === Pivotal Container Service (PKS)
 
-Pivotal Container Service (PKS) can be used to deploy and manage production-quality Kubernetes clusters on Pivotal Cloud Foundry. Follow the https://docs.pivotal.io/runtimes/pks/[PKS documentation] to install the product, create a cluster, and target the cluster with `kubectl`.
+Pivotal Container Service (PKS) can be used to deploy and manage production-quality Kubernetes clusters on Pivotal Cloud Foundry.
+Follow the https://docs.pivotal.io/runtimes/pks/[PKS documentation] to install the product, create a cluster, and target the cluster with `kubectl`.
 
-*NOTE*: Ensure that post-deploy scripts have been enabled in PCF Ops Manager as described on the https://docs.pivotal.io/runtimes/pks/1-0/troubleshoot-issues.html#timeouts[PKS Troubleshooting page].
+NOTE: Ensure that post-deploy scripts have been enabled in PCF Ops Manager as described on the https://docs.pivotal.io/runtimes/pks/1-0/troubleshoot-issues.html#timeouts[PKS Troubleshooting page].
 
 == Service Catalog
 
@@ -51,6 +54,9 @@ The VMware Harbor product can be used to deploy a Docker registry in the same in
 The Gradle build file for the service broker sample project can be used to build a Docker image and push it to a repository.
 
 When using a private Docker repository, the following command can be used to build the image and push it with the default `sample` group. This isn't likely to work with a public Docker repository unless you own the group named `sample` in that repository.
+
+NOTE: This step will build an image for the `webmvc` variation of the sample service broker.
+To build an image for the `weflux` variation of the sample service broker, change to the `webflux` directory instead of the `webmvc` directory.
 
 ----
 $ cd webmvc
@@ -465,4 +471,4 @@ type: Opaque
 
 Refer to the https://kubernetes.io/docs/concepts/configuration/secret/#decoding-a-secret[Kubernetes documentation] to decode the `password`, `uri`, and `username` values.
 
-*NOTE*: The URI provided in the service binding credentials will only be accessible from within the Kubernetes cluster.
+NOTE: The URI provided in the service binding credentials will only be accessible from within the Kubernetes cluster.

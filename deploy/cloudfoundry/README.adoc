@@ -8,20 +8,24 @@ All instructions below assume that the commands are being run from the root of t
 
 == Cloud Foundry CLI
 
-These instructions use the `cf` CLI to interact with a running Cloud Foundry foundation. Follow the https://docs.cloudfoundry.org/cf-cli/[`cf` documentation] to install and verify the CLI.
+These instructions use the `cf` CLI to interact with a running Cloud Foundry foundation.
+Follow the https://docs.cloudfoundry.org/cf-cli/[`cf` documentation] to install and verify the CLI.
 
 == Cloud Foundry foundation
 
-A Cloud Foundry foundation will be used to deploy the service broker application and register it to the service marketplace. This can be a public hosted Cloud Foundry, a private Cloud Foundry, or a workstation-deployed Cloud Foundry like https://pivotal.io/pcf-dev[PCF Dev].
+A Cloud Foundry foundation will be used to deploy the service broker application and register it to the service marketplace.
+This can be a public hosted Cloud Foundry, a private Cloud Foundry, or a workstation-deployed Cloud Foundry like https://pivotal.io/pcf-dev[PCF Dev].
 
 Use the `cf` CLI to https://docs.cloudfoundry.org/cf-cli/getting-started.html#login[log into] Cloud Foundry and target an organization and space for deployment of an application.
 
 = Build the service broker application
 
-The Gradle build file for the service broker sample project can be used to build a Docker image and push it to a repository.
+The Gradle build file for the service broker sample project can be used to build the application.
 
 ----
+$ cd webmvc
 $ ./gradlew assemble
+$ cd ..
 ----
 
 = Deploy and test the service broker
@@ -29,6 +33,9 @@ $ ./gradlew assemble
 == Deploy the service broker application
 
 Deploy the service broker application to Cloud Foundry:
+
+NOTE: This step will deploy the `webmvc` variation of the sample service broker.
+To deploy the `weflux` variation of the sample service broker, modify the path in the link:manifest.yml[manifest.yml] file.
 
 ----
 $ cf push -f deploy/cloudfoundry/manifest.yml
@@ -58,7 +65,8 @@ routes:            bookstore-service-broker.apps.example.com
 
 == Verify the service broker application
 
-Note the value of the `route` row in the output from the command above. Use this route to build a URL to access the `/v2/catalog` endpoint of the service broker application.
+Note the value of the `route` row in the output from the command above.
+Use this route to build a URL to access the `/v2/catalog` endpoint of the service broker application.
 
 ----
 $ curl https://bookstore-service-broker.apps.example.com/v2/catalog -u admin:supersecret
@@ -75,7 +83,8 @@ Now that the application has been deployed and verified, it can be registered to
 
 If you have administrator privileges on Cloud Foundry, you can make the service broker available in all organizations and spaces.
 
-The Open Service Broker API endpoints in the service broker application are secured with a basic auth username and password. Register the service broker using the URL from above and the credentials:
+The Open Service Broker API endpoints in the service broker application are secured with a basic auth username and password.
+Register the service broker using the URL from above and the credentials:
 
 ----
 $ cf create-service-broker bookstore admin supersecret https://bookstore-service-broker.apps.example.com
