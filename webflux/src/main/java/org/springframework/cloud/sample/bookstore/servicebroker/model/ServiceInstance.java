@@ -16,35 +16,18 @@
 
 package org.springframework.cloud.sample.bookstore.servicebroker.model;
 
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.MapKeyColumn;
-import javax.persistence.Table;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.util.Map;
 
-@Entity
-@Table(name = "service_instances")
+@Document
 public class ServiceInstance {
 	@Id
-	@Column(length = 50)
 	private final String instanceId;
 
-	@Column(length = 50)
 	private final String serviceDefinitionId;
-
-	@Column(length = 50)
 	private final String planId;
-
-	@ElementCollection
-	@MapKeyColumn(name="parameter_name", length = 100)
-	@Column(name = "parameter_value")
-	@CollectionTable(name="service_instance_parameters", joinColumns = @JoinColumn(name = "instance_id"))
-	@Convert(converter = ObjectToStringConverter.class, attributeName = "value")
 	private final Map<String, Object> parameters;
 
 	@SuppressWarnings("unused")

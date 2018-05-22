@@ -17,7 +17,7 @@
 package org.springframework.cloud.sample.bookstore.servicebroker.repository;
 
 import org.springframework.cloud.sample.bookstore.servicebroker.model.ServiceInstance;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 
-public interface ServiceInstanceRepository extends JpaRepository<ServiceInstance, String> {
+public interface ServiceInstanceRepository extends ReactiveCrudRepository<ServiceInstance, String> {
 }

@@ -18,21 +18,10 @@ package org.springframework.cloud.sample.bookstore.web.model;
 
 import org.springframework.hateoas.Identifiable;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-
-@Embeddable
 public class Book implements Identifiable<String> {
-	@Column(length = 50)
 	private final String id;
-
-	@Column(length = 20)
 	private final String isbn;
-
-	@Column(length = 100)
 	private final String title;
-
-	@Column(length = 100)
 	private final String author;
 
 	@SuppressWarnings("unused")

@@ -41,25 +41,24 @@ public class UserService {
 	}
 
 	public void initializeUsers() {
-		if (userRepository.count() == 0) {
-			userRepository.save(adminUser());
-		}
+		userRepository.count().subscribe(c -> {
+			if (c == 0) {
+				userRepository.save(adminUser());
+			}
+		});
 	}
 
 	public User createUser(String username, String... authorities) {
 		String password = generatePassword();
 		String encodedPassword = passwordEncoder.encode(password);
 
-		userRepository.save(new User(username, encodedPassword, authorities));
-
-		return new User(username, password, authorities);
+		User user = new User(username, encodedPassword, authorities);
+		userRepository.save(user);
+		return user;
 	}
 
 	public void deleteUser(String username) {
-		User user = userRepository.findByUsername(username);
-		if (user != null) {
-			userRepository.deleteById(user.getId());
-		}
+		userRepository.deleteUserByUsername(username).subscribe();
 	}
 
 	private User adminUser() {

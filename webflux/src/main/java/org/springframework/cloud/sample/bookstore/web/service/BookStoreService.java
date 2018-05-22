@@ -20,6 +20,7 @@ import org.springframework.cloud.sample.bookstore.web.model.Book;
 import org.springframework.cloud.sample.bookstore.web.model.BookStore;
 import org.springframework.cloud.sample.bookstore.web.repository.BookStoreRepository;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -32,19 +33,18 @@ public class BookStoreService {
 		this.repository = bookStoreRepository;
 	}
 
-	public BookStore createBookStore(String storeId) {
+	public Mono<BookStore> createBookStore(String storeId) {
 		BookStore bookStore = new BookStore(storeId);
 
 		return repository.save(bookStore);
 	}
 
-	public BookStore createBookStore() {
+	public Mono<BookStore> createBookStore() {
 		return createBookStore(generateRandomId());
 	}
 
-	public BookStore getBookStore(String storeId) {
-		Optional<BookStore> store = repository.findById(storeId);
-		return store.orElseThrow(() -> new IllegalArgumentException("Invalid book store ID " + storeId + "."));
+	public Mono<BookStore> getBookStore(String storeId) {
+		return repository.findById(storeId);
 	}
 
 	public void deleteBookStore(String id) {
@@ -55,24 +55,22 @@ public class BookStoreService {
 		String bookId = generateRandomId();
 		Book bookWithId = new Book(bookId, book);
 
-		BookStore store = getBookStore(storeId);
-		store.addBook(bookWithId);
-
-		repository.save(store);
+		getBookStore(storeId).subscribe(store -> {
+			store.addBook(bookWithId);
+			repository.save(store);
+		});
 
 		return bookWithId;
 	}
 
-	public Book getBookFromStore(String storeId, String bookId) {
-		BookStore store = getBookStore(storeId);
-		return store.getBookById(bookId)
-				.orElseThrow(() -> new IllegalArgumentException("Invalid book ID " + storeId + ":" + bookId + "."));
+	public Optional<Book> getBookFromStore(String storeId, String bookId) {
+		return getBookStore(storeId).map(store -> store.getBookById(bookId));
 	}
 
 	public Book removeBookFromStore(String storeId, String bookId) {
-		BookStore store = getBookStore(storeId);
-		return store.remove(bookId)
-				.orElseThrow(() -> new IllegalArgumentException("Invalid book ID " + storeId + ":" + bookId + "."));
+		getBookStore(storeId)
+			.doOnError(() -> throw new IllegalArgumentException("Invalid book ID " + storeId + ":" + bookId + "."))
+			.subscribe(store -> store.remove(bookId));
 	}
 
 	private String generateRandomId() {
