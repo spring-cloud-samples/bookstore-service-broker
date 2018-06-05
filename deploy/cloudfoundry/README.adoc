@@ -23,9 +23,7 @@ Use the `cf` CLI to https://docs.cloudfoundry.org/cf-cli/getting-started.html#lo
 The Gradle build file for the service broker sample project can be used to build the application.
 
 ----
-$ cd webmvc
 $ ./gradlew assemble
-$ cd ..
 ----
 
 = Deploy and test the service broker
@@ -34,9 +32,6 @@ $ cd ..
 
 Deploy the service broker application to Cloud Foundry:
 
-NOTE: This step will deploy the `webmvc` variation of the sample service broker.
-To deploy the `weflux` variation of the sample service broker, modify the path in the link:manifest.yml[manifest.yml] file.
-
 ----
 $ cf push -f deploy/cloudfoundry/manifest.yml
 Pushing from manifest to org sample / space test as user@example.com...
@@ -44,7 +39,7 @@ Using manifest file deploy/cloudfoundry/manifest.yml
 Getting app info...
 Creating app with these attributes...
 + name:       bookstore-service-broker
-  path:       build/libs/bookstore-service-broker-webmvc-0.0.1.BUILD-SNAPSHOT.jar
+  path:       build/libs/bookstore-service-broker-0.0.1.BUILD-SNAPSHOT.jar
 + memory:     1G
   routes:
 +   bookstore-service-broker.apps.example.com

@@ -55,21 +55,14 @@ The Gradle build file for the service broker sample project can be used to build
 
 When using a private Docker repository, the following command can be used to build the image and push it with the default `sample` group. This isn't likely to work with a public Docker repository unless you own the group named `sample` in that repository.
 
-NOTE: This step will build an image for the `webmvc` variation of the sample service broker.
-To build an image for the `weflux` variation of the sample service broker, change to the `webflux` directory instead of the `webmvc` directory.
-
 ----
-$ cd webmvc
 $ ./gradlew assemble dockerPush
-$ cd ..
 ----
 
 When using a public Docker repository, provide your repository username to the Gradle command. 
 
 ----
-$ cd webmvc
 $ ./gradlew assemble dockerPush -PdockerGroup=[username]
-$ cd ..
 ----
 
 = Deploy and test the service broker

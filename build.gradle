@@ -36,7 +36,7 @@ apply plugin: 'io.spring.dependency-management'
 apply plugin: 'com.palantir.docker'
 
 group = 'org.springframework.cloud'
-archivesBaseName = 'bookstore-service-broker-webflux'
+archivesBaseName = 'bookstore-service-broker'
 version = '0.0.1.BUILD-SNAPSHOT'
 
 sourceCompatibility = 1.8
@@ -47,14 +47,14 @@ repositories {
 }
 
 dependencies {
-	compile('org.springframework.boot:spring-boot-starter-webflux')
+	compile('org.springframework.boot:spring-boot-starter-web')
 	compile('org.springframework.boot:spring-boot-starter-actuator')
 	compile('org.springframework.boot:spring-boot-starter-security')
 	compile('org.springframework.hateoas:spring-hateoas:0.24.0.RELEASE')
 
 	runtime('org.springframework.boot:spring-boot-devtools')
 
-	compile('org.springframework.cloud:spring-cloud-starter-open-service-broker-webflux:2.0.0.RC1')
+	compile('org.springframework.cloud:spring-cloud-starter-open-service-broker-webmvc:2.0.0.RC1')
 
 	compile('org.springframework.boot:spring-boot-starter-data-jpa')
 	runtime('org.hsqldb:hsqldb')

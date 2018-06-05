@@ -2,5 +2,5 @@
 applications:
 - name: bookstore-service-broker
   memory: 1G
-  path: ../../webmvc/build/libs/bookstore-service-broker-webmvc-0.0.1.BUILD-SNAPSHOT.jar
+  path: ../../build/libs/bookstore-service-broker-0.0.1.BUILD-SNAPSHOT.jar
 
