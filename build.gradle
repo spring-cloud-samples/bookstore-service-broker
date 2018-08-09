@@ -44,6 +44,7 @@ sourceCompatibility = 1.8
 repositories {
 	mavenCentral()
 	maven { url "https://repo.spring.io/release" }
+	maven { url "https://repo.spring.io/libs-staging-local" }
 }
 
 dependencies {
@@ -54,7 +55,7 @@ dependencies {
 
 	runtime('org.springframework.boot:spring-boot-devtools')
 
-	compile('org.springframework.cloud:spring-cloud-starter-open-service-broker-webmvc:2.0.0.RELEASE')
+	compile('org.springframework.cloud:spring-cloud-starter-open-service-broker-webmvc:2.0.1.RELEASE')
 
 	compile('org.springframework.boot:spring-boot-starter-data-jpa')
 	runtime('org.hsqldb:hsqldb')

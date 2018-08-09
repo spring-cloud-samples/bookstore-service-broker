@@ -16,26 +16,28 @@
 
 package org.springframework.cloud.sample.bookstore.servicebroker.service;
 
+import java.util.HashMap;
+import java.util.Optional;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
 import org.springframework.cloud.sample.bookstore.servicebroker.model.ServiceInstance;
 import org.springframework.cloud.sample.bookstore.servicebroker.repository.ServiceInstanceRepository;
 import org.springframework.cloud.sample.bookstore.web.service.BookStoreService;
 import org.springframework.cloud.servicebroker.exception.ServiceInstanceDoesNotExistException;
 import org.springframework.cloud.servicebroker.model.Context;
+import org.springframework.cloud.servicebroker.model.PlatformContext;
 import org.springframework.cloud.servicebroker.model.instance.CreateServiceInstanceRequest;
 import org.springframework.cloud.servicebroker.model.instance.CreateServiceInstanceResponse;
 import org.springframework.cloud.servicebroker.model.instance.DeleteServiceInstanceRequest;
 import org.springframework.cloud.servicebroker.model.instance.DeleteServiceInstanceResponse;
 import org.springframework.cloud.servicebroker.model.instance.GetServiceInstanceRequest;
 import org.springframework.cloud.servicebroker.model.instance.GetServiceInstanceResponse;
-
-import java.util.HashMap;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
@@ -87,7 +89,7 @@ public class BookstoreServiceInstanceServiceTests {
 
 	@Test
 	public void createServiceInstanceWhenInstanceDoesNotExist() {
-		Context context = Context.builder()
+		Context context = PlatformContext.builder()
 				.platform("test-platform")
 				.build();
 
