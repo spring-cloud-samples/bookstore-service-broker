@@ -151,13 +151,13 @@ When using `minikube`, the following command will show the URL that can be used 
 
 ----
 $ minikube service bookstore-broker -n bookstore-broker --url
-http://192.168.99.100:31742
+https://192.168.99.100:31742
 ----
 
 Use the provided URL to access the `/v2/catalog` endpoint of the service broker application:
 
 ----
-$ curl http://192.168.99.100:31742/v2/catalog -u admin:supersecret
+$ curl https://192.168.99.100:31742/v2/catalog -u admin:supersecret
 {"services":[{"id":"bdb1be2e-360b-495c-8115-d7697f9c6a9e","name":"bookstore","description":"A simple book store service","bindable":true,"plan_updateable":false,"plans":[{"id":"b973fb78-82f3-49ef-9b8b-c1876974a6cd","name":"standard","description":"A simple book store plan","free":true}],"tags":["book-store","books","sample"]}]}
 ----
 
@@ -187,7 +187,7 @@ Events:                   <none>
 Note the value of the `LoadBalancer Ingress` IP address and `NodePort` rows. Construct a URL using these two values, and use the this URL to access the `/v2/catalog` endpoint of the service broker application:
 
 ----
-$ curl http://192.168.1.238:32248/v2/catalog -u admin:supersecret
+$ curl https://192.168.1.238:32248/v2/catalog -u admin:supersecret
 {"services":[{"id":"bdb1be2e-360b-495c-8115-d7697f9c6a9e","name":"bookstore","description":"A simple book store service","bindable":true,"plan_updateable":false,"plans":[{"id":"b973fb78-82f3-49ef-9b8b-c1876974a6cd","name":"standard","description":"A simple book store plan","free":true}],"tags":["book-store","books","sample"]}]}
 ----
 
@@ -237,7 +237,7 @@ Spec:
   Relist Behavior:  Duration
   Relist Duration:  15m0s
   Relist Requests:  0
-  URL:              http://bookstore-broker.bookstore-broker.svc.cluster.local
+  URL:              https://bookstore-broker.bookstore-broker.svc.cluster.local
 Status:
   Conditions:
     Message: Successfully fetched catalog entries from broker.
