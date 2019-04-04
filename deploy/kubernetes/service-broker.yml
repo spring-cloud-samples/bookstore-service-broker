@@ -5,7 +5,7 @@ metadata:
   labels:
     run: bookstore-broker
 spec:
-  url: http://bookstore-broker.bookstore-broker.svc.cluster.local
+  url: https://bookstore-broker.bookstore-broker.svc.cluster.local
   authInfo:
     basic:
       secretRef:
