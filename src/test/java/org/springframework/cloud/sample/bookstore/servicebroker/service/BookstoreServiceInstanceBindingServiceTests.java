@@ -60,7 +60,7 @@ public class BookstoreServiceInstanceBindingServiceTests {
 	private BookStoreServiceInstanceBindingService service;
 
 	private final Map<String, Object> credentials = new HashMap<String, Object>() {{
-		put("uri", "http://example.com");
+		put("uri", "https://example.com");
 		put("username", "testuser");
 		put("password", "testpassword");
 	}};
