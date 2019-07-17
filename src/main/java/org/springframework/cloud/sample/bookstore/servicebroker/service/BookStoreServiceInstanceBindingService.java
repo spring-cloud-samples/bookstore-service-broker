@@ -70,10 +70,10 @@ public class BookStoreServiceInstanceBindingService implements ServiceInstanceBi
 		CreateServiceInstanceAppBindingResponseBuilder responseBuilder =
 			CreateServiceInstanceAppBindingResponse.builder();
 
-		Optional<ServiceBinding> bindingEntity = bindingRepository.findById(request.getBindingId());
+		Optional<ServiceBinding> bindingRecord = bindingRepository.findById(request.getBindingId());
 
-		if (bindingEntity.isPresent()) {
-			responseBuilder.bindingExisted(true).credentials(bindingEntity.get().getCredentials());
+		if (bindingRecord.isPresent()) {
+			responseBuilder.bindingExisted(true).credentials(bindingRecord.get().getCredentials());
 			return Mono.just(responseBuilder.build());
 		} else {
 			User user = createUser(request);
@@ -82,11 +82,11 @@ public class BookStoreServiceInstanceBindingService implements ServiceInstanceBi
 			responseBuilder.bindingExisted(false).credentials(credentials);
 
 			return this.credhubCreate.map(credhub -> credhub.buildResponse(request, responseBuilder)
-				.map(builder ->
+				.map(convertedBuilder ->
 				{
-					CreateServiceInstanceAppBindingResponse build = builder.build();
-					saveBinding(request, build.getCredentials());
-					return (CreateServiceInstanceBindingResponse) build;
+					CreateServiceInstanceAppBindingResponse response = convertedBuilder.build();
+					saveBinding(request, response.getCredentials());
+					return (CreateServiceInstanceBindingResponse) response;
 				})
 			).orElseGet(() -> {
 				saveBinding(request, credentials);
@@ -121,7 +121,7 @@ public class BookStoreServiceInstanceBindingService implements ServiceInstanceBi
 			userService.deleteUser(bindingId);
 			return this.credhubDelete
 				.map(credhub -> credhub.buildResponse(request, builder))
-				.get()
+				.orElseGet(() -> Mono.just(DeleteServiceInstanceBindingResponse.builder()))
 				.map(DeleteServiceInstanceBindingResponseBuilder::build);
 		} else {
 			throw new ServiceInstanceBindingDoesNotExistException(bindingId);
