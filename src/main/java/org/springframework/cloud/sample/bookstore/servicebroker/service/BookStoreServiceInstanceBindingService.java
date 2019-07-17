@@ -16,14 +16,17 @@
 
 package org.springframework.cloud.sample.bookstore.servicebroker.service;
 
-import org.springframework.cloud.sample.bookstore.web.model.ApplicationInformation;
+import org.springframework.cloud.sample.bookstore.servicebroker.credhub.CredhubCreateServiceInstanceBinding;
+import org.springframework.cloud.sample.bookstore.servicebroker.credhub.CredhubDeleteServiceInstanceBinding;
 import org.springframework.cloud.sample.bookstore.servicebroker.model.ServiceBinding;
 import org.springframework.cloud.sample.bookstore.servicebroker.repository.ServiceBindingRepository;
+import org.springframework.cloud.sample.bookstore.web.model.ApplicationInformation;
 import org.springframework.cloud.sample.bookstore.web.model.User;
 import org.springframework.cloud.sample.bookstore.web.service.UserService;
 import org.springframework.cloud.servicebroker.exception.ServiceInstanceBindingDoesNotExistException;
 import org.springframework.cloud.servicebroker.model.binding.*;
 import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceAppBindingResponse.CreateServiceInstanceAppBindingResponseBuilder;
+import org.springframework.cloud.servicebroker.model.binding.DeleteServiceInstanceBindingResponse.DeleteServiceInstanceBindingResponseBuilder;
 import org.springframework.cloud.servicebroker.service.ServiceInstanceBindingService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -33,10 +36,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.springframework.cloud.sample.bookstore.web.security.SecurityAuthorities.FULL_ACCESS;
 import static org.springframework.cloud.sample.bookstore.web.security.SecurityAuthorities.BOOK_STORE_ID_PREFIX;
+import static org.springframework.cloud.sample.bookstore.web.security.SecurityAuthorities.FULL_ACCESS;
 
 @Service
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class BookStoreServiceInstanceBindingService implements ServiceInstanceBindingService {
 	private static final String URI_KEY = "uri";
 	private static final String USERNAME_KEY = "username";
@@ -46,50 +50,62 @@ public class BookStoreServiceInstanceBindingService implements ServiceInstanceBi
 	private final UserService userService;
 	private final ApplicationInformation applicationInformation;
 
+	private final Optional<CredhubCreateServiceInstanceBinding> credhubCreate;
+	private final Optional<CredhubDeleteServiceInstanceBinding> credhubDelete;
+
 	public BookStoreServiceInstanceBindingService(ServiceBindingRepository bindingRepository,
 												  UserService userService,
-												  ApplicationInformation applicationInformation) {
+												  ApplicationInformation applicationInformation,
+												  Optional<CredhubCreateServiceInstanceBinding> credhubCreate,
+												  Optional<CredhubDeleteServiceInstanceBinding> credhubDelete) {
 		this.bindingRepository = bindingRepository;
 		this.userService = userService;
 		this.applicationInformation = applicationInformation;
+		this.credhubCreate = credhubCreate;
+		this.credhubDelete = credhubDelete;
 	}
 
 	@Override
 	public Mono<CreateServiceInstanceBindingResponse> createServiceInstanceBinding(CreateServiceInstanceBindingRequest request) {
 		CreateServiceInstanceAppBindingResponseBuilder responseBuilder =
-				CreateServiceInstanceAppBindingResponse.builder();
+			CreateServiceInstanceAppBindingResponse.builder();
 
-		Optional<ServiceBinding> binding = bindingRepository.findById(request.getBindingId());
+		Optional<ServiceBinding> bindingEntity = bindingRepository.findById(request.getBindingId());
 
-		if (binding.isPresent()) {
-			responseBuilder
-					.bindingExisted(true)
-					.credentials(binding.get().getCredentials());
+		if (bindingEntity.isPresent()) {
+			responseBuilder.bindingExisted(true).credentials(bindingEntity.get().getCredentials());
+			return Mono.just(responseBuilder.build());
 		} else {
 			User user = createUser(request);
 
 			Map<String, Object> credentials = buildCredentials(request.getServiceInstanceId(), user);
-			saveBinding(request, credentials);
+			responseBuilder.bindingExisted(false).credentials(credentials);
 
-			responseBuilder
-					.bindingExisted(false)
-					.credentials(credentials);
+			return this.credhubCreate.map(credhub -> credhub.buildResponse(request, responseBuilder)
+				.map(builder ->
+				{
+					CreateServiceInstanceAppBindingResponse build = builder.build();
+					saveBinding(request, build.getCredentials());
+					return (CreateServiceInstanceBindingResponse) build;
+				})
+			).orElseGet(() -> {
+				saveBinding(request, credentials);
+				return Mono.just(responseBuilder.build());
+			});
 		}
-
-		return Mono.just(responseBuilder.build());
 	}
 
 	@Override
 	public Mono<GetServiceInstanceBindingResponse> getServiceInstanceBinding(GetServiceInstanceBindingRequest request) {
 		String bindingId = request.getBindingId();
 
-		Optional<ServiceBinding> serviceBinding = bindingRepository.findById(bindingId);
+		Optional<ServiceBinding> bindingRecord = bindingRepository.findById(bindingId);
 
-		if (serviceBinding.isPresent()) {
+		if (bindingRecord.isPresent()) {
 			return Mono.just(GetServiceInstanceAppBindingResponse.builder()
-					.parameters(serviceBinding.get().getParameters())
-					.credentials(serviceBinding.get().getCredentials())
-					.build());
+				.parameters(bindingRecord.get().getParameters())
+				.credentials(bindingRecord.get().getCredentials())
+				.build());
 		} else {
 			throw new ServiceInstanceBindingDoesNotExistException(bindingId);
 		}
@@ -98,19 +114,23 @@ public class BookStoreServiceInstanceBindingService implements ServiceInstanceBi
 	@Override
 	public Mono<DeleteServiceInstanceBindingResponse> deleteServiceInstanceBinding(DeleteServiceInstanceBindingRequest request) {
 		String bindingId = request.getBindingId();
+		DeleteServiceInstanceBindingResponseBuilder builder = DeleteServiceInstanceBindingResponse.builder();
 
 		if (bindingRepository.existsById(bindingId)) {
 			bindingRepository.deleteById(bindingId);
 			userService.deleteUser(bindingId);
+			return this.credhubDelete
+				.map(credhub -> credhub.buildResponse(request, builder))
+				.get()
+				.map(DeleteServiceInstanceBindingResponseBuilder::build);
 		} else {
 			throw new ServiceInstanceBindingDoesNotExistException(bindingId);
 		}
-		return Mono.just(DeleteServiceInstanceBindingResponse.builder().build());
 	}
 
 	private User createUser(CreateServiceInstanceBindingRequest request) {
 		return userService.createUser(request.getBindingId(),
-				FULL_ACCESS, BOOK_STORE_ID_PREFIX + request.getServiceInstanceId());
+			FULL_ACCESS, BOOK_STORE_ID_PREFIX + request.getServiceInstanceId());
 	}
 
 	private Map<String, Object> buildCredentials(String instanceId, User user) {
@@ -125,15 +145,15 @@ public class BookStoreServiceInstanceBindingService implements ServiceInstanceBi
 
 	private String buildUri(String instanceId) {
 		return UriComponentsBuilder
-					.fromUriString(applicationInformation.getBaseUrl())
-					.pathSegment("bookstores", instanceId)
-					.build()
-					.toUriString();
+			.fromUriString(applicationInformation.getBaseUrl())
+			.pathSegment("bookstores", instanceId)
+			.build()
+			.toUriString();
 	}
 
 	private void saveBinding(CreateServiceInstanceBindingRequest request, Map<String, Object> credentials) {
 		ServiceBinding serviceBinding =
-				new ServiceBinding(request.getBindingId(), request.getParameters(), credentials);
+			new ServiceBinding(request.getBindingId(), request.getParameters(), credentials);
 		bindingRepository.save(serviceBinding);
 	}
 }

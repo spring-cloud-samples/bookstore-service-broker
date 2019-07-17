@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.springframework.cloud.sample.bookstore.servicebroker.credhub.CredhubCreateServiceInstanceBinding;
 import org.springframework.cloud.sample.bookstore.web.model.ApplicationInformation;
 import org.springframework.cloud.sample.bookstore.servicebroker.model.ServiceBinding;
 import org.springframework.cloud.sample.bookstore.servicebroker.repository.ServiceBindingRepository;
@@ -33,7 +34,6 @@ import org.springframework.cloud.servicebroker.model.binding.DeleteServiceInstan
 import org.springframework.cloud.servicebroker.model.binding.GetServiceInstanceAppBindingResponse;
 import org.springframework.cloud.servicebroker.model.binding.GetServiceInstanceBindingRequest;
 import org.springframework.cloud.servicebroker.model.binding.GetServiceInstanceBindingResponse;
-import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -66,13 +66,14 @@ public class BookstoreServiceInstanceBindingServiceTests {
 		put("password", "testpassword");
 	}};
 
+
 	@Before
 	public void setUp() {
 		initMocks(this);
 
 		ApplicationInformation appInfo = new ApplicationInformation(BASE_URL);
 
-		service = new BookStoreServiceInstanceBindingService(repository, userService, appInfo);
+		service = new BookStoreServiceInstanceBindingService(repository, userService, appInfo, Optional.empty(), Optional.empty() );
 	}
 
 	@Test

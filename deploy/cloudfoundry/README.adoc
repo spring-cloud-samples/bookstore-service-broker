@@ -58,6 +58,70 @@ routes:            bookstore-service-broker.apps.example.com
 #0   running   2018-02-13T21:58:44Z   0.0%   290.8M of 1G   144.7M of 1G
 ----
 
+== Deploy the service broker application with Secure Service Credential support
+
+The service broker does support storing credentials in Cloud Foundry`s Credhub optionally. The broker needs UAA client_credentials, which are authorized to `/c/bookstore-service-broker/bdb1be2e-360b-495c-8115-d7697f9c6a9e/*` in Credhub, to access and store credentials securely.
+More information about Secure Service Credential in Cloud Foundry can be found here: https://github.com/cloudfoundry-incubator/credhub/blob/master/docs/secure-service-credentials.md
+
+=== Create client credentials in UAA
+
+----
+$ uaac target uaa.<system domain>
+$ uaac token client get admin -s <password> # UAA Admin Client
+$ uaac client add bookstore-service-broker  --name bookstore-service-broker --authorized_grant_types client_credentials --authorities "credhub.write","credhub.read"
+----
+
+=== Set permissions in Credhub
+
+A documentation how to access Credhub in Pivotal PAS from Operations Manager can be found here: https://community.pivotal.io/s/article/how-to-login-and-access-credhub-in-pcf
+
+----
+$ credhub login -s credhub.service.cf.internal:8844 --client-name credhub_admin_client --client-secret <secret> --skip-tls-validation
+$ credhub set-permission -a uaa-client:bookstore-service-broker -p /c/bookstore-service-broker/bdb1be2e-360b-495c-8115-d7697f9c6a9e/* -o read,write,delete,read_acl,write_acl
+----
+
+==== Verify Credhub permissions
+----
+$ credhub login -s credhub.service.cf.internal:8844 --client-name bookstore-service-broker --client-secret <secret> --skip-tls-validation
+$ credhub set -n /c/bookstore-service-broker/bdb1be2e-360b-495c-8115-d7697f9c6a9e/test -t value -v test
+$ credhub delete -n '/c/bookstore-service-broker/bdb1be2e-360b-495c-8115-d7697f9c6a9e/test'
+----
+
+=== Push Service Broker
+
+Modify value of `CREDHUB_CLIENT_SECRET` in `deploy/cloudfoundry/manifest-credhub.yml` to match your chosen client_secret for the service broker.
+If necessary, `CREDHUB_URL`, `CREDHUB_CLIENT_ID` and `UAA_TOKEN_URI` can be configured optionally.
+
+----
+$ cf push -f deploy/cloudfoundry/manifest-credhub.yml
+Pushing from manifest to org sample / space test as user@example.com...
+Using manifest file deploy/cloudfoundry/manifest.yml
+Getting app info...
+Creating app with these attributes...
++ name:       bookstore-service-broker
+  path:       build/libs/bookstore-service-broker-0.0.1.BUILD-SNAPSHOT.jar
++ memory:     1G
+  env:
+    CREDHUB_CLIENT_SECRET
+    SPRING_PROFILES_ACTIVE
+  routes:
++   bookstore-service-broker.apps.example.com
+
+...
+
+name:              bookstore-service-broker
+requested state:   started
+instances:         1/1
+usage:             1G x 1 instances
+routes:            bookstore-service-broker.apps.example.com
+
+...
+
+      state     since                  cpu    memory         disk           details
+#0   running   2018-02-13T21:58:44Z   0.0%   290.8M of 1G   144.7M of 1G
+----
+
+
 == Verify the service broker application
 
 Note the value of the `route` row in the output from the command above.

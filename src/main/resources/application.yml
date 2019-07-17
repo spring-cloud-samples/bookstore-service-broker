@@ -9,7 +9,8 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
-
+  application:
+    name: bookstore-service-broker
 ---
 spring:
   profiles:
