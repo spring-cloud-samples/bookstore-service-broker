@@ -33,6 +33,7 @@ import org.springframework.cloud.servicebroker.model.binding.DeleteServiceInstan
 import org.springframework.cloud.servicebroker.model.binding.GetServiceInstanceAppBindingResponse;
 import org.springframework.cloud.servicebroker.model.binding.GetServiceInstanceBindingRequest;
 import org.springframework.cloud.servicebroker.model.binding.GetServiceInstanceBindingResponse;
+import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -87,7 +88,7 @@ public class BookstoreServiceInstanceBindingServiceTests {
 				.bindingId(SERVICE_BINDING_ID)
 				.build();
 
-		CreateServiceInstanceBindingResponse response = service.createServiceInstanceBinding(request);
+		CreateServiceInstanceBindingResponse response = service.createServiceInstanceBinding(request).block();
 
 		assertThat(response).isInstanceOf(CreateServiceInstanceAppBindingResponse.class);
 
@@ -126,7 +127,7 @@ public class BookstoreServiceInstanceBindingServiceTests {
 				.bindingId(SERVICE_BINDING_ID)
 				.build();
 
-		CreateServiceInstanceBindingResponse response = service.createServiceInstanceBinding(request);
+		CreateServiceInstanceBindingResponse response = service.createServiceInstanceBinding(request).block();
 
 		assertThat(response).isInstanceOf(CreateServiceInstanceAppBindingResponse.class);
 
@@ -151,7 +152,7 @@ public class BookstoreServiceInstanceBindingServiceTests {
 				.bindingId(SERVICE_BINDING_ID)
 				.build();
 
-		GetServiceInstanceBindingResponse response = service.getServiceInstanceBinding(request);
+		GetServiceInstanceBindingResponse response = service.getServiceInstanceBinding(request).block();
 
 		assertThat(response).isInstanceOf(GetServiceInstanceAppBindingResponse.class);
 

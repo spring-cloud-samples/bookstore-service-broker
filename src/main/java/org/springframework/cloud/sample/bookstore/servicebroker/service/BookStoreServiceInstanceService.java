@@ -29,6 +29,7 @@ import org.springframework.cloud.servicebroker.model.instance.GetServiceInstance
 import org.springframework.cloud.servicebroker.model.instance.GetServiceInstanceResponse;
 import org.springframework.cloud.servicebroker.service.ServiceInstanceService;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 import java.util.Optional;
 
@@ -43,7 +44,7 @@ public class BookStoreServiceInstanceService implements ServiceInstanceService {
 	}
 
 	@Override
-	public CreateServiceInstanceResponse createServiceInstance(CreateServiceInstanceRequest request) {
+	public Mono<CreateServiceInstanceResponse> createServiceInstance(CreateServiceInstanceRequest request) {
 		String instanceId = request.getServiceInstanceId();
 
 		CreateServiceInstanceResponseBuilder responseBuilder = CreateServiceInstanceResponse.builder();
@@ -56,35 +57,35 @@ public class BookStoreServiceInstanceService implements ServiceInstanceService {
 			saveInstance(request, instanceId);
 		}
 
-		return responseBuilder.build();
+		return Mono.just(responseBuilder.build());
 	}
 
 	@Override
-	public GetServiceInstanceResponse getServiceInstance(GetServiceInstanceRequest request) {
+	public Mono<GetServiceInstanceResponse> getServiceInstance(GetServiceInstanceRequest request) {
 		String instanceId = request.getServiceInstanceId();
 
 		Optional<ServiceInstance> serviceInstance = instanceRepository.findById(instanceId);
 
 		if (serviceInstance.isPresent()) {
-			return GetServiceInstanceResponse.builder()
+			return Mono.just(GetServiceInstanceResponse.builder()
 					.serviceDefinitionId(serviceInstance.get().getServiceDefinitionId())
 					.planId(serviceInstance.get().getPlanId())
 					.parameters(serviceInstance.get().getParameters())
-					.build();
+					.build());
 		} else {
 			throw new ServiceInstanceDoesNotExistException(instanceId);
 		}
 	}
 
 	@Override
-	public DeleteServiceInstanceResponse deleteServiceInstance(DeleteServiceInstanceRequest request) {
+	public Mono<DeleteServiceInstanceResponse> deleteServiceInstance(DeleteServiceInstanceRequest request) {
 		String instanceId = request.getServiceInstanceId();
 
 		if (instanceRepository.existsById(instanceId)) {
 			storeService.deleteBookStore(instanceId);
 			instanceRepository.deleteById(instanceId);
 
-			return DeleteServiceInstanceResponse.builder().build();
+			return Mono.just(DeleteServiceInstanceResponse.builder().build());
 		} else {
 			throw new ServiceInstanceDoesNotExistException(instanceId);
 		}

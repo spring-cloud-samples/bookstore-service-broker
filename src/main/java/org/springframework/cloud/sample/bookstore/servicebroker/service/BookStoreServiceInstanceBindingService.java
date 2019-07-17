@@ -22,17 +22,12 @@ import org.springframework.cloud.sample.bookstore.servicebroker.repository.Servi
 import org.springframework.cloud.sample.bookstore.web.model.User;
 import org.springframework.cloud.sample.bookstore.web.service.UserService;
 import org.springframework.cloud.servicebroker.exception.ServiceInstanceBindingDoesNotExistException;
-import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceAppBindingResponse;
+import org.springframework.cloud.servicebroker.model.binding.*;
 import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceAppBindingResponse.CreateServiceInstanceAppBindingResponseBuilder;
-import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceBindingRequest;
-import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceBindingResponse;
-import org.springframework.cloud.servicebroker.model.binding.DeleteServiceInstanceBindingRequest;
-import org.springframework.cloud.servicebroker.model.binding.GetServiceInstanceAppBindingResponse;
-import org.springframework.cloud.servicebroker.model.binding.GetServiceInstanceBindingRequest;
-import org.springframework.cloud.servicebroker.model.binding.GetServiceInstanceBindingResponse;
 import org.springframework.cloud.servicebroker.service.ServiceInstanceBindingService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
+import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -60,7 +55,7 @@ public class BookStoreServiceInstanceBindingService implements ServiceInstanceBi
 	}
 
 	@Override
-	public CreateServiceInstanceBindingResponse createServiceInstanceBinding(CreateServiceInstanceBindingRequest request) {
+	public Mono<CreateServiceInstanceBindingResponse> createServiceInstanceBinding(CreateServiceInstanceBindingRequest request) {
 		CreateServiceInstanceAppBindingResponseBuilder responseBuilder =
 				CreateServiceInstanceAppBindingResponse.builder();
 
@@ -81,27 +76,27 @@ public class BookStoreServiceInstanceBindingService implements ServiceInstanceBi
 					.credentials(credentials);
 		}
 
-		return responseBuilder.build();
+		return Mono.just(responseBuilder.build());
 	}
 
 	@Override
-	public GetServiceInstanceBindingResponse getServiceInstanceBinding(GetServiceInstanceBindingRequest request) {
+	public Mono<GetServiceInstanceBindingResponse> getServiceInstanceBinding(GetServiceInstanceBindingRequest request) {
 		String bindingId = request.getBindingId();
 
 		Optional<ServiceBinding> serviceBinding = bindingRepository.findById(bindingId);
 
 		if (serviceBinding.isPresent()) {
-			return GetServiceInstanceAppBindingResponse.builder()
+			return Mono.just(GetServiceInstanceAppBindingResponse.builder()
 					.parameters(serviceBinding.get().getParameters())
 					.credentials(serviceBinding.get().getCredentials())
-					.build();
+					.build());
 		} else {
 			throw new ServiceInstanceBindingDoesNotExistException(bindingId);
 		}
 	}
 
 	@Override
-	public void deleteServiceInstanceBinding(DeleteServiceInstanceBindingRequest request) {
+	public Mono<DeleteServiceInstanceBindingResponse> deleteServiceInstanceBinding(DeleteServiceInstanceBindingRequest request) {
 		String bindingId = request.getBindingId();
 
 		if (bindingRepository.existsById(bindingId)) {
@@ -110,6 +105,7 @@ public class BookStoreServiceInstanceBindingService implements ServiceInstanceBi
 		} else {
 			throw new ServiceInstanceBindingDoesNotExistException(bindingId);
 		}
+		return Mono.just(DeleteServiceInstanceBindingResponse.builder().build());
 	}
 
 	private User createUser(CreateServiceInstanceBindingRequest request) {
