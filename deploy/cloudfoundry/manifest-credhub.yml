@@ -1,0 +1,8 @@
+---
+applications:
+- name: bookstore-service-broker
+  memory: 1G
+  path: ../../build/libs/bookstore-service-broker-0.0.1.BUILD-SNAPSHOT.jar
+  env:
+    SPRING_PROFILES_ACTIVE: cloud,credhub
+    CREDHUB_CLIENT_SECRET: secret

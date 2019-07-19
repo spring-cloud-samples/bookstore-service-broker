@@ -16,7 +16,7 @@
 
 buildscript {
 	ext {
-		springBootVersion = '2.0.3.RELEASE'
+		springBootVersion = '2.1.6.RELEASE'
 	}
 	repositories {
 		mavenCentral()
@@ -51,11 +51,12 @@ dependencies {
 	compile('org.springframework.boot:spring-boot-starter-web')
 	compile('org.springframework.boot:spring-boot-starter-actuator')
 	compile('org.springframework.boot:spring-boot-starter-security')
-	compile('org.springframework.hateoas:spring-hateoas:0.24.0.RELEASE')
+	compile('org.springframework.hateoas:spring-hateoas:0.25.1.RELEASE')
+	compile('org.springframework.credhub:spring-credhub-starter:2.0.1.RELEASE')
 
 	runtime('org.springframework.boot:spring-boot-devtools')
 
-	compile('org.springframework.cloud:spring-cloud-starter-open-service-broker-webmvc:2.0.1.RELEASE')
+	compile('org.springframework.cloud:spring-cloud-starter-open-service-broker:3.0.3.RELEASE')
 
 	compile('org.springframework.boot:spring-boot-starter-data-jpa')
 	runtime('org.hsqldb:hsqldb')

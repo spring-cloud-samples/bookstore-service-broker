@@ -74,7 +74,7 @@ public class BookstoreServiceInstanceServiceTests {
 				.serviceInstanceId(SERVICE_INSTANCE_ID)
 				.build();
 
-		CreateServiceInstanceResponse response = service.createServiceInstance(request);
+		CreateServiceInstanceResponse response = service.createServiceInstance(request).block();
 
 		assertThat(response.isInstanceExisted()).isTrue();
 		assertThat(response.getDashboardUrl()).isNull();
@@ -101,7 +101,7 @@ public class BookstoreServiceInstanceServiceTests {
 				.context(context)
 				.build();
 
-		CreateServiceInstanceResponse response = service.createServiceInstance(request);
+		CreateServiceInstanceResponse response = service.createServiceInstance(request).block();
 
 		assertThat(response.isInstanceExisted()).isFalse();
 		assertThat(response.getDashboardUrl()).isNull();
@@ -132,7 +132,7 @@ public class BookstoreServiceInstanceServiceTests {
 				.serviceInstanceId(SERVICE_INSTANCE_ID)
 				.build();
 
-		GetServiceInstanceResponse response = service.getServiceInstance(request);
+		GetServiceInstanceResponse response = service.getServiceInstance(request).block();
 
 		assertThat(response.getServiceDefinitionId()).isEqualTo(serviceInstance.getServiceDefinitionId());
 		assertThat(response.getPlanId()).isEqualTo(serviceInstance.getPlanId());
@@ -163,7 +163,7 @@ public class BookstoreServiceInstanceServiceTests {
 				.serviceInstanceId(SERVICE_INSTANCE_ID)
 				.build();
 
-		DeleteServiceInstanceResponse response = service.deleteServiceInstance(request);
+		DeleteServiceInstanceResponse response = service.deleteServiceInstance(request).block();
 
 		assertThat(response.isAsync()).isFalse();
 		assertThat(response.getOperation()).isNull();

@@ -1,0 +1,17 @@
+spring:
+  credhub:
+    url: ${CREDHUB_URL:https://credhub.service.cf.internal:8844}
+    oauth2:
+      registration-id: credhub-client
+  security:
+    oauth2:
+      client:
+        registration:
+          credhub-client:
+            provider: uaa
+            client-id: ${CREDHUB_CLIENT_ID:bookstore-service-broker}
+            client-secret: ${CREDHUB_CLIENT_SECRET:password}
+            authorization-grant-type: client_credentials
+        provider:
+          uaa:
+            token-uri: ${UAA_TOKEN_URI:https://uaa.service.cf.internal:8443/oauth/token}
