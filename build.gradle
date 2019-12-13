@@ -16,7 +16,7 @@
 
 buildscript {
 	ext {
-		springBootVersion = '2.0.3.RELEASE'
+		springBootVersion = '2.2.2.RELEASE'
 	}
 	repositories {
 		mavenCentral()
@@ -44,14 +44,13 @@ sourceCompatibility = 1.8
 repositories {
 	mavenCentral()
 	maven { url "https://repo.spring.io/release" }
-	maven { url "https://repo.spring.io/libs-staging-local" }
 }
 
 dependencies {
 	compile('org.springframework.boot:spring-boot-starter-web')
 	compile('org.springframework.boot:spring-boot-starter-actuator')
 	compile('org.springframework.boot:spring-boot-starter-security')
-	compile('org.springframework.hateoas:spring-hateoas:0.24.0.RELEASE')
+	compile('org.springframework.hateoas:spring-hateoas:1.0.2.RELEASE')
 
 	runtime('org.springframework.boot:spring-boot-devtools')
 
@@ -63,7 +62,6 @@ dependencies {
 
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 	testCompile('org.springframework.security:spring-security-test')
-	testCompile('org.assertj:assertj-core')
 }
 
 if (!project.hasProperty("dockerGroup")) {

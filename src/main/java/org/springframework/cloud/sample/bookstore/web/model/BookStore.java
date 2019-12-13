@@ -16,7 +16,9 @@
 
 package org.springframework.cloud.sample.bookstore.web.model;
 
-import org.springframework.hateoas.Identifiable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -26,13 +28,11 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Table;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 @Entity
 @Table(name = "bookstores")
-public class BookStore implements Identifiable<String> {
+public class BookStore {
+
 	@Id
 	@Column(length = 50)
 	private final String id;
@@ -50,7 +50,6 @@ public class BookStore implements Identifiable<String> {
 		this.id = id;
 	}
 
-	@Override
 	public String getId() {
 		return this.id;
 	}
@@ -76,4 +75,5 @@ public class BookStore implements Identifiable<String> {
 
 		return book;
 	}
+
 }

@@ -84,7 +84,7 @@ public class BookstoreServiceInstanceServiceTests {
 		verify(repository).existsById(SERVICE_INSTANCE_ID);
 		verifyNoMoreInteractions(repository);
 
-		verifyZeroInteractions(store);
+		verifyNoMoreInteractions(store);
 	}
 
 	@Test

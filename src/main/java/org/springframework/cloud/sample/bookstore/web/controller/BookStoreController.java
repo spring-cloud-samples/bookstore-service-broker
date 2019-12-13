@@ -53,7 +53,7 @@ public class BookStoreController extends BaseController {
 	}
 
 	private ResponseEntity<BookStoreResource> createResponse(BookStore bookStore) {
-		BookStoreResource bookStoreResource = new BookStoreResourceAssembler().toResource(bookStore);
+		BookStoreResource bookStoreResource = new BookStoreResourceAssembler().toModel(bookStore);
 		return new ResponseEntity<>(bookStoreResource, HttpStatus.OK);
 	}
 }

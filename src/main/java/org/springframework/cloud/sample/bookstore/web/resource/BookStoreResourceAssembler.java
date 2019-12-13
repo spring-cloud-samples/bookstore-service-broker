@@ -21,12 +21,12 @@ import org.springframework.cloud.sample.bookstore.web.model.BookStore;
 
 import java.util.List;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 public class BookStoreResourceAssembler {
-	public BookStoreResource toResource(BookStore bookStore) {
+	public BookStoreResource toModel(BookStore bookStore) {
 		BookResourceAssembler bookAssembler = new BookResourceAssembler();
-		List<BookResource> bookResources = bookAssembler.toResources(bookStore.getBooks(), bookStore.getId());
+		List<BookResource> bookResources = bookAssembler.toCollectionModel(bookStore.getBooks(), bookStore.getId());
 
 		BookStoreResource bookStoreResource = new BookStoreResource(bookResources);
 		bookStoreResource.add(

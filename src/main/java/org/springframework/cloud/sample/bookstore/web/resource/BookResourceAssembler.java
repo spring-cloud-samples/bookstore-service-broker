@@ -24,10 +24,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 public class BookResourceAssembler {
-	public BookResource toResource(Book book, String bookStoreId) {
+	public BookResource toModel(Book book, String bookStoreId) {
 		BookResource bookResource = new BookResource(book);
 		bookResource.add(
 				linkTo(BookController.class, bookStoreId)
@@ -37,9 +37,9 @@ public class BookResourceAssembler {
 		return bookResource;
 	}
 
-	public List<BookResource> toResources(Collection<Book> books, String bookStoreId) {
+	public List<BookResource> toCollectionModel(Collection<Book> books, String bookStoreId) {
 		return books.stream()
-				.map(book -> toResource(book, bookStoreId))
+				.map(book -> toModel(book, bookStoreId))
 				.collect(Collectors.toCollection(() -> new ArrayList<>(books.size())));
 	}
 }

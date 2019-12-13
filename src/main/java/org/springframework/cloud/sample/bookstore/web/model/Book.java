@@ -16,13 +16,12 @@
 
 package org.springframework.cloud.sample.bookstore.web.model;
 
-import org.springframework.hateoas.Identifiable;
-
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 @Embeddable
-public class Book implements Identifiable<String> {
+public class Book {
+
 	@Column(length = 50)
 	private final String id;
 
@@ -57,7 +56,6 @@ public class Book implements Identifiable<String> {
 		this.author = book.getAuthor();
 	}
 
-	@Override
 	public String getId() {
 		return this.id;
 	}
@@ -73,4 +71,5 @@ public class Book implements Identifiable<String> {
 	public String getAuthor() {
 		return this.author;
 	}
+
 }

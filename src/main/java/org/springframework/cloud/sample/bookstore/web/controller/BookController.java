@@ -62,7 +62,7 @@ public class BookController extends BaseController {
 	}
 
 	private ResponseEntity<BookResource> createResponse(String bookStoreId, Book book, HttpStatus httpStatus) {
-		BookResource bookResource = new BookResourceAssembler().toResource(book, bookStoreId);
+		BookResource bookResource = new BookResourceAssembler().toModel(book, bookStoreId);
 		return new ResponseEntity<>(bookResource, httpStatus);
 	}
 }

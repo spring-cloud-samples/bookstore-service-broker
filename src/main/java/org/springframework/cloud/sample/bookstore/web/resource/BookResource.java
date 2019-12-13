@@ -17,10 +17,10 @@
 package org.springframework.cloud.sample.bookstore.web.resource;
 
 import org.springframework.cloud.sample.bookstore.web.model.Book;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 
 @SuppressWarnings("unused")
-public class BookResource extends ResourceSupport {
+public class BookResource extends RepresentationModel {
 	private final Book book;
 
 	BookResource(Book book) {

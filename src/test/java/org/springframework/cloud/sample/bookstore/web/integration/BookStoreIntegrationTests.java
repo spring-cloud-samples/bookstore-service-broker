@@ -16,9 +16,13 @@
 
 package org.springframework.cloud.sample.bookstore.web.integration;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.cloud.sample.bookstore.web.controller.BookController;
@@ -27,15 +31,12 @@ import org.springframework.cloud.sample.bookstore.web.model.Book;
 import org.springframework.cloud.sample.bookstore.web.model.BookStore;
 import org.springframework.cloud.sample.bookstore.web.repository.BookStoreRepository;
 import org.springframework.cloud.sample.bookstore.web.service.BookStoreService;
-import org.springframework.hateoas.Link;
+import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -109,7 +110,7 @@ public class BookStoreIntegrationTests {
 
 				.andExpect(jsonPath("$.links", hasSize(1)))
 				.andExpect(jsonPath("$.links[0].href", endsWith(buildBookStoreRef(bookStore.getId()))))
-				.andExpect(jsonPath("$.links[0].rel", equalTo(Link.REL_SELF)));
+				.andExpect(jsonPath("$.links[0].rel", equalTo(IanaLinkRelations.SELF.value())));
 	}
 
 	@Test
@@ -124,7 +125,7 @@ public class BookStoreIntegrationTests {
 
 				.andExpect(jsonPath("$.links", hasSize(1)))
 				.andExpect(jsonPath("$.links[0].href", endsWith(buildBookRef(bookStore.getId(), book.getId()))))
-				.andExpect(jsonPath("$.links[0].rel", equalTo(Link.REL_SELF)));
+				.andExpect(jsonPath("$.links[0].rel", equalTo(IanaLinkRelations.SELF.value())));
 	}
 
 	@Test
@@ -139,7 +140,7 @@ public class BookStoreIntegrationTests {
 
 				.andExpect(jsonPath("$.links", hasSize(1)))
 				.andExpect(jsonPath("$.links[0].href", containsString(buildBookRef(bookStore.getId()))))
-				.andExpect(jsonPath("$.links[0].rel", equalTo(Link.REL_SELF)));
+				.andExpect(jsonPath("$.links[0].rel", equalTo(IanaLinkRelations.SELF.value())));
 
 		assertThat(getBooksFromRepository()).size().isEqualTo(3);
 	}
@@ -156,7 +157,7 @@ public class BookStoreIntegrationTests {
 
 				.andExpect(jsonPath("$.links", hasSize(1)))
 				.andExpect(jsonPath("$.links[0].href", endsWith(buildBookRef(bookStore.getId(), book.getId()))))
-				.andExpect(jsonPath("$.links[0].rel", equalTo(Link.REL_SELF)));
+				.andExpect(jsonPath("$.links[0].rel", equalTo(IanaLinkRelations.SELF.value())));
 
 		assertThat(getBooksFromRepository()).size().isEqualTo(1);
 	}

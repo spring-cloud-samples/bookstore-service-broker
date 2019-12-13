@@ -16,12 +16,12 @@
 
 package org.springframework.cloud.sample.bookstore.web.resource;
 
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 
 import java.util.Collection;
 
 @SuppressWarnings("unused")
-public class BookStoreResource extends ResourceSupport {
+public class BookStoreResource extends RepresentationModel {
 	private final Collection<BookResource> bookResources;
 
 	BookStoreResource(Collection<BookResource> bookResources) {
