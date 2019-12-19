@@ -25,29 +25,29 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import org.springframework.cloud.sample.bookstore.servicebroker.model.ServiceInstance;
 import org.springframework.cloud.sample.bookstore.servicebroker.repository.ServiceInstanceRepository;
+import org.springframework.cloud.sample.bookstore.web.model.BookStore;
 import org.springframework.cloud.sample.bookstore.web.service.BookStoreService;
 import org.springframework.cloud.servicebroker.exception.ServiceInstanceDoesNotExistException;
 import org.springframework.cloud.servicebroker.model.Context;
 import org.springframework.cloud.servicebroker.model.PlatformContext;
 import org.springframework.cloud.servicebroker.model.instance.CreateServiceInstanceRequest;
-import org.springframework.cloud.servicebroker.model.instance.CreateServiceInstanceResponse;
 import org.springframework.cloud.servicebroker.model.instance.DeleteServiceInstanceRequest;
-import org.springframework.cloud.servicebroker.model.instance.DeleteServiceInstanceResponse;
 import org.springframework.cloud.servicebroker.model.instance.GetServiceInstanceRequest;
-import org.springframework.cloud.servicebroker.model.instance.GetServiceInstanceResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BookstoreServiceInstanceServiceTests {
+
 	private static final String SERVICE_INSTANCE_ID = "instance-id";
 
 	@Mock
@@ -68,45 +68,53 @@ public class BookstoreServiceInstanceServiceTests {
 	@Test
 	public void createServiceInstanceWhenInstanceExists() {
 		when(repository.existsById(SERVICE_INSTANCE_ID))
-				.thenReturn(true);
+			.thenReturn(true);
 
 		CreateServiceInstanceRequest request = CreateServiceInstanceRequest.builder()
-				.serviceInstanceId(SERVICE_INSTANCE_ID)
-				.build();
+			.serviceInstanceId(SERVICE_INSTANCE_ID)
+			.build();
 
-		CreateServiceInstanceResponse response = service.createServiceInstance(request);
-
-		assertThat(response.isInstanceExisted()).isTrue();
-		assertThat(response.getDashboardUrl()).isNull();
-		assertThat(response.isAsync()).isFalse();
-		assertThat(response.getOperation()).isNull();
+		StepVerifier.create(service.createServiceInstance(request))
+			.consumeNextWith(response -> {
+				assertThat(response.isInstanceExisted()).isTrue();
+				assertThat(response.getDashboardUrl()).isNull();
+				assertThat(response.isAsync()).isFalse();
+				assertThat(response.getOperation()).isNull();
+			})
+			.expectComplete()
+			.verify();
 
 		verify(repository).existsById(SERVICE_INSTANCE_ID);
 		verifyNoMoreInteractions(repository);
-
 		verifyNoMoreInteractions(store);
 	}
 
 	@Test
 	public void createServiceInstanceWhenInstanceDoesNotExist() {
 		Context context = PlatformContext.builder()
-				.platform("test-platform")
-				.build();
+			.platform("test-platform")
+			.build();
 
 		when(repository.existsById(SERVICE_INSTANCE_ID))
-				.thenReturn(false);
+			.thenReturn(false);
+
+		when(store.createBookStore(SERVICE_INSTANCE_ID))
+			.thenReturn(Mono.just(new BookStore(SERVICE_INSTANCE_ID)));
 
 		CreateServiceInstanceRequest request = CreateServiceInstanceRequest.builder()
-				.serviceInstanceId(SERVICE_INSTANCE_ID)
-				.context(context)
-				.build();
+			.serviceInstanceId(SERVICE_INSTANCE_ID)
+			.context(context)
+			.build();
 
-		CreateServiceInstanceResponse response = service.createServiceInstance(request);
-
-		assertThat(response.isInstanceExisted()).isFalse();
-		assertThat(response.getDashboardUrl()).isNull();
-		assertThat(response.isAsync()).isFalse();
-		assertThat(response.getOperation()).isNull();
+		StepVerifier.create(service.createServiceInstance(request))
+			.consumeNextWith(response -> {
+				assertThat(response.isInstanceExisted()).isFalse();
+				assertThat(response.getDashboardUrl()).isNull();
+				assertThat(response.isAsync()).isFalse();
+				assertThat(response.getOperation()).isNull();
+			})
+			.expectComplete()
+			.verify();
 
 		verify(repository).existsById(SERVICE_INSTANCE_ID);
 		ArgumentCaptor<ServiceInstance> argumentCaptor = ArgumentCaptor.forClass(ServiceInstance.class);
@@ -123,50 +131,61 @@ public class BookstoreServiceInstanceServiceTests {
 	@Test
 	public void getServiceInstanceWhenInstanceExists() {
 		ServiceInstance serviceInstance = new ServiceInstance(SERVICE_INSTANCE_ID, "service-definition-id",
-				"plan-id", new HashMap<>());
+			"plan-id", new HashMap<>());
 
 		when(repository.findById(SERVICE_INSTANCE_ID))
-				.thenReturn(Optional.of(serviceInstance));
+			.thenReturn(Optional.of(serviceInstance));
 
 		GetServiceInstanceRequest request = GetServiceInstanceRequest.builder()
-				.serviceInstanceId(SERVICE_INSTANCE_ID)
-				.build();
+			.serviceInstanceId(SERVICE_INSTANCE_ID)
+			.build();
 
-		GetServiceInstanceResponse response = service.getServiceInstance(request);
-
-		assertThat(response.getServiceDefinitionId()).isEqualTo(serviceInstance.getServiceDefinitionId());
-		assertThat(response.getPlanId()).isEqualTo(serviceInstance.getPlanId());
-		assertThat(response.getParameters()).isEqualTo(serviceInstance.getParameters());
+		StepVerifier.create(service.getServiceInstance(request))
+			.consumeNextWith(response -> {
+				assertThat(response.getServiceDefinitionId()).isEqualTo(serviceInstance.getServiceDefinitionId());
+				assertThat(response.getPlanId()).isEqualTo(serviceInstance.getPlanId());
+				assertThat(response.getParameters()).isEqualTo(serviceInstance.getParameters());
+			})
+			.expectComplete()
+			.verify();
 
 		verify(repository).findById(SERVICE_INSTANCE_ID);
 		verifyNoMoreInteractions(repository);
 	}
 
-	@Test(expected = ServiceInstanceDoesNotExistException.class)
+	@Test
 	public void getServiceInstanceWhenInstanceDoesNotExists() {
 		when(repository.findById(SERVICE_INSTANCE_ID))
-				.thenReturn(Optional.empty());
+			.thenReturn(Optional.empty());
 
 		GetServiceInstanceRequest request = GetServiceInstanceRequest.builder()
-				.serviceInstanceId(SERVICE_INSTANCE_ID)
-				.build();
+			.serviceInstanceId(SERVICE_INSTANCE_ID)
+			.build();
 
-		service.getServiceInstance(request);
+		StepVerifier.create(service.getServiceInstance(request))
+			.expectErrorMatches(e -> e instanceof ServiceInstanceDoesNotExistException)
+			.verify();
 	}
 
 	@Test
 	public void deleteServiceInstanceWhenInstanceExists() {
 		when(repository.existsById(SERVICE_INSTANCE_ID))
-				.thenReturn(true);
+			.thenReturn(true);
+
+		when(store.deleteBookStore(SERVICE_INSTANCE_ID))
+			.thenReturn(Mono.empty());
 
 		DeleteServiceInstanceRequest request = DeleteServiceInstanceRequest.builder()
-				.serviceInstanceId(SERVICE_INSTANCE_ID)
-				.build();
+			.serviceInstanceId(SERVICE_INSTANCE_ID)
+			.build();
 
-		DeleteServiceInstanceResponse response = service.deleteServiceInstance(request);
-
-		assertThat(response.isAsync()).isFalse();
-		assertThat(response.getOperation()).isNull();
+		StepVerifier.create(service.deleteServiceInstance(request))
+			.consumeNextWith(response -> {
+				assertThat(response.isAsync()).isFalse();
+				assertThat(response.getOperation()).isNull();
+			})
+			.expectComplete()
+			.verify();
 
 		verify(repository).existsById(SERVICE_INSTANCE_ID);
 		verify(repository).deleteById(SERVICE_INSTANCE_ID);
@@ -176,15 +195,18 @@ public class BookstoreServiceInstanceServiceTests {
 		verifyNoMoreInteractions(store);
 	}
 
-	@Test(expected = ServiceInstanceDoesNotExistException.class)
+	@Test
 	public void deleteServiceInstanceWhenInstanceDoesNotExist() {
 		when(repository.existsById(SERVICE_INSTANCE_ID))
-				.thenReturn(false);
+			.thenReturn(false);
 
 		DeleteServiceInstanceRequest request = DeleteServiceInstanceRequest.builder()
-				.serviceInstanceId(SERVICE_INSTANCE_ID)
-				.build();
+			.serviceInstanceId(SERVICE_INSTANCE_ID)
+			.build();
 
-		service.deleteServiceInstance(request);
+		StepVerifier.create(service.deleteServiceInstance(request))
+			.expectErrorMatches(e -> e instanceof ServiceInstanceDoesNotExistException)
+			.verify();
 	}
+
 }

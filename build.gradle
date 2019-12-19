@@ -47,14 +47,14 @@ repositories {
 }
 
 dependencies {
-	compile('org.springframework.boot:spring-boot-starter-web')
+	compile('org.springframework.boot:spring-boot-starter-webflux')
 	compile('org.springframework.boot:spring-boot-starter-actuator')
 	compile('org.springframework.boot:spring-boot-starter-security')
 	compile('org.springframework.hateoas:spring-hateoas:1.0.2.RELEASE')
 
 	runtime('org.springframework.boot:spring-boot-devtools')
 
-	compile('org.springframework.cloud:spring-cloud-starter-open-service-broker-webmvc:2.0.1.RELEASE')
+	compile('org.springframework.cloud:spring-cloud-starter-open-service-broker:3.1.0.RELEASE')
 
 	compile('org.springframework.boot:spring-boot-starter-data-jpa')
 	runtime('org.hsqldb:hsqldb')
@@ -62,6 +62,7 @@ dependencies {
 
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 	testCompile('org.springframework.security:spring-security-test')
+	testCompile('io.projectreactor:reactor-test')
 }
 
 if (!project.hasProperty("dockerGroup")) {

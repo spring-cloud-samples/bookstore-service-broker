@@ -16,20 +16,24 @@
 
 package org.springframework.cloud.sample.bookstore.web.security;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
+
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+
 import org.springframework.cloud.sample.bookstore.web.model.User;
 import org.springframework.cloud.sample.bookstore.web.repository.UserRepository;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.stream.Collectors;
-
 @Service
-public class RepositoryUserDetailsService implements UserDetailsService {
+public class RepositoryUserDetailsService implements ReactiveUserDetailsService {
+
 	private final UserRepository userRepository;
 
 	public RepositoryUserDetailsService(UserRepository userRepository) {
@@ -37,17 +41,15 @@ public class RepositoryUserDetailsService implements UserDetailsService {
 	}
 
 	@Override
-	public UserDetails loadUserByUsername(String username) {
-		User user = userRepository.findByUsername(username);
-
-		if (user == null) {
-			throw new UsernameNotFoundException(username);
-		}
-
-		return new CustomUserDetails(user);
+	public Mono<UserDetails> findByUsername(String username) {
+		return Mono.fromCallable(() -> userRepository.findByUsername(username))
+			.subscribeOn(Schedulers.boundedElastic())
+			.switchIfEmpty(Mono.error(new UsernameNotFoundException(username)))
+			.flatMap(user -> Mono.just(new CustomUserDetails(user)));
 	}
 
-	private class CustomUserDetails implements UserDetails {
+	private static class CustomUserDetails implements UserDetails {
+
 		private final User delegate;
 
 		CustomUserDetails(User user) {
@@ -67,9 +69,9 @@ public class RepositoryUserDetailsService implements UserDetailsService {
 		@Override
 		public Collection<? extends GrantedAuthority> getAuthorities() {
 			return delegate.getAuthorities()
-					.stream()
-					.map(SimpleGrantedAuthority::new)
-					.collect(Collectors.toList());
+				.stream()
+				.map(SimpleGrantedAuthority::new)
+				.collect(Collectors.toList());
 		}
 
 		@Override
@@ -95,10 +97,12 @@ public class RepositoryUserDetailsService implements UserDetailsService {
 		@Override
 		public String toString() {
 			return "CustomUserDetails{" +
-					"username=" + getUsername() +
-					", password=" + getPassword() +
-					", authorities=" + getAuthorities() +
-					'}';
+				"username=" + getUsername() +
+				", password=" + getPassword() +
+				", authorities=" + getAuthorities() +
+				'}';
 		}
+
 	}
+
 }

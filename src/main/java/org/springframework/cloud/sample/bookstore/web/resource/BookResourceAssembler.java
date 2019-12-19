@@ -16,30 +16,32 @@
 
 package org.springframework.cloud.sample.bookstore.web.resource;
 
-import org.springframework.cloud.sample.bookstore.web.controller.BookController;
-import org.springframework.cloud.sample.bookstore.web.model.Book;
-
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import org.springframework.cloud.sample.bookstore.web.controller.BookController;
+import org.springframework.cloud.sample.bookstore.web.model.Book;
+
+import static org.springframework.hateoas.server.reactive.WebFluxLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.reactive.WebFluxLinkBuilder.methodOn;
 
 public class BookResourceAssembler {
-	public BookResource toModel(Book book, String bookStoreId) {
-		BookResource bookResource = new BookResource(book);
-		bookResource.add(
-				linkTo(BookController.class, bookStoreId)
-						.slash(book.getId())
-						.withSelfRel());
 
-		return bookResource;
+	public Mono<BookResource> toModel(Book book, String bookStoreId) {
+		return Mono.just(new BookResource(book))
+			.flatMap(bookResource -> linkTo(methodOn(BookController.class).getBook(bookStoreId, book.getId())).withSelfRel().toMono()
+				.flatMap(link -> Mono.just(bookResource.add(link)))
+				.thenReturn(bookResource));
 	}
 
-	public List<BookResource> toCollectionModel(Collection<Book> books, String bookStoreId) {
-		return books.stream()
-				.map(book -> toModel(book, bookStoreId))
-				.collect(Collectors.toCollection(() -> new ArrayList<>(books.size())));
+	public Mono<List<BookResource>> toCollectionModel(Collection<Book> books, String bookStoreId) {
+		return Flux.fromIterable(books)
+			.flatMap(book -> toModel(book, bookStoreId))
+			.collect(Collectors.toList());
 	}
+
 }

@@ -16,66 +16,84 @@
 
 package org.springframework.cloud.sample.bookstore.web.service;
 
+import java.util.UUID;
+
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+
 import org.springframework.cloud.sample.bookstore.web.model.Book;
 import org.springframework.cloud.sample.bookstore.web.model.BookStore;
 import org.springframework.cloud.sample.bookstore.web.repository.BookStoreRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-import java.util.UUID;
-
 @Service
 public class BookStoreService {
-	private BookStoreRepository repository;
+
+	private final BookStoreRepository repository;
 
 	public BookStoreService(BookStoreRepository bookStoreRepository) {
 		this.repository = bookStoreRepository;
 	}
 
-	public BookStore createBookStore(String storeId) {
-		BookStore bookStore = new BookStore(storeId);
-
-		return repository.save(bookStore);
+	public Mono<BookStore> createBookStore(String storeId) {
+		return Mono.fromCallable(() -> repository.save(new BookStore(storeId)))
+			.publishOn(Schedulers.boundedElastic());
 	}
 
-	public BookStore createBookStore() {
-		return createBookStore(generateRandomId());
+	public Mono<BookStore> createBookStore() {
+		return generateRandomId()
+			.flatMap(this::createBookStore);
 	}
 
-	public BookStore getBookStore(String storeId) {
-		Optional<BookStore> store = repository.findById(storeId);
-		return store.orElseThrow(() -> new IllegalArgumentException("Invalid book store ID " + storeId + "."));
+	public Mono<BookStore> getBookStore(String storeId) {
+		return Mono.fromCallable(() -> repository.findById(storeId))
+			.publishOn(Schedulers.boundedElastic())
+			.flatMap(Mono::justOrEmpty)
+			.switchIfEmpty(Mono.error(new IllegalArgumentException("Invalid book store ID " + storeId + ".")));
 	}
 
-	public void deleteBookStore(String id) {
-		repository.deleteById(id);
+	public Mono<Void> deleteBookStore(String id) {
+		return Mono.fromCallable(() -> {
+			repository.deleteById(id);
+			return null;
+		})
+			.publishOn(Schedulers.boundedElastic())
+			.then();
 	}
 
-	public Book putBookInStore(String storeId, Book book) {
-		String bookId = generateRandomId();
-		Book bookWithId = new Book(bookId, book);
-
-		BookStore store = getBookStore(storeId);
-		store.addBook(bookWithId);
-
-		repository.save(store);
-
-		return bookWithId;
+	public Mono<Book> putBookInStore(String storeId, Book book) {
+		return generateRandomId()
+			.flatMap(bookId -> Mono.just(new Book(bookId, book)))
+			.flatMap(bookWithId -> getBookStore(storeId)
+				.flatMap(store -> Mono.fromCallable(() -> {
+					store.addBook(bookWithId);
+					repository.save(store);
+					return bookWithId;
+				})
+					.publishOn(Schedulers.boundedElastic())));
 	}
 
-	public Book getBookFromStore(String storeId, String bookId) {
-		BookStore store = getBookStore(storeId);
-		return store.getBookById(bookId)
-				.orElseThrow(() -> new IllegalArgumentException("Invalid book ID " + storeId + ":" + bookId + "."));
+	public Mono<Book> getBookFromStore(String storeId, String bookId) {
+		return getBookStore(storeId)
+			.flatMap(store -> Mono.justOrEmpty(store.getBookById(bookId)))
+			.switchIfEmpty(Mono.error(new IllegalArgumentException("Invalid book ID " + storeId + ":" + bookId + ".")));
 	}
 
-	public Book removeBookFromStore(String storeId, String bookId) {
-		BookStore store = getBookStore(storeId);
-		return store.remove(bookId)
-				.orElseThrow(() -> new IllegalArgumentException("Invalid book ID " + storeId + ":" + bookId + "."));
+	public Mono<Book> removeBookFromStore(String storeId, String bookId) {
+		return getBookStore(storeId)
+			.flatMap(store -> Mono.justOrEmpty(store.remove(bookId))
+				.switchIfEmpty(
+					Mono.error(new IllegalArgumentException("Invalid book ID " + storeId + ":" + bookId + ".")))
+				.flatMap(book -> Mono.fromCallable(() -> {
+					repository.save(store);
+					return book;
+				})
+					.publishOn(Schedulers.boundedElastic())));
 	}
 
-	private String generateRandomId() {
-		return UUID.randomUUID().toString();
+	private Mono<String> generateRandomId() {
+		return Mono.fromCallable(() -> UUID.randomUUID().toString())
+			.publishOn(Schedulers.boundedElastic());
 	}
+
 }

@@ -16,36 +16,36 @@
 
 package org.springframework.cloud.sample.bookstore.config;
 
-import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
+import org.springframework.boot.actuate.autoconfigure.security.reactive.EndpointRequest;
 import org.springframework.cloud.sample.bookstore.web.security.SecurityAuthorities;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.server.SecurityWebFilterChain;
 
 @Configuration
-@EnableWebSecurity
-public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
-		// @formatter:off
-		http
+@EnableWebFluxSecurity
+public class SecurityConfiguration {
+
+	@Bean
+	public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
+		return http
 			.csrf().disable()
-			.authorizeRequests()
-				.antMatchers("/bookstores/**").authenticated()
-				.antMatchers("/v2/**").hasAuthority(SecurityAuthorities.ADMIN)
-				.requestMatchers(EndpointRequest.to("info", "health")).permitAll()
-				.requestMatchers(EndpointRequest.toAnyEndpoint()).hasAuthority(SecurityAuthorities.ADMIN)
-				.and()
-			.httpBasic();
-		// @formatter:on
+			.httpBasic()
+			.and().authorizeExchange()
+			.pathMatchers("/bookstores/**").authenticated()
+			.pathMatchers("/v2/**").hasAuthority(SecurityAuthorities.ADMIN)
+			.matchers(EndpointRequest.to("info", "health")).permitAll()
+			.matchers(EndpointRequest.toAnyEndpoint()).hasAuthority(SecurityAuthorities.ADMIN)
+			.and().build();
 	}
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
+
 }

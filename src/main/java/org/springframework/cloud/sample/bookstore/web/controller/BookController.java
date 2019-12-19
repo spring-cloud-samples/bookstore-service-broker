@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.sample.bookstore.web.controller;
 
+import reactor.core.publisher.Mono;
+
 import org.springframework.cloud.sample.bookstore.web.model.Book;
 import org.springframework.cloud.sample.bookstore.web.resource.BookResource;
 import org.springframework.cloud.sample.bookstore.web.resource.BookResourceAssembler;
@@ -34,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/bookstores/{bookStoreId}/books")
 public class BookController extends BaseController {
+
 	private final BookStoreService bookStoreService;
 
 	public BookController(BookStoreService bookStoreService) {
@@ -41,28 +44,31 @@ public class BookController extends BaseController {
 	}
 
 	@PutMapping
-	@PreAuthorize("hasRole('ROLE_FULL_ACCESS') and hasPermission(#bookStoreId, '')")
-	public ResponseEntity<BookResource> addBook(@PathVariable String bookStoreId, @RequestBody Book book) {
-		Book savedBook = bookStoreService.putBookInStore(bookStoreId, book);
-		return createResponse(bookStoreId, savedBook, HttpStatus.CREATED);
+	@PreAuthorize("hasRole('ROLE_FULL_ACCESS') and @bookStoreIdEvaluator.canAccessBookstore(authentication, #bookStoreId)")
+	public Mono<ResponseEntity<BookResource>> addBook(@PathVariable String bookStoreId, @RequestBody Book book) {
+		return bookStoreService.putBookInStore(bookStoreId, book)
+			.flatMap(savedBook -> createResponse(bookStoreId, savedBook, HttpStatus.CREATED));
 	}
 
 	@GetMapping("/{bookId}")
-	@PreAuthorize("hasAnyRole('ROLE_FULL_ACCESS','ROLE_READ_ONLY') and hasPermission(#bookStoreId, '')")
-	public ResponseEntity<BookResource> getBook(@PathVariable String bookStoreId, @PathVariable String bookId) {
-		Book book = bookStoreService.getBookFromStore(bookStoreId, bookId);
-		return createResponse(bookStoreId, book, HttpStatus.OK);
+	@PreAuthorize("hasAnyRole('ROLE_FULL_ACCESS','ROLE_READ_ONLY') and @bookStoreIdEvaluator.canAccessBookstore" +
+		"(authentication, #bookStoreId)")
+	public Mono<ResponseEntity<BookResource>> getBook(@PathVariable String bookStoreId, @PathVariable String bookId) {
+		return bookStoreService.getBookFromStore(bookStoreId, bookId)
+			.flatMap(book -> createResponse(bookStoreId, book, HttpStatus.OK));
 	}
 
 	@DeleteMapping("/{bookId}")
-	@PreAuthorize("hasRole('ROLE_FULL_ACCESS') and hasPermission(#bookStoreId, '')")
-	public ResponseEntity<BookResource> deleteBook(@PathVariable String bookStoreId, @PathVariable String bookId) {
-		Book book = bookStoreService.removeBookFromStore(bookStoreId, bookId);
-		return createResponse(bookStoreId, book, HttpStatus.OK);
+	@PreAuthorize("hasRole('ROLE_FULL_ACCESS') and @bookStoreIdEvaluator.canAccessBookstore(authentication, #bookStoreId)")
+	public Mono<ResponseEntity<BookResource>> deleteBook(@PathVariable String bookStoreId,
+		@PathVariable String bookId) {
+		return bookStoreService.removeBookFromStore(bookStoreId, bookId)
+			.flatMap(book -> createResponse(bookStoreId, book, HttpStatus.OK));
 	}
 
-	private ResponseEntity<BookResource> createResponse(String bookStoreId, Book book, HttpStatus httpStatus) {
-		BookResource bookResource = new BookResourceAssembler().toModel(book, bookStoreId);
-		return new ResponseEntity<>(bookResource, httpStatus);
+	private Mono<ResponseEntity<BookResource>> createResponse(String bookStoreId, Book book, HttpStatus httpStatus) {
+		return new BookResourceAssembler().toModel(book, bookStoreId)
+			.flatMap(bookResource -> Mono.just(new ResponseEntity<>(bookResource, httpStatus)));
 	}
+
 }

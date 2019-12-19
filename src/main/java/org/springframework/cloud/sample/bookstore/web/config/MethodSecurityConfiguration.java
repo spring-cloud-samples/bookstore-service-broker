@@ -16,17 +16,18 @@
 
 package org.springframework.cloud.sample.bookstore.web.config;
 
-import org.springframework.cloud.sample.bookstore.web.security.BookStorePermissionEvaluator;
+import org.springframework.cloud.sample.bookstore.web.security.BookStoreIdEvaluator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-
+import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 
 @Configuration
-@EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
+@EnableReactiveMethodSecurity
 public class MethodSecurityConfiguration {
+
 	@Bean
-	BookStorePermissionEvaluator permissionEvaluator() {
-		return new BookStorePermissionEvaluator();
+	public BookStoreIdEvaluator bookStoreIdEvaluator() {
+		return new BookStoreIdEvaluator();
 	}
+
 }
