@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 import org.springframework.cloud.sample.bookstore.web.model.User;
 import org.springframework.cloud.sample.bookstore.web.repository.UserRepository;
@@ -42,8 +41,7 @@ public class RepositoryUserDetailsService implements ReactiveUserDetailsService 
 
 	@Override
 	public Mono<UserDetails> findByUsername(String username) {
-		return Mono.fromCallable(() -> userRepository.findByUsername(username))
-			.subscribeOn(Schedulers.boundedElastic())
+		return userRepository.findByUsername(username)
 			.switchIfEmpty(Mono.error(new UsernameNotFoundException(username)))
 			.flatMap(user -> Mono.just(new CustomUserDetails(user)));
 	}

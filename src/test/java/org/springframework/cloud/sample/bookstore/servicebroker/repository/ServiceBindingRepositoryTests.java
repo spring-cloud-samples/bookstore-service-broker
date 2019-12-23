@@ -16,21 +16,23 @@
 
 package org.springframework.cloud.sample.bookstore.servicebroker.repository;
 
+import java.util.HashMap;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import reactor.test.StepVerifier;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.cloud.sample.bookstore.servicebroker.model.ServiceBinding;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.HashMap;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
-@DataJpaTest
+@DataMongoTest
 public class ServiceBindingRepositoryTests {
+
 	@Autowired
 	private ServiceBindingRepository repository;
 
@@ -49,20 +51,22 @@ public class ServiceBindingRepositoryTests {
 	public void save() {
 		ServiceBinding binding = new ServiceBinding("binding-id", parameters, credentials);
 
-		ServiceBinding savedBinding = repository.save(binding);
-
-		assertThat(savedBinding).isEqualToComparingFieldByField(binding);
+		StepVerifier.create(repository.save(binding))
+			.assertNext(savedBinding -> assertThat(savedBinding).isEqualToComparingFieldByField(binding))
+			.verifyComplete();
 	}
 
 	@Test
 	public void retrieve() {
 		ServiceBinding binding = new ServiceBinding("binding-id", parameters, credentials);
 
-		repository.save(binding);
+		StepVerifier.create(repository.save(binding))
+			.expectNext(binding)
+			.verifyComplete();
 
-		Optional<ServiceBinding> foundBinding = repository.findById("binding-id");
-
-		assertThat(foundBinding).isPresent();
-		assertThat(foundBinding.orElse(null)).isEqualToComparingFieldByField(binding);
+		StepVerifier.create(repository.findById("binding-id"))
+			.assertNext(foundBinding -> assertThat(foundBinding).isEqualToComparingFieldByField(binding))
+			.verifyComplete();
 	}
+
 }

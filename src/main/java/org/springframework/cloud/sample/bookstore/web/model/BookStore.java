@@ -20,26 +20,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.Table;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Entity
-@Table(name = "bookstores")
+@Document
 public class BookStore {
 
 	@Id
-	@Column(length = 50)
-	private final String id;
+	private String id;
 
-	@ElementCollection(fetch = FetchType.EAGER)
-	@CollectionTable(name = "books", joinColumns = @JoinColumn(name = "bookstore_id"))
-	private final List<Book> books = new ArrayList<>();
+	private List<Book> books = new ArrayList<>();
 
 	@SuppressWarnings("unused")
 	private BookStore() {
@@ -64,8 +54,8 @@ public class BookStore {
 
 	public Optional<Book> getBookById(String bookId) {
 		return books.stream()
-				.filter(book -> book.getId().equals(bookId))
-				.findFirst();
+			.filter(book -> book.getId().equals(bookId))
+			.findFirst();
 	}
 
 	public Optional<Book> remove(String bookId) {

@@ -21,10 +21,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.sample.bookstore.ServiceBrokerApplication;
 import org.springframework.cloud.sample.bookstore.web.model.Book;
 import org.springframework.cloud.sample.bookstore.web.model.BookStore;
 import org.springframework.cloud.sample.bookstore.web.service.BookStoreService;
@@ -41,7 +39,6 @@ import static org.springframework.cloud.sample.bookstore.web.security.SecurityAu
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureWebTestClient
-@AutoConfigureTestDatabase
 public class BookStoreSecurityIntegrationTests {
 
 	private static final String BOOKSTORE_INSTANCE_ID = "1111-1111-1111-1111";

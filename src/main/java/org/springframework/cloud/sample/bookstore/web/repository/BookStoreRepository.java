@@ -17,7 +17,7 @@
 package org.springframework.cloud.sample.bookstore.web.repository;
 
 import org.springframework.cloud.sample.bookstore.web.model.BookStore;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 
-public interface BookStoreRepository extends JpaRepository<BookStore, String> {
+public interface BookStoreRepository extends ReactiveCrudRepository<BookStore, String> {
 }

@@ -18,10 +18,8 @@ package org.springframework.cloud.sample.bookstore.servicebroker.service;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 import org.springframework.cloud.sample.bookstore.servicebroker.model.ServiceBinding;
 import org.springframework.cloud.sample.bookstore.servicebroker.repository.ServiceBindingRepository;
@@ -70,25 +68,32 @@ public class BookStoreServiceInstanceBindingService implements ServiceInstanceBi
 	public Mono<CreateServiceInstanceBindingResponse> createServiceInstanceBinding(
 		CreateServiceInstanceBindingRequest request) {
 		return Mono.just(CreateServiceInstanceAppBindingResponse.builder())
-			.flatMap(responseBuilder -> findBindingById(request.getBindingId())
-				.flatMap(optionalBinding -> optionalBinding
-					.map(serviceBinding -> Mono.just(responseBuilder
-						.bindingExisted(true)
-						.credentials(serviceBinding.getCredentials())
-						.build()))
-					.orElseGet(() -> createUser(request)
-						.flatMap(user -> buildCredentials(request.getServiceInstanceId(), user))
-						.flatMap(credentials -> saveBinding(request, credentials)
-							.thenReturn(responseBuilder
-								.bindingExisted(false)
-								.credentials(credentials)
-								.build())))));
+			.flatMap(responseBuilder -> bindingRepository.existsById(request.getBindingId())
+				.flatMap(exists -> {
+					if (exists) {
+						return bindingRepository.findById(request.getBindingId())
+							.flatMap(serviceBinding -> Mono.just(responseBuilder
+								.bindingExisted(true)
+								.credentials(serviceBinding.getCredentials())
+								.build()));
+					}
+					else {
+						return createUser(request)
+							.flatMap(user -> buildCredentials(request.getServiceInstanceId(), user))
+							.flatMap(credentials -> bindingRepository.save(new ServiceBinding(request.getBindingId(),
+								request.getParameters(), credentials))
+								.thenReturn(responseBuilder
+									.bindingExisted(false)
+									.credentials(credentials)
+									.build()));
+					}
+				}));
 	}
 
 	@Override
 	public Mono<GetServiceInstanceBindingResponse> getServiceInstanceBinding(GetServiceInstanceBindingRequest request) {
 		return Mono.just(request.getBindingId())
-			.flatMap(bindingId -> findBindingById(bindingId)
+			.flatMap(bindingId -> bindingRepository.findById(bindingId)
 				.flatMap(Mono::justOrEmpty)
 				.switchIfEmpty(Mono.error(new ServiceInstanceBindingDoesNotExistException(bindingId)))
 				.flatMap(serviceBinding -> Mono.just(GetServiceInstanceAppBindingResponse.builder()
@@ -101,10 +106,10 @@ public class BookStoreServiceInstanceBindingService implements ServiceInstanceBi
 	public Mono<DeleteServiceInstanceBindingResponse> deleteServiceInstanceBinding(
 		DeleteServiceInstanceBindingRequest request) {
 		return Mono.just(request.getBindingId())
-			.flatMap(bindingId -> bindingExistsById(bindingId)
+			.flatMap(bindingId -> bindingRepository.existsById(bindingId)
 				.flatMap(exists -> {
 					if (exists) {
-						return deleteBindingById(bindingId)
+						return bindingRepository.deleteById(bindingId)
 							.then(userService.deleteUser(bindingId))
 							.thenReturn(DeleteServiceInstanceBindingResponse.builder().build());
 					}
@@ -112,33 +117,6 @@ public class BookStoreServiceInstanceBindingService implements ServiceInstanceBi
 						return Mono.error(new ServiceInstanceBindingDoesNotExistException(bindingId));
 					}
 				}));
-	}
-
-	private Mono<Optional<ServiceBinding>> findBindingById(String bindingId) {
-		return Mono.fromCallable(() -> bindingRepository.findById(bindingId))
-			.subscribeOn(Schedulers.boundedElastic());
-	}
-
-	private Mono<Boolean> bindingExistsById(String bindingId) {
-		return Mono.fromCallable(() -> bindingRepository.existsById(bindingId))
-			.subscribeOn(Schedulers.boundedElastic());
-	}
-
-	private Mono<Void> saveBinding(CreateServiceInstanceBindingRequest request, Map<String, Object> credentials) {
-		return Mono.fromCallable(() -> bindingRepository.save(new ServiceBinding(request.getBindingId(),
-			request.getParameters(), credentials)))
-			.subscribeOn(Schedulers.boundedElastic())
-			.then();
-	}
-
-	private Mono<Void> deleteBindingById(String bindingId) {
-		return Mono.justOrEmpty(bindingId)
-			.flatMap(nonEmptyBindingId -> Mono.fromCallable(() -> {
-				bindingRepository.deleteById(bindingId);
-				return null;
-			})
-				.subscribeOn(Schedulers.boundedElastic()))
-			.then();
 	}
 
 	private Mono<User> createUser(CreateServiceInstanceBindingRequest request) {

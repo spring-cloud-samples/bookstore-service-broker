@@ -16,23 +16,20 @@
 
 package org.springframework.cloud.sample.bookstore.web.model;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Embeddable
+@Document
 public class Book {
 
-	@Column(length = 50)
-	private final String id;
+	@Id
+	private String id;
 
-	@Column(length = 20)
-	private final String isbn;
+	private String isbn;
 
-	@Column(length = 100)
-	private final String title;
+	private String title;
 
-	@Column(length = 100)
-	private final String author;
+	private String author;
 
 	@SuppressWarnings("unused")
 	private Book() {

@@ -46,42 +46,23 @@ public class UserService {
 	}
 
 	public void initializeUsers() {
-		if (userRepository.count() == 0) {
-			userRepository.save(adminUser());
-		}
+		userRepository.count().subscribe(c -> {
+			if (c == 0) {
+				userRepository.save(adminUser());
+			}
+		});
 	}
 
 	public Mono<User> createUser(String username, String... authorities) {
 		return generatePassword()
 			.flatMap(password -> Mono.fromCallable(() -> passwordEncoder.encode(password))
-				.flatMap(encodedPassword -> saveUser(new User(username, encodedPassword, authorities)))
+				.flatMap(encodedPassword -> userRepository.save(new User(username, encodedPassword, authorities)))
 				.thenReturn(new User(username, password, authorities)));
 	}
 
 	public Mono<Void> deleteUser(String username) {
-		return findByUsername(username)
-			.flatMap(user -> deleteById(user.getId()));
-	}
-
-	private Mono<User> saveUser(User user) {
-		return Mono.fromCallable(() -> userRepository.save(user))
-			.subscribeOn(Schedulers.boundedElastic());
-	}
-
-	private Mono<User> findByUsername(String username) {
-		return Mono.justOrEmpty(username)
-			.flatMap(nonEmptyUsername -> Mono.fromCallable(() -> userRepository.findByUsername(nonEmptyUsername))
-				.subscribeOn(Schedulers.boundedElastic()));
-	}
-
-	private Mono<Void> deleteById(Long userId) {
-		return Mono.justOrEmpty(userId)
-			.flatMap(nonEmptyUserId -> Mono.fromCallable(() -> {
-				userRepository.deleteById(nonEmptyUserId);
-				return null;
-			})
-				.subscribeOn(Schedulers.boundedElastic()))
-			.then();
+		return userRepository.findByUsername(username)
+			.flatMap(user -> userRepository.deleteById(user.getId()));
 	}
 
 	private User adminUser() {
@@ -95,10 +76,10 @@ public class UserService {
 				for (int i = 0; i < PASSWORD_LENGTH; i++) {
 					sb.append(PASSWORD_CHARS.charAt(RANDOM.nextInt(PASSWORD_CHARS.length())));
 				}
-				return null;
+				return sb;
 			})
-				.subscribeOn(Schedulers.boundedElastic())
-				.thenReturn(sb.toString()));
+				.subscribeOn(Schedulers.boundedElastic()))
+			.flatMap(sb -> Mono.just(sb.toString()));
 	}
 
 }

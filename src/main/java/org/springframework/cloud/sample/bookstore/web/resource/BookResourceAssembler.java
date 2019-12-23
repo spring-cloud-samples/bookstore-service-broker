@@ -33,9 +33,11 @@ public class BookResourceAssembler {
 
 	public Mono<BookResource> toModel(Book book, String bookStoreId) {
 		return Mono.just(new BookResource(book))
-			.flatMap(bookResource -> linkTo(methodOn(BookController.class).getBook(bookStoreId, book.getId())).withSelfRel().toMono()
-				.flatMap(link -> Mono.just(bookResource.add(link)))
-				.thenReturn(bookResource));
+			.flatMap(
+				bookResource -> linkTo(methodOn(BookController.class).getBook(bookStoreId, book.getId())).withSelfRel()
+					.toMono()
+					.flatMap(link -> Mono.just(bookResource.add(link)))
+					.thenReturn(bookResource));
 	}
 
 	public Mono<List<BookResource>> toCollectionModel(Collection<Book> books, String bookStoreId) {

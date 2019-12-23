@@ -16,37 +16,20 @@
 
 package org.springframework.cloud.sample.bookstore.servicebroker.model;
 
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.MapKeyColumn;
-import javax.persistence.Table;
 import java.util.Map;
 
-@Entity
-@Table(name = "service_bindings")
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document
 public class ServiceBinding {
+
 	@Id
-	@Column(length = 50)
-	private final String bindingId;
+	private String bindingId;
 
-	@ElementCollection
-	@MapKeyColumn(name = "parameter_name", length = 100)
-	@Column(name = "parameter_value")
-	@CollectionTable(name = "service_binding_parameters", joinColumns = @JoinColumn(name = "binding_id"))
-	@Convert(converter = ObjectToStringConverter.class, attributeName = "value")
-	private final Map<String, Object> parameters;
+	private Map<String, Object> parameters;
 
-	@ElementCollection
-	@MapKeyColumn(name = "credential_name", length = 100)
-	@Column(name = "credential_value")
-	@CollectionTable(name = "service_binding_credentials", joinColumns = @JoinColumn(name = "binding_id"))
-	@Convert(converter = ObjectToStringConverter.class, attributeName = "value")
-	private final Map<String, Object> credentials;
+	private Map<String, Object> credentials;
 
 	@SuppressWarnings("unused")
 	private ServiceBinding() {
@@ -72,4 +55,5 @@ public class ServiceBinding {
 	public Map<String, Object> getParameters() {
 		return parameters;
 	}
+
 }

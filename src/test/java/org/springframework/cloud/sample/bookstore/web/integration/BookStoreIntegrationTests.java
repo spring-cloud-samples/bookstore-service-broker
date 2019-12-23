@@ -25,8 +25,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.cloud.sample.bookstore.web.controller.BookController;
 import org.springframework.cloud.sample.bookstore.web.controller.BookStoreController;
 import org.springframework.cloud.sample.bookstore.web.model.Book;
@@ -41,8 +40,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
-@AutoConfigureTestDatabase
+@DataMongoTest
 public class BookStoreIntegrationTests {
 
 	private WebTestClient client;
@@ -50,14 +48,13 @@ public class BookStoreIntegrationTests {
 	@Autowired
 	private BookStoreRepository repository;
 
-	@Autowired
 	private BookStoreService service;
 
 	private String bookStoreId;
 
 	@Before
 	public void setUp() {
-		BookStoreService service = new BookStoreService(repository);
+		this.service = new BookStoreService(repository);
 
 		BookStoreController bookStoreController = new BookStoreController(service);
 		BookController bookController = new BookController(service);

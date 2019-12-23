@@ -16,9 +16,13 @@
 
 package org.springframework.cloud.sample.bookstore.web.repository;
 
-import org.springframework.cloud.sample.bookstore.web.model.User;
-import org.springframework.data.jpa.repository.JpaRepository;
+import reactor.core.publisher.Mono;
 
-public interface UserRepository extends JpaRepository<User, Long> {
-	User findByUsername(String username);
+import org.springframework.cloud.sample.bookstore.web.model.User;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+
+public interface UserRepository extends ReactiveCrudRepository<User, Long> {
+
+	Mono<User> findByUsername(String username);
+
 }

@@ -17,7 +17,6 @@
 package org.springframework.cloud.sample.bookstore.servicebroker.service;
 
 import java.util.HashMap;
-import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -40,6 +39,7 @@ import org.springframework.cloud.servicebroker.model.instance.DeleteServiceInsta
 import org.springframework.cloud.servicebroker.model.instance.GetServiceInstanceRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -68,7 +68,7 @@ public class BookstoreServiceInstanceServiceTests {
 	@Test
 	public void createServiceInstanceWhenInstanceExists() {
 		when(repository.existsById(SERVICE_INSTANCE_ID))
-			.thenReturn(true);
+			.thenReturn(Mono.just(true));
 
 		CreateServiceInstanceRequest request = CreateServiceInstanceRequest.builder()
 			.serviceInstanceId(SERVICE_INSTANCE_ID)
@@ -81,8 +81,7 @@ public class BookstoreServiceInstanceServiceTests {
 				assertThat(response.isAsync()).isFalse();
 				assertThat(response.getOperation()).isNull();
 			})
-			.expectComplete()
-			.verify();
+			.verifyComplete();
 
 		verify(repository).existsById(SERVICE_INSTANCE_ID);
 		verifyNoMoreInteractions(repository);
@@ -96,10 +95,15 @@ public class BookstoreServiceInstanceServiceTests {
 			.build();
 
 		when(repository.existsById(SERVICE_INSTANCE_ID))
-			.thenReturn(false);
+			.thenReturn(Mono.just(false));
 
 		when(store.createBookStore(SERVICE_INSTANCE_ID))
 			.thenReturn(Mono.just(new BookStore(SERVICE_INSTANCE_ID)));
+
+		ServiceInstance serviceInstance = new ServiceInstance(SERVICE_INSTANCE_ID, null,
+			null, new HashMap<>());
+		when(repository.save(refEq(serviceInstance)))
+			.thenReturn(Mono.just(serviceInstance));
 
 		CreateServiceInstanceRequest request = CreateServiceInstanceRequest.builder()
 			.serviceInstanceId(SERVICE_INSTANCE_ID)
@@ -113,8 +117,7 @@ public class BookstoreServiceInstanceServiceTests {
 				assertThat(response.isAsync()).isFalse();
 				assertThat(response.getOperation()).isNull();
 			})
-			.expectComplete()
-			.verify();
+			.verifyComplete();
 
 		verify(repository).existsById(SERVICE_INSTANCE_ID);
 		ArgumentCaptor<ServiceInstance> argumentCaptor = ArgumentCaptor.forClass(ServiceInstance.class);
@@ -134,7 +137,7 @@ public class BookstoreServiceInstanceServiceTests {
 			"plan-id", new HashMap<>());
 
 		when(repository.findById(SERVICE_INSTANCE_ID))
-			.thenReturn(Optional.of(serviceInstance));
+			.thenReturn(Mono.just(serviceInstance));
 
 		GetServiceInstanceRequest request = GetServiceInstanceRequest.builder()
 			.serviceInstanceId(SERVICE_INSTANCE_ID)
@@ -146,8 +149,7 @@ public class BookstoreServiceInstanceServiceTests {
 				assertThat(response.getPlanId()).isEqualTo(serviceInstance.getPlanId());
 				assertThat(response.getParameters()).isEqualTo(serviceInstance.getParameters());
 			})
-			.expectComplete()
-			.verify();
+			.verifyComplete();
 
 		verify(repository).findById(SERVICE_INSTANCE_ID);
 		verifyNoMoreInteractions(repository);
@@ -156,7 +158,7 @@ public class BookstoreServiceInstanceServiceTests {
 	@Test
 	public void getServiceInstanceWhenInstanceDoesNotExists() {
 		when(repository.findById(SERVICE_INSTANCE_ID))
-			.thenReturn(Optional.empty());
+			.thenReturn(Mono.empty());
 
 		GetServiceInstanceRequest request = GetServiceInstanceRequest.builder()
 			.serviceInstanceId(SERVICE_INSTANCE_ID)
@@ -170,9 +172,12 @@ public class BookstoreServiceInstanceServiceTests {
 	@Test
 	public void deleteServiceInstanceWhenInstanceExists() {
 		when(repository.existsById(SERVICE_INSTANCE_ID))
-			.thenReturn(true);
+			.thenReturn(Mono.just(true));
 
 		when(store.deleteBookStore(SERVICE_INSTANCE_ID))
+			.thenReturn(Mono.empty());
+
+		when(repository.deleteById(SERVICE_INSTANCE_ID))
 			.thenReturn(Mono.empty());
 
 		DeleteServiceInstanceRequest request = DeleteServiceInstanceRequest.builder()
@@ -184,8 +189,7 @@ public class BookstoreServiceInstanceServiceTests {
 				assertThat(response.isAsync()).isFalse();
 				assertThat(response.getOperation()).isNull();
 			})
-			.expectComplete()
-			.verify();
+			.verifyComplete();
 
 		verify(repository).existsById(SERVICE_INSTANCE_ID);
 		verify(repository).deleteById(SERVICE_INSTANCE_ID);
@@ -198,7 +202,7 @@ public class BookstoreServiceInstanceServiceTests {
 	@Test
 	public void deleteServiceInstanceWhenInstanceDoesNotExist() {
 		when(repository.existsById(SERVICE_INSTANCE_ID))
-			.thenReturn(false);
+			.thenReturn(Mono.just(false));
 
 		DeleteServiceInstanceRequest request = DeleteServiceInstanceRequest.builder()
 			.serviceInstanceId(SERVICE_INSTANCE_ID)

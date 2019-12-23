@@ -36,8 +36,7 @@ public class BookStoreService {
 	}
 
 	public Mono<BookStore> createBookStore(String storeId) {
-		return Mono.fromCallable(() -> repository.save(new BookStore(storeId)))
-			.publishOn(Schedulers.boundedElastic());
+		return repository.save(new BookStore(storeId));
 	}
 
 	public Mono<BookStore> createBookStore() {
@@ -46,31 +45,24 @@ public class BookStoreService {
 	}
 
 	public Mono<BookStore> getBookStore(String storeId) {
-		return Mono.fromCallable(() -> repository.findById(storeId))
-			.publishOn(Schedulers.boundedElastic())
-			.flatMap(Mono::justOrEmpty)
+		return repository.findById(storeId)
 			.switchIfEmpty(Mono.error(new IllegalArgumentException("Invalid book store ID " + storeId + ".")));
 	}
 
 	public Mono<Void> deleteBookStore(String id) {
-		return Mono.fromCallable(() -> {
-			repository.deleteById(id);
-			return null;
-		})
-			.publishOn(Schedulers.boundedElastic())
-			.then();
+		return repository.deleteById(id);
 	}
 
 	public Mono<Book> putBookInStore(String storeId, Book book) {
 		return generateRandomId()
 			.flatMap(bookId -> Mono.just(new Book(bookId, book)))
 			.flatMap(bookWithId -> getBookStore(storeId)
-				.flatMap(store -> Mono.fromCallable(() -> {
+				.flatMap(store -> {
 					store.addBook(bookWithId);
-					repository.save(store);
-					return bookWithId;
+					return Mono.just(store);
 				})
-					.publishOn(Schedulers.boundedElastic())));
+				.flatMap(store -> repository.save(store))
+				.thenReturn(bookWithId));
 	}
 
 	public Mono<Book> getBookFromStore(String storeId, String bookId) {
@@ -84,11 +76,8 @@ public class BookStoreService {
 			.flatMap(store -> Mono.justOrEmpty(store.remove(bookId))
 				.switchIfEmpty(
 					Mono.error(new IllegalArgumentException("Invalid book ID " + storeId + ":" + bookId + ".")))
-				.flatMap(book -> Mono.fromCallable(() -> {
-					repository.save(store);
-					return book;
-				})
-					.publishOn(Schedulers.boundedElastic())));
+				.flatMap(book -> repository.save(store)
+					.thenReturn(book)));
 	}
 
 	private Mono<String> generateRandomId() {
