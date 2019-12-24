@@ -20,9 +20,8 @@ import java.util.Collection;
 
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.ReadContext;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
@@ -34,12 +33,10 @@ import org.springframework.cloud.sample.bookstore.web.repository.BookStoreReposi
 import org.springframework.cloud.sample.bookstore.web.service.BookStoreService;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringRunner.class)
 @DataMongoTest
 public class BookStoreIntegrationTests {
 
@@ -52,7 +49,7 @@ public class BookStoreIntegrationTests {
 
 	private String bookStoreId;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		this.service = new BookStoreService(repository);
 
@@ -73,7 +70,7 @@ public class BookStoreIntegrationTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void bookStoreIsRetrieved() throws Exception {
+	public void bookStoreIsRetrieved() {
 		BookStore bookStore = service.getBookStore(bookStoreId).block();
 
 		String body = client.get().uri("/bookstores/{bookStoreId}", bookStore.getId())
@@ -100,7 +97,7 @@ public class BookStoreIntegrationTests {
 	}
 
 	@Test
-	public void bookIsRetrieved() throws Exception {
+	public void bookIsRetrieved() {
 		BookStore bookStore = service.getBookStore(bookStoreId).block();
 		Book book = bookStore.getBooks().get(0);
 
@@ -123,7 +120,7 @@ public class BookStoreIntegrationTests {
 	}
 
 	@Test
-	public void bookIsAdded() throws Exception {
+	public void bookIsAdded() {
 		BookStore bookStore = service.getBookStore(bookStoreId).block();
 
 		String body = client.put().uri("/bookstores/{bookStoreId}/books", bookStore.getId())
@@ -148,7 +145,7 @@ public class BookStoreIntegrationTests {
 	}
 
 	@Test
-	public void bookIsDeleted() throws Exception {
+	public void bookIsDeleted() {
 		BookStore bookStore = service.getBookStore(bookStoreId).block();
 		Book book = bookStore.getBooks().get(0);
 

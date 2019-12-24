@@ -16,20 +16,19 @@
 
 package org.springframework.cloud.sample.bookstore;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.util.Date;
+
+import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest
 public class ApplicationTests {
+
 	@Autowired
 	private ApplicationContext applicationContext;
 
@@ -37,4 +36,5 @@ public class ApplicationTests {
 	public void contextLoads() {
 		assertThat(applicationContext.getStartupDate()).isLessThanOrEqualTo(new Date().getTime());
 	}
+
 }

@@ -19,8 +19,8 @@ package org.springframework.cloud.sample.bookstore.servicebroker.service;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import reactor.core.publisher.Mono;
@@ -70,7 +70,7 @@ public class BookstoreServiceInstanceBindingServiceTests {
 		put("password", "testpassword");
 	}};
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		initMocks(this);
 

@@ -18,12 +18,12 @@ package org.springframework.cloud.sample.bookstore.servicebroker.service;
 
 import java.util.HashMap;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -45,7 +45,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-@RunWith(MockitoJUnitRunner.class)
 public class BookstoreServiceInstanceServiceTests {
 
 	private static final String SERVICE_INSTANCE_ID = "instance-id";
@@ -58,7 +57,7 @@ public class BookstoreServiceInstanceServiceTests {
 
 	private BookStoreServiceInstanceService service;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		initMocks(this);
 

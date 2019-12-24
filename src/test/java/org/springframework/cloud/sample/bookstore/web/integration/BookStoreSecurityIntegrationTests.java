@@ -16,9 +16,8 @@
 
 package org.springframework.cloud.sample.bookstore.web.integration;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -29,14 +28,12 @@ import org.springframework.cloud.sample.bookstore.web.service.BookStoreService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import static org.springframework.cloud.sample.bookstore.web.security.SecurityAuthorities.BOOK_STORE_ID_PREFIX;
 import static org.springframework.cloud.sample.bookstore.web.security.SecurityAuthorities.FULL_ACCESS;
 import static org.springframework.cloud.sample.bookstore.web.security.SecurityAuthorities.READ_ONLY;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureWebTestClient
 public class BookStoreSecurityIntegrationTests {
@@ -55,7 +52,7 @@ public class BookStoreSecurityIntegrationTests {
 
 	private String bookId;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		BookStore bookStore = bookStoreService.createBookStore(BOOKSTORE_INSTANCE_ID).block();
 		this.bookStoreId = bookStore.getId();
@@ -67,7 +64,7 @@ public class BookStoreSecurityIntegrationTests {
 	}
 
 	@Test
-	public void anonymousAccessIsUnauthorized() throws Exception {
+	public void anonymousAccessIsUnauthorized() {
 		assertExpectedResponseStatus(
 			HttpStatus.UNAUTHORIZED,
 			HttpStatus.UNAUTHORIZED,
@@ -77,7 +74,7 @@ public class BookStoreSecurityIntegrationTests {
 
 	@Test
 	@WithMockUser(authorities = {FULL_ACCESS})
-	public void fullAccessWithoutInstanceIdIsAllowed() throws Exception {
+	public void fullAccessWithoutInstanceIdIsAllowed() {
 
 		assertExpectedResponseStatus(
 			HttpStatus.OK,
@@ -88,7 +85,7 @@ public class BookStoreSecurityIntegrationTests {
 
 	@Test
 	@WithMockUser(authorities = {FULL_ACCESS, BOOK_STORE_ID_PREFIX + BOOKSTORE_INSTANCE_ID})
-	public void fullAccessWithInstanceIdIsAllowed() throws Exception {
+	public void fullAccessWithInstanceIdIsAllowed() {
 		assertExpectedResponseStatus(
 			HttpStatus.OK,
 			HttpStatus.OK,
@@ -98,7 +95,7 @@ public class BookStoreSecurityIntegrationTests {
 
 	@Test
 	@WithMockUser(authorities = {FULL_ACCESS, BOOK_STORE_ID_PREFIX + OTHER_INSTANCE_ID})
-	public void fullAccessWithOtherInstanceIdIsForbidden() throws Exception {
+	public void fullAccessWithOtherInstanceIdIsForbidden() {
 		assertExpectedResponseStatus(
 			HttpStatus.FORBIDDEN,
 			HttpStatus.FORBIDDEN,
@@ -108,7 +105,7 @@ public class BookStoreSecurityIntegrationTests {
 
 	@Test
 	@WithMockUser(authorities = {READ_ONLY})
-	public void readOnlyWithoutInstanceIdIsPartiallyAllowed() throws Exception {
+	public void readOnlyWithoutInstanceIdIsPartiallyAllowed() {
 		assertExpectedResponseStatus(
 			HttpStatus.OK,
 			HttpStatus.OK,
@@ -118,7 +115,7 @@ public class BookStoreSecurityIntegrationTests {
 
 	@Test
 	@WithMockUser(authorities = {READ_ONLY, BOOK_STORE_ID_PREFIX + BOOKSTORE_INSTANCE_ID})
-	public void readOnlyWithInstanceIdIsPartiallyAllowed() throws Exception {
+	public void readOnlyWithInstanceIdIsPartiallyAllowed() {
 		assertExpectedResponseStatus(
 			HttpStatus.OK,
 			HttpStatus.OK,
@@ -128,7 +125,7 @@ public class BookStoreSecurityIntegrationTests {
 
 	@Test
 	@WithMockUser(authorities = {READ_ONLY, BOOK_STORE_ID_PREFIX + OTHER_INSTANCE_ID})
-	public void readOnlyWithOtherInstanceIdIsForbidden() throws Exception {
+	public void readOnlyWithOtherInstanceIdIsForbidden() {
 		assertExpectedResponseStatus(
 			HttpStatus.FORBIDDEN,
 			HttpStatus.FORBIDDEN,
@@ -137,7 +134,7 @@ public class BookStoreSecurityIntegrationTests {
 	}
 
 	private void assertExpectedResponseStatus(HttpStatus getAllStatus, HttpStatus getStatus, HttpStatus putStatus,
-		HttpStatus deleteStatus) throws Exception {
+		HttpStatus deleteStatus) {
 		this.client.get().uri("/bookstores/{bookStoreId}", bookStoreId)
 			.accept(MediaType.APPLICATION_JSON)
 			.exchange()
