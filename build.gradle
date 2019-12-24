@@ -14,26 +14,12 @@
  * limitations under the License.
  */
 
-buildscript {
-	ext {
-		springBootVersion = '2.2.2.RELEASE'
-	}
-	repositories {
-		mavenCentral()
-		maven { url "https://plugins.gradle.org/m2/" }
-	}
-	dependencies {
-		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-		classpath("gradle.plugin.com.palantir.gradle.docker:gradle-docker:0.17.2")
-	}
+plugins {
+	id 'org.springframework.boot' version '2.2.2.RELEASE'
+	id 'io.spring.dependency-management' version '1.0.8.RELEASE'
+	id 'java'
+	id 'com.palantir.docker' version '0.17.2'
 }
-
-apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: 'idea'
-apply plugin: 'org.springframework.boot'
-apply plugin: 'io.spring.dependency-management'
-apply plugin: 'com.palantir.docker'
 
 group = 'org.springframework.cloud'
 archivesBaseName = 'bookstore-service-broker'
@@ -47,19 +33,19 @@ repositories {
 }
 
 dependencies {
-	compile('org.springframework.boot:spring-boot-starter-webflux')
-	compile('org.springframework.boot:spring-boot-starter-actuator')
-	compile('org.springframework.boot:spring-boot-starter-security')
-	compile('org.springframework.hateoas:spring-hateoas:1.0.2.RELEASE')
-	compile('org.springframework.cloud:spring-cloud-starter-open-service-broker:3.1.0.RELEASE')
-	compile('org.springframework.boot:spring-boot-starter-data-mongodb-reactive')
-	runtime('org.springframework.boot:spring-boot-devtools')
+	implementation('org.springframework.boot:spring-boot-starter-webflux')
+	implementation('org.springframework.boot:spring-boot-starter-actuator')
+	implementation('org.springframework.boot:spring-boot-starter-security')
+	implementation('org.springframework.hateoas:spring-hateoas:1.0.2.RELEASE')
+	implementation('org.springframework.cloud:spring-cloud-starter-open-service-broker:3.1.0.RELEASE')
+	implementation('org.springframework.boot:spring-boot-starter-data-mongodb-reactive')
+	runtimeOnly('org.springframework.boot:spring-boot-devtools')
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
-	testCompile('org.springframework.security:spring-security-test')
-	testCompile('io.projectreactor:reactor-test')
-	testCompile('de.flapdoodle.embed:de.flapdoodle.embed.mongo')
+	testImplementation('org.springframework.security:spring-security-test')
+	testImplementation('io.projectreactor:reactor-test')
+	testImplementation('de.flapdoodle.embed:de.flapdoodle.embed.mongo')
 }
 
 test {
