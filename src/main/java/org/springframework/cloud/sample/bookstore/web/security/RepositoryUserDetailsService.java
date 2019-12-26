@@ -48,6 +48,8 @@ public class RepositoryUserDetailsService implements ReactiveUserDetailsService 
 
 	private static class CustomUserDetails implements UserDetails {
 
+		private static final long serialVersionUID = 8772606763988236474L;
+
 		private final User delegate;
 
 		CustomUserDetails(User user) {

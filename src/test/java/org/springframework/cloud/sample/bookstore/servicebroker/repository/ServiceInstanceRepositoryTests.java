@@ -18,6 +18,7 @@ package org.springframework.cloud.sample.bookstore.servicebroker.repository;
 
 import java.util.HashMap;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.test.StepVerifier;
 
@@ -33,10 +34,14 @@ public class ServiceInstanceRepositoryTests {
 	@Autowired
 	private ServiceInstanceRepository repository;
 
-	private final HashMap<String, Object> parameters = new HashMap<String, Object>() {{
-		put("key1", "value1");
-		put("key2", "value2");
-	}};
+	private HashMap<String, Object> parameters;
+
+	@BeforeEach
+	void setUp() {
+		this.parameters = new HashMap<>();
+		parameters.put("key1", "value1");
+		parameters.put("key2", "value2");
+	}
 
 	@Test
 	public void save() {

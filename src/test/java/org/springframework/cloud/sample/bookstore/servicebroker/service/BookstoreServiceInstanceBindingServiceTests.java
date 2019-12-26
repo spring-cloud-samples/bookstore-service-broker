@@ -64,14 +64,15 @@ public class BookstoreServiceInstanceBindingServiceTests {
 
 	private BookStoreServiceInstanceBindingService service;
 
-	private final Map<String, Object> credentials = new HashMap<String, Object>() {{
-		put("uri", "https://example.com");
-		put("username", "testuser");
-		put("password", "testpassword");
-	}};
+	private Map<String, Object> credentials;
 
 	@BeforeEach
 	public void setUp() {
+		this.credentials = new HashMap<>();
+		credentials.put("uri", "https://example.com");
+		credentials.put("username", "testuser");
+		credentials.put("password", "testpassword");
+
 		initMocks(this);
 
 		ApplicationInformation appInfo = new ApplicationInformation(BASE_URL);
@@ -89,11 +90,11 @@ public class BookstoreServiceInstanceBindingServiceTests {
 			.thenReturn(Mono.just(new User(SERVICE_BINDING_ID, "password", FULL_ACCESS,
 				BOOK_STORE_ID_PREFIX + SERVICE_INSTANCE_ID)));
 
-		final Map<String, Object> creds = new HashMap<String, Object>() {{
-			put("uri", BASE_URL + "/bookstores/" + SERVICE_INSTANCE_ID);
-			put("username", SERVICE_BINDING_ID);
-			put("password", "password");
-		}};
+		final Map<String, Object> creds = new HashMap<>();
+		creds.put("uri", BASE_URL + "/bookstores/" + SERVICE_INSTANCE_ID);
+		creds.put("username", SERVICE_BINDING_ID);
+		creds.put("password", "password");
+
 		ServiceBinding binding = new ServiceBinding(SERVICE_BINDING_ID, new HashMap<>(), creds);
 		when(repository.save(refEq(binding)))
 			.thenReturn(Mono.just(binding));

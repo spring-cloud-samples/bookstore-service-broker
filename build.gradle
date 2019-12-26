@@ -27,6 +27,28 @@ version = '0.0.1.BUILD-SNAPSHOT'
 
 sourceCompatibility = 1.8
 
+[compileJava, compileTestJava]*.options*.compilerArgs = [
+		"-Xlint:serial",
+		"-Xlint:varargs",
+		"-Xlint:cast",
+		"-Xlint:classfile",
+		"-Xlint:dep-ann",
+		"-Xlint:divzero",
+		"-Xlint:empty",
+		"-Xlint:finally",
+		"-Xlint:overrides",
+		"-Xlint:path",
+		"-Xlint:-processing",
+		"-Xlint:static",
+		"-Xlint:try",
+		"-Xlint:fallthrough",
+		"-Xlint:rawtypes",
+		"-Xlint:deprecation",
+		"-Xlint:unchecked",
+		"-Xlint:options",
+		"-Werror"
+]
+
 repositories {
 	mavenCentral()
 	maven { url "https://repo.spring.io/release" }
