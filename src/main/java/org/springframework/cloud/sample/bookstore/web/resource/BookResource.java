@@ -20,7 +20,8 @@ import org.springframework.cloud.sample.bookstore.web.model.Book;
 import org.springframework.hateoas.RepresentationModel;
 
 @SuppressWarnings("unused")
-public class BookResource extends RepresentationModel {
+public class BookResource extends RepresentationModel<BookResource> {
+
 	private final Book book;
 
 	BookResource(Book book) {
@@ -38,4 +39,5 @@ public class BookResource extends RepresentationModel {
 	public String getAuthor() {
 		return book.getAuthor();
 	}
+
 }

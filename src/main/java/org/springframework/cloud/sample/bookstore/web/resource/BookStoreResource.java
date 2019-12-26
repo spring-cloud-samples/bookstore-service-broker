@@ -16,12 +16,13 @@
 
 package org.springframework.cloud.sample.bookstore.web.resource;
 
-import org.springframework.hateoas.RepresentationModel;
-
 import java.util.Collection;
 
+import org.springframework.hateoas.RepresentationModel;
+
 @SuppressWarnings("unused")
-public class BookStoreResource extends RepresentationModel {
+public class BookStoreResource extends RepresentationModel<BookStoreResource> {
+
 	private final Collection<BookResource> bookResources;
 
 	BookStoreResource(Collection<BookResource> bookResources) {
@@ -31,4 +32,5 @@ public class BookStoreResource extends RepresentationModel {
 	public Collection<BookResource> getBooks() {
 		return bookResources;
 	}
+
 }
