@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class ServiceCatalogConfiguration {
+
 	@Bean
 	public Catalog catalog() {
 		Plan plan = Plan.builder()
@@ -49,4 +50,5 @@ public class ServiceCatalogConfiguration {
 				.serviceDefinitions(serviceDefinition)
 				.build();
 	}
+
 }

@@ -17,6 +17,7 @@
 package org.springframework.cloud.sample.bookstore.web.model;
 
 public class ApplicationInformation {
+
 	private final String baseUrl;
 
 	public ApplicationInformation(String baseUrl) {
@@ -26,4 +27,5 @@ public class ApplicationInformation {
 	public String getBaseUrl() {
 		return baseUrl;
 	}
+
 }

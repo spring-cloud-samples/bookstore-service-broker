@@ -28,6 +28,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @Configuration
 public class ApplicationConfiguration {
+
 	@Bean
 	@ConditionalOnCloudPlatform(CloudPlatform.CLOUD_FOUNDRY)
 	public ApplicationInformation cloudFoundryApplicationInformation(Environment environment) {
@@ -47,17 +48,17 @@ public class ApplicationConfiguration {
 	public ApplicationInformation kubernetesApplicationInformation(Environment environment) {
 		String uri = environment.getProperty("KUBERNETES_SERVICE_HOST");
 		String port = environment.getProperty("KUBERNETES_SERVICE_PORT");
-		
+
 		String baseUrl = UriComponentsBuilder.newInstance()
-			.scheme("https")
-			.host(uri)
-			.port(port)
-			.build()
-			.toUriString();
+				.scheme("https")
+				.host(uri)
+				.port(port)
+				.build()
+				.toUriString();
 
 		return new ApplicationInformation(baseUrl);
 	}
-	
+
 	@Bean
 	@ConditionalOnMissingBean(ApplicationInformation.class)
 	public ApplicationInformation defaultApplicationInformation() {
@@ -70,4 +71,5 @@ public class ApplicationConfiguration {
 
 		return new ApplicationInformation(baseUrl);
 	}
+
 }

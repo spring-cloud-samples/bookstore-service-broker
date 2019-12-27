@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class UserApplicationListener implements ApplicationListener<ApplicationReadyEvent> {
+
 	private UserService userService;
 
 	public UserApplicationListener(UserService userService) {
@@ -33,4 +34,5 @@ public class UserApplicationListener implements ApplicationListener<ApplicationR
 	public void onApplicationEvent(ApplicationReadyEvent event) {
 		userService.initializeUsers();
 	}
+
 }

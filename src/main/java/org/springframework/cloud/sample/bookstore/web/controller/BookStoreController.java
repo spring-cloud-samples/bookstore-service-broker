@@ -45,10 +45,10 @@ public class BookStoreController extends BaseController {
 
 	@GetMapping("/{bookStoreId}")
 	@PreAuthorize("hasAnyRole('ROLE_FULL_ACCESS','ROLE_READ_ONLY') and @bookStoreIdEvaluator.canAccessBookstore" +
-		"(authentication, #bookStoreId)")
+			"(authentication, #bookStoreId)")
 	public Mono<ResponseEntity<BookStoreResource>> getBooks(@PathVariable String bookStoreId) {
 		return bookStoreService.getBookStore(bookStoreId)
-			.flatMap(this::createResponse);
+				.flatMap(this::createResponse);
 	}
 
 	@ExceptionHandler(IllegalArgumentException.class)
@@ -58,7 +58,7 @@ public class BookStoreController extends BaseController {
 
 	private Mono<ResponseEntity<BookStoreResource>> createResponse(BookStore bookStore) {
 		return new BookStoreResourceAssembler().toModel(bookStore)
-			.flatMap(bookStoreResource -> Mono.just(new ResponseEntity<>(bookStoreResource, HttpStatus.OK)));
+				.flatMap(bookStoreResource -> Mono.just(new ResponseEntity<>(bookStoreResource, HttpStatus.OK)));
 	}
 
 }

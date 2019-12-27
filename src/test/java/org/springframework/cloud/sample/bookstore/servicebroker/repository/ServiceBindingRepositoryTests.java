@@ -55,8 +55,8 @@ public class ServiceBindingRepositoryTests {
 		ServiceBinding binding = new ServiceBinding("binding-id", parameters, credentials);
 
 		StepVerifier.create(repository.save(binding))
-			.assertNext(savedBinding -> assertThat(savedBinding).isEqualToComparingFieldByField(binding))
-			.verifyComplete();
+				.assertNext(savedBinding -> assertThat(savedBinding).isEqualToComparingFieldByField(binding))
+				.verifyComplete();
 	}
 
 	@Test
@@ -64,12 +64,12 @@ public class ServiceBindingRepositoryTests {
 		ServiceBinding binding = new ServiceBinding("binding-id", parameters, credentials);
 
 		StepVerifier.create(repository.save(binding))
-			.expectNext(binding)
-			.verifyComplete();
+				.expectNext(binding)
+				.verifyComplete();
 
 		StepVerifier.create(repository.findById("binding-id"))
-			.assertNext(foundBinding -> assertThat(foundBinding).isEqualToComparingFieldByField(binding))
-			.verifyComplete();
+				.assertNext(foundBinding -> assertThat(foundBinding).isEqualToComparingFieldByField(binding))
+				.verifyComplete();
 	}
 
 }

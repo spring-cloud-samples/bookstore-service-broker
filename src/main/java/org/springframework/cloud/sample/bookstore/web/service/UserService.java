@@ -55,31 +55,32 @@ public class UserService {
 
 	public Mono<User> createUser(String username, String... authorities) {
 		return generatePassword()
-			.flatMap(password -> Mono.fromCallable(() -> passwordEncoder.encode(password))
-				.flatMap(encodedPassword -> userRepository.save(new User(username, encodedPassword, authorities)))
-				.thenReturn(new User(username, password, authorities)));
+				.flatMap(password -> Mono.fromCallable(() -> passwordEncoder.encode(password))
+						.flatMap(encodedPassword -> userRepository
+								.save(new User(username, encodedPassword, authorities)))
+						.thenReturn(new User(username, password, authorities)));
 	}
 
 	public Mono<Void> deleteUser(String username) {
 		return userRepository.findByUsername(username)
-			.flatMap(user -> userRepository.deleteById(user.getId()));
+				.flatMap(user -> userRepository.deleteById(user.getId()));
 	}
 
 	private User adminUser() {
 		return new User("admin", passwordEncoder.encode("supersecret"),
-			SecurityAuthorities.ADMIN, SecurityAuthorities.FULL_ACCESS);
+				SecurityAuthorities.ADMIN, SecurityAuthorities.FULL_ACCESS);
 	}
 
 	private Mono<String> generatePassword() {
 		return Mono.just(new StringBuilder(PASSWORD_LENGTH))
-			.flatMap(sb -> Mono.fromCallable(() -> {
-				for (int i = 0; i < PASSWORD_LENGTH; i++) {
-					sb.append(PASSWORD_CHARS.charAt(RANDOM.nextInt(PASSWORD_CHARS.length())));
-				}
-				return sb;
-			})
-				.subscribeOn(Schedulers.boundedElastic()))
-			.flatMap(sb -> Mono.just(sb.toString()));
+				.flatMap(sb -> Mono.fromCallable(() -> {
+					for (int i = 0; i < PASSWORD_LENGTH; i++) {
+						sb.append(PASSWORD_CHARS.charAt(RANDOM.nextInt(PASSWORD_CHARS.length())));
+					}
+					return sb;
+				})
+						.subscribeOn(Schedulers.boundedElastic()))
+				.flatMap(sb -> Mono.just(sb.toString()));
 	}
 
 }

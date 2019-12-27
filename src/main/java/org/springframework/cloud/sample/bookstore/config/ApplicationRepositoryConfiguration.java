@@ -9,6 +9,6 @@ import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRep
 
 @Configuration
 @EnableReactiveMongoRepositories(basePackageClasses = {BookStoreRepository.class,
-	UserRepository.class, ServiceBindingRepository.class, ServiceInstanceRepository.class})
+		UserRepository.class, ServiceBindingRepository.class, ServiceInstanceRepository.class})
 public class ApplicationRepositoryConfiguration {
 }

@@ -24,13 +24,13 @@ public class BookStoreIdEvaluator {
 
 	public boolean canAccessBookstore(Authentication authentication, String bookStoreId) {
 		return authentication.getAuthorities().stream()
-			.filter(authority -> authority.getAuthority().startsWith(BOOK_STORE_ID_PREFIX))
-			.map(authority -> {
-				String serviceInstanceId = authority.getAuthority().substring(BOOK_STORE_ID_PREFIX.length());
-				return serviceInstanceId.equals(bookStoreId);
-			})
-			.findFirst()
-			.orElse(true);
+				.filter(authority -> authority.getAuthority().startsWith(BOOK_STORE_ID_PREFIX))
+				.map(authority -> {
+					String serviceInstanceId = authority.getAuthority().substring(BOOK_STORE_ID_PREFIX.length());
+					return serviceInstanceId.equals(bookStoreId);
+				})
+				.findFirst()
+				.orElse(true);
 	}
 
 }

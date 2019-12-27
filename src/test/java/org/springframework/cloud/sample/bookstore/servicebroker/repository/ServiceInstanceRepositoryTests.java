@@ -46,25 +46,25 @@ public class ServiceInstanceRepositoryTests {
 	@Test
 	public void save() {
 		ServiceInstance instance = new ServiceInstance("service-instance-id", "service-definition-id",
-			"plan-id", parameters);
+				"plan-id", parameters);
 
 		StepVerifier.create(repository.save(instance))
-			.assertNext(savedInstance -> assertThat(savedInstance).isEqualToComparingFieldByField(instance))
-			.verifyComplete();
+				.assertNext(savedInstance -> assertThat(savedInstance).isEqualToComparingFieldByField(instance))
+				.verifyComplete();
 	}
 
 	@Test
 	public void retrieve() {
 		ServiceInstance instance = new ServiceInstance("service-instance-id", "service-definition-id",
-			"plan-id", parameters);
+				"plan-id", parameters);
 
 		StepVerifier.create(repository.save(instance))
-			.expectNext(instance)
-			.verifyComplete();
+				.expectNext(instance)
+				.verifyComplete();
 
 		StepVerifier.create(repository.findById("service-instance-id"))
-			.assertNext(foundInstance -> assertThat(foundInstance).isEqualToComparingFieldByField(instance))
-			.verifyComplete();
+				.assertNext(foundInstance -> assertThat(foundInstance).isEqualToComparingFieldByField(instance))
+				.verifyComplete();
 	}
 
 }

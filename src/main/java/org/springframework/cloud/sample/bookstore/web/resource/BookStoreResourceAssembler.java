@@ -28,11 +28,12 @@ public class BookStoreResourceAssembler {
 
 	public Mono<BookStoreResource> toModel(BookStore bookStore) {
 		return new BookResourceAssembler().toCollectionModel(bookStore.getBooks(), bookStore.getId())
-			.flatMap(bookResources -> Mono.just(new BookStoreResource(bookResources))
-				.flatMap(bookStoreResource -> linkTo(methodOn(BookStoreController.class).getBooks(bookStore.getId()))
-					.withSelfRel().toMono()
-					.flatMap(link -> Mono.just(bookStoreResource.add(link)))
-					.thenReturn(bookStoreResource)));
+				.flatMap(bookResources -> Mono.just(new BookStoreResource(bookResources))
+						.flatMap(bookStoreResource -> linkTo(
+								methodOn(BookStoreController.class).getBooks(bookStore.getId()))
+								.withSelfRel().toMono()
+								.flatMap(link -> Mono.just(bookStoreResource.add(link)))
+								.thenReturn(bookStoreResource)));
 	}
 
 }
