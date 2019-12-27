@@ -4,9 +4,9 @@ This project implements a sample service broker that adheres to the https://www.
 
 == Compatibility
 
-* https://projects.spring.io/spring-framework/[Spring Framework] 5.x
-* https://projects.spring.io/spring-boot/[Spring Boot] 2.x
-* https://cloud.spring.io/spring-cloud-open-service-broker/[Spring Cloud Open Service Broker] 2.0.0.BUILD-SNAPSHOT
+* https://projects.spring.io/spring-framework/[Spring Framework] 5.2.x
+* https://projects.spring.io/spring-boot/[Spring Boot] 2.2.x
+* https://cloud.spring.io/spring-cloud-open-service-broker/[Spring Cloud Open Service Broker] 3.1.x
 
 == Getting Started
 
