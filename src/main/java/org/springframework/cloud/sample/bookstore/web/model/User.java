@@ -26,7 +26,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class User {
 
 	@Id
-	private Long id;
+	private String id;
 
 	private String username;
 
@@ -49,7 +49,7 @@ public class User {
 		this.authorities = Arrays.asList(authorities);
 	}
 
-	public Long getId() {
+	public String getId() {
 		return id;
 	}
 

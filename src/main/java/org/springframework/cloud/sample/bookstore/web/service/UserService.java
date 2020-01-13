@@ -46,11 +46,14 @@ public class UserService {
 	}
 
 	public void initializeUsers() {
-		userRepository.count().subscribe(c -> {
-			if (c == 0) {
-				userRepository.save(adminUser());
-			}
-		});
+		userRepository.count()
+				.flatMap(count -> {
+					if (count == 0) {
+						return userRepository.save(adminUser());
+					}
+					return Mono.empty();
+				})
+				.subscribe();
 	}
 
 	public Mono<User> createUser(String username, String... authorities) {
