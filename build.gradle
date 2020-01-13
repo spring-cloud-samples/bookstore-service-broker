@@ -63,13 +63,13 @@ dependencies {
 	implementation('org.springframework.boot:spring-boot-starter-hateoas') {
 		exclude group: 'org.springframework.boot', module: 'spring-boot-starter-web'
 	}
+	implementation('de.flapdoodle.embed:de.flapdoodle.embed.mongo')
 	runtimeOnly('org.springframework.boot:spring-boot-devtools')
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
 	testImplementation('org.springframework.security:spring-security-test')
 	testImplementation('io.projectreactor:reactor-test')
-	testImplementation('de.flapdoodle.embed:de.flapdoodle.embed.mongo')
 }
 
 test {
