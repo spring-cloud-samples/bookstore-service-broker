@@ -8,13 +8,20 @@ This project implements a sample service broker that adheres to the https://www.
 * https://projects.spring.io/spring-boot/[Spring Boot] 2.2.x
 * https://cloud.spring.io/spring-cloud-open-service-broker/[Spring Cloud Open Service Broker] 3.1.x
 
+Branches:
+
+- https://github.com/spring-cloud-samples/bookstore-service-broker/tree/SCOSB-2.0.x[SCOSB-3.1.x] (master) - reactive, Spring WebFlux version of the sample app based on Spring Cloud Open Service Broker 3.1.x.
+- https://github.com/spring-cloud-samples/bookstore-service-broker/tree/SCOSB-2.0.x[SCOSB-2.0.x] - imperative, Spring MVC version of the sample app based on Spring Cloud Open Service Broker 2.0.x.
+
 == Getting Started
 
 This service broker manages instances of a bookstore service.
 
-When a service instance is https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#provisioning[provisioned], a new data structure is allocated in memory.
+When a service instance is https://github.com/openservicebrokerapi/servicebroker/blob/v2.15/spec.md#provisioning[provisioned], a new data structure is allocated in memory.
 
-When a https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#credentials[service binding] is created, a URL and basic auth credentials are provided in the binding credentials. The bookstore URL and credentials can be used to add, retrieve, delete, and list books in the bookstore. Unique credentials are generated for each service binding.
+When a https://github.com/openservicebrokerapi/servicebroker/blob/v2.15/spec.md#credentials[service binding] is created, a URL and basic auth credentials are provided in the binding credentials. The bookstore URL and credentials can be used to add, retrieve, delete, and list books in the bookstore. Unique credentials are generated for each service binding.
+
+See the blog post https://spring.io/blog/2020/01/14/reactive-bookstore-service-broker[Reactive BookStore Service Broker] for more information about the architecture and integration of other Spring projects within this sample app.
 
 == Build
 
