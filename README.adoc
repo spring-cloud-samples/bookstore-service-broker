@@ -10,8 +10,9 @@ This project implements a sample service broker that adheres to the https://www.
 
 Branches:
 
-- https://github.com/spring-cloud-samples/bookstore-service-broker/tree/SCOSB-2.0.x[SCOSB-3.1.x] (master) - reactive, Spring WebFlux version of the sample app based on Spring Cloud Open Service Broker 3.1.x.
-- https://github.com/spring-cloud-samples/bookstore-service-broker/tree/SCOSB-2.0.x[SCOSB-2.0.x] - imperative, Spring MVC version of the sample app based on Spring Cloud Open Service Broker 2.0.x.
+- https://github.com/spring-cloud-samples/bookstore-service-broker/tree/master[master] - reactive, Spring WebFlux version of the sample app based on Spring Cloud Open Service Broker 3.2 and Spring Boot 2.3.
+- https://github.com/spring-cloud-samples/bookstore-service-broker/tree/SCOSB-3.1.x[SCOSB-3.1.x] - reactive, Spring WebFlux version of the sample app based on Spring Cloud Open Service Broker 3.1 and Spring Boot 2.2.
+- https://github.com/spring-cloud-samples/bookstore-service-broker/tree/SCOSB-2.0.x[SCOSB-2.0.x] - imperative, Spring MVC version of the sample app based on Spring Cloud Open Service Broker 2.0.
 
 == Getting Started
 

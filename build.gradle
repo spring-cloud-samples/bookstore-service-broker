@@ -15,8 +15,7 @@
  */
 
 plugins {
-	id 'org.springframework.boot' version '2.2.8.RELEASE'
-	id 'io.spring.dependency-management' version '1.0.8.RELEASE'
+	id 'org.springframework.boot' version '2.3.1.RELEASE'
 	id 'java'
 	id 'com.palantir.docker' version '0.17.2'
 }
@@ -52,10 +51,12 @@ sourceCompatibility = 1.8
 repositories {
 	mavenCentral()
 	maven { url "https://repo.spring.io/release" }
+	maven { url "https://repo.spring.io/milestone" }
 }
 
 dependencies {
-	implementation('org.springframework.cloud:spring-cloud-starter-open-service-broker:3.1.2.RELEASE')
+	implementation enforcedPlatform('org.springframework.boot:spring-boot-dependencies')
+	implementation('org.springframework.cloud:spring-cloud-starter-open-service-broker:3.2.0-M1')
 	implementation('org.springframework.boot:spring-boot-starter-webflux')
 	implementation('org.springframework.boot:spring-boot-starter-actuator')
 	implementation('org.springframework.boot:spring-boot-starter-security')
@@ -65,9 +66,7 @@ dependencies {
 	}
 	implementation('de.flapdoodle.embed:de.flapdoodle.embed.mongo')
 	runtimeOnly('org.springframework.boot:spring-boot-devtools')
-	testImplementation('org.springframework.boot:spring-boot-starter-test') {
-		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
-	}
+	testImplementation('org.springframework.boot:spring-boot-starter-test')
 	testImplementation('org.springframework.security:spring-security-test')
 	testImplementation('io.projectreactor:reactor-test')
 }
