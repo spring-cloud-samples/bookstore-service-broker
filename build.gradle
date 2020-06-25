@@ -76,6 +76,10 @@ test {
 	useJUnitPlatform()
 }
 
+wrapper {
+	gradleVersion = '6.5'
+}
+
 if (!project.hasProperty("dockerGroup")) {
 	ext.dockerGroup = "sample"
 }
