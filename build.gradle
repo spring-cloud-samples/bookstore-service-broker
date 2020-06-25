@@ -15,7 +15,7 @@
  */
 
 plugins {
-	id 'org.springframework.boot' version '2.2.2.RELEASE'
+	id 'org.springframework.boot' version '2.2.8.RELEASE'
 	id 'io.spring.dependency-management' version '1.0.8.RELEASE'
 	id 'java'
 	id 'com.palantir.docker' version '0.17.2'
