@@ -41,7 +41,7 @@ import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 public class BookstoreServiceInstanceServiceTests {
 
@@ -57,7 +57,7 @@ public class BookstoreServiceInstanceServiceTests {
 
 	@BeforeEach
 	public void setUp() {
-		initMocks(this);
+		openMocks(this);
 
 		service = new BookStoreServiceInstanceService(store, repository);
 	}

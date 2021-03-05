@@ -49,7 +49,7 @@ public class ServiceInstanceRepositoryTests {
 				"plan-id", parameters);
 
 		StepVerifier.create(repository.save(instance))
-				.assertNext(savedInstance -> assertThat(savedInstance).isEqualToComparingFieldByField(instance))
+				.assertNext(savedInstance -> assertThat(savedInstance).usingRecursiveComparison().isEqualTo(instance))
 				.verifyComplete();
 	}
 
@@ -63,7 +63,7 @@ public class ServiceInstanceRepositoryTests {
 				.verifyComplete();
 
 		StepVerifier.create(repository.findById("service-instance-id"))
-				.assertNext(foundInstance -> assertThat(foundInstance).isEqualToComparingFieldByField(instance))
+				.assertNext(foundInstance -> assertThat(foundInstance).usingRecursiveComparison().isEqualTo(instance))
 				.verifyComplete();
 	}
 

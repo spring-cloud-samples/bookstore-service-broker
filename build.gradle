@@ -15,7 +15,7 @@
  */
 
 plugins {
-	id 'org.springframework.boot' version '2.3.1.RELEASE'
+	id 'org.springframework.boot' version '2.4.2'
 	id 'java'
 	id 'com.palantir.docker' version '0.17.2'
 }
@@ -51,12 +51,11 @@ sourceCompatibility = 1.8
 repositories {
 	mavenCentral()
 	maven { url "https://repo.spring.io/release" }
-	maven { url "https://repo.spring.io/milestone" }
 }
 
 dependencies {
-	implementation enforcedPlatform('org.springframework.boot:spring-boot-dependencies')
-	implementation('org.springframework.cloud:spring-cloud-starter-open-service-broker:3.2.0-M1')
+	implementation enforcedPlatform('org.springframework.boot:spring-boot-dependencies:2.4.2')
+	implementation('org.springframework.cloud:spring-cloud-starter-open-service-broker:3.3.0')
 	implementation('org.springframework.boot:spring-boot-starter-webflux')
 	implementation('org.springframework.boot:spring-boot-starter-actuator')
 	implementation('org.springframework.boot:spring-boot-starter-security')

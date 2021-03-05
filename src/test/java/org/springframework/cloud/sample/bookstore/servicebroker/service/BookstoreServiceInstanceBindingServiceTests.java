@@ -44,7 +44,7 @@ import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 import static org.springframework.cloud.sample.bookstore.web.security.SecurityAuthorities.BOOK_STORE_ID_PREFIX;
 import static org.springframework.cloud.sample.bookstore.web.security.SecurityAuthorities.FULL_ACCESS;
 
@@ -73,7 +73,7 @@ public class BookstoreServiceInstanceBindingServiceTests {
 		credentials.put("username", "testuser");
 		credentials.put("password", "testpassword");
 
-		initMocks(this);
+		openMocks(this);
 
 		ApplicationInformation appInfo = new ApplicationInformation(BASE_URL);
 
