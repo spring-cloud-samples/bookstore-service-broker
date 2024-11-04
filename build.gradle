@@ -50,8 +50,6 @@ sourceCompatibility = 1.8
 
 repositories {
 	mavenCentral()
-	maven { url "https://repo.spring.io/release" }
-	maven { url "https://repo.spring.io/milestone" }
 }
 
 dependencies {
