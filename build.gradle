@@ -76,7 +76,7 @@ test {
 }
 
 wrapper {
-	gradleVersion = '6.5'
+	gradleVersion = '7.6.4'
 }
 
 if (!project.hasProperty("dockerGroup")) {
