@@ -5,6 +5,9 @@ management:
         include: "*"
 
 spring:
+  mongodb:
+    embedded:
+      version: 3.5.4
   data:
     mongodb:
       uri: mongodb://localhost:27017/broker-db
