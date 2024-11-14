@@ -17,7 +17,7 @@
 plugins {
 	id 'org.springframework.boot' version '3.0.13'
 	id 'java'
-	id 'com.palantir.docker' version '0.17.2'
+	id 'com.palantir.docker' version '0.35.0'
 }
 
 group = 'org.springframework.cloud'
@@ -72,7 +72,7 @@ test {
 }
 
 wrapper {
-	gradleVersion = '7.6.4'
+	gradleVersion = '8.11'
 }
 
 if (!project.hasProperty("dockerGroup")) {
