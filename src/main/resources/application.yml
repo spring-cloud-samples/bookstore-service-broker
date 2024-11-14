@@ -4,10 +4,13 @@ management:
       exposure:
         include: "*"
 
+de:
+  flapdoodle:
+    mongodb:
+      embedded:
+        version: 4.4.1
+
 spring:
-  mongodb:
-    embedded:
-      version: 4.4.1
   data:
     mongodb:
       uri: mongodb://localhost:27017/broker-db

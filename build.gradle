@@ -15,7 +15,7 @@
  */
 
 plugins {
-	id 'org.springframework.boot' version '2.7.18'
+	id 'org.springframework.boot' version '3.0.13'
 	id 'java'
 	id 'com.palantir.docker' version '0.17.2'
 }
@@ -23,8 +23,6 @@ plugins {
 group = 'org.springframework.cloud'
 archivesBaseName = 'bookstore-service-broker'
 version = '0.0.1.BUILD-SNAPSHOT'
-
-sourceCompatibility = 1.8
 
 [compileJava, compileTestJava]*.options*.compilerArgs = [
 		"-Xlint:serial",
@@ -53,8 +51,8 @@ repositories {
 }
 
 dependencies {
-	implementation platform('org.springframework.boot:spring-boot-dependencies:2.7.18')
-	implementation('org.springframework.cloud:spring-cloud-starter-open-service-broker:3.6.1')
+	implementation platform('org.springframework.boot:spring-boot-dependencies:3.0.13')
+	implementation('org.springframework.cloud:spring-cloud-starter-open-service-broker:4.0.2')
 	implementation('org.springframework.boot:spring-boot-starter-webflux')
 	implementation('org.springframework.boot:spring-boot-starter-actuator')
 	implementation('org.springframework.boot:spring-boot-starter-security')
@@ -62,7 +60,7 @@ dependencies {
 	implementation('org.springframework.boot:spring-boot-starter-hateoas') {
 		exclude group: 'org.springframework.boot', module: 'spring-boot-starter-web'
 	}
-	implementation('de.flapdoodle.embed:de.flapdoodle.embed.mongo')
+	implementation('de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring3x:4.16.1')
 	runtimeOnly('org.springframework.boot:spring-boot-devtools')
 	testImplementation('org.springframework.boot:spring-boot-starter-test')
 	testImplementation('org.springframework.security:spring-security-test')
@@ -84,6 +82,6 @@ if (!project.hasProperty("dockerGroup")) {
 docker {
 	name "${dockerGroup}/bookstore-service-broker:${version}"
 	dockerfile file('../deploy/docker/Dockerfile')
-	files jar.archivePath
-	buildArgs(['JAR_FILE': "${jar.archiveName}"])
+	files jar.archiveFile
+	buildArgs(['JAR_FILE': "${jar.archiveFileName}"])
 }
