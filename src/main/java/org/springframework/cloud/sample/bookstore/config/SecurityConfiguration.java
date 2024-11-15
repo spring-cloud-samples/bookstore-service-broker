@@ -20,6 +20,7 @@ import org.springframework.boot.actuate.autoconfigure.security.reactive.Endpoint
 import org.springframework.cloud.sample.bookstore.web.security.SecurityAuthorities;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -33,14 +34,14 @@ public class SecurityConfiguration {
 	@Bean
 	public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
 		return http
-				.csrf().disable()
-				.httpBasic()
-				.and().authorizeExchange()
-				.pathMatchers("/bookstores/**").authenticated()
-				.pathMatchers("/v2/**").hasAuthority(SecurityAuthorities.ADMIN)
-				.matchers(EndpointRequest.to("info", "health")).permitAll()
-				.matchers(EndpointRequest.toAnyEndpoint()).hasAuthority(SecurityAuthorities.ADMIN)
-				.and().build();
+				.csrf((csrf) -> csrf.disable())
+				.httpBasic(Customizer.withDefaults())
+				.authorizeExchange((exchange) -> exchange
+						.pathMatchers("/bookstores/**").authenticated()
+						.pathMatchers("/v2/**").hasAuthority(SecurityAuthorities.ADMIN)
+						.matchers(EndpointRequest.to("info", "health")).permitAll()
+						.matchers(EndpointRequest.toAnyEndpoint()).hasAuthority(SecurityAuthorities.ADMIN))
+				.build();
 	}
 
 	@Bean
