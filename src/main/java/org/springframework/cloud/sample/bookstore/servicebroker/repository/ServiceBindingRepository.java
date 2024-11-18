@@ -20,4 +20,5 @@ import org.springframework.cloud.sample.bookstore.servicebroker.model.ServiceBin
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 
 public interface ServiceBindingRepository extends ReactiveCrudRepository<ServiceBinding, String> {
+
 }

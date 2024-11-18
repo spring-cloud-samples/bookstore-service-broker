@@ -57,105 +57,88 @@ public class BookStoreSecurityIntegrationTests {
 		BookStore bookStore = bookStoreService.createBookStore(BOOKSTORE_INSTANCE_ID).block();
 		this.bookStoreId = bookStore.getId();
 
-		Book book = bookStoreService.putBookInStore(bookStoreId,
-				new Book("978-1617292545", "Spring Boot in Action", "Craig Walls"))
-				.block();
+		Book book = bookStoreService
+			.putBookInStore(bookStoreId, new Book("978-1617292545", "Spring Boot in Action", "Craig Walls"))
+			.block();
 		this.bookId = book.getId();
 	}
 
 	@Test
 	public void anonymousAccessIsUnauthorized() {
-		assertExpectedResponseStatus(
-				HttpStatus.UNAUTHORIZED,
-				HttpStatus.UNAUTHORIZED,
-				HttpStatus.UNAUTHORIZED,
+		assertExpectedResponseStatus(HttpStatus.UNAUTHORIZED, HttpStatus.UNAUTHORIZED, HttpStatus.UNAUTHORIZED,
 				HttpStatus.UNAUTHORIZED);
 	}
 
 	@Test
-	@WithMockUser(authorities = {FULL_ACCESS})
+	@WithMockUser(authorities = { FULL_ACCESS })
 	public void fullAccessWithoutInstanceIdIsAllowed() {
 
-		assertExpectedResponseStatus(
-				HttpStatus.OK,
-				HttpStatus.OK,
-				HttpStatus.CREATED,
-				HttpStatus.OK);
+		assertExpectedResponseStatus(HttpStatus.OK, HttpStatus.OK, HttpStatus.CREATED, HttpStatus.OK);
 	}
 
 	@Test
-	@WithMockUser(authorities = {FULL_ACCESS, BOOK_STORE_ID_PREFIX + BOOKSTORE_INSTANCE_ID})
+	@WithMockUser(authorities = { FULL_ACCESS, BOOK_STORE_ID_PREFIX + BOOKSTORE_INSTANCE_ID })
 	public void fullAccessWithInstanceIdIsAllowed() {
-		assertExpectedResponseStatus(
-				HttpStatus.OK,
-				HttpStatus.OK,
-				HttpStatus.CREATED,
-				HttpStatus.OK);
+		assertExpectedResponseStatus(HttpStatus.OK, HttpStatus.OK, HttpStatus.CREATED, HttpStatus.OK);
 	}
 
 	@Test
-	@WithMockUser(authorities = {FULL_ACCESS, BOOK_STORE_ID_PREFIX + OTHER_INSTANCE_ID})
+	@WithMockUser(authorities = { FULL_ACCESS, BOOK_STORE_ID_PREFIX + OTHER_INSTANCE_ID })
 	public void fullAccessWithOtherInstanceIdIsForbidden() {
-		assertExpectedResponseStatus(
-				HttpStatus.FORBIDDEN,
-				HttpStatus.FORBIDDEN,
-				HttpStatus.FORBIDDEN,
+		assertExpectedResponseStatus(HttpStatus.FORBIDDEN, HttpStatus.FORBIDDEN, HttpStatus.FORBIDDEN,
 				HttpStatus.FORBIDDEN);
 	}
 
 	@Test
-	@WithMockUser(authorities = {READ_ONLY})
+	@WithMockUser(authorities = { READ_ONLY })
 	public void readOnlyWithoutInstanceIdIsPartiallyAllowed() {
-		assertExpectedResponseStatus(
-				HttpStatus.OK,
-				HttpStatus.OK,
-				HttpStatus.FORBIDDEN,
-				HttpStatus.FORBIDDEN);
+		assertExpectedResponseStatus(HttpStatus.OK, HttpStatus.OK, HttpStatus.FORBIDDEN, HttpStatus.FORBIDDEN);
 	}
 
 	@Test
-	@WithMockUser(authorities = {READ_ONLY, BOOK_STORE_ID_PREFIX + BOOKSTORE_INSTANCE_ID})
+	@WithMockUser(authorities = { READ_ONLY, BOOK_STORE_ID_PREFIX + BOOKSTORE_INSTANCE_ID })
 	public void readOnlyWithInstanceIdIsPartiallyAllowed() {
-		assertExpectedResponseStatus(
-				HttpStatus.OK,
-				HttpStatus.OK,
-				HttpStatus.FORBIDDEN,
-				HttpStatus.FORBIDDEN);
+		assertExpectedResponseStatus(HttpStatus.OK, HttpStatus.OK, HttpStatus.FORBIDDEN, HttpStatus.FORBIDDEN);
 	}
 
 	@Test
-	@WithMockUser(authorities = {READ_ONLY, BOOK_STORE_ID_PREFIX + OTHER_INSTANCE_ID})
+	@WithMockUser(authorities = { READ_ONLY, BOOK_STORE_ID_PREFIX + OTHER_INSTANCE_ID })
 	public void readOnlyWithOtherInstanceIdIsForbidden() {
-		assertExpectedResponseStatus(
-				HttpStatus.FORBIDDEN,
-				HttpStatus.FORBIDDEN,
-				HttpStatus.FORBIDDEN,
+		assertExpectedResponseStatus(HttpStatus.FORBIDDEN, HttpStatus.FORBIDDEN, HttpStatus.FORBIDDEN,
 				HttpStatus.FORBIDDEN);
 	}
 
 	private void assertExpectedResponseStatus(HttpStatus getAllStatus, HttpStatus getStatus, HttpStatus putStatus,
 			HttpStatus deleteStatus) {
-		this.client.get().uri("/bookstores/{bookStoreId}", bookStoreId)
-				.accept(MediaType.APPLICATION_JSON)
-				.exchange()
-				.expectStatus().isEqualTo(getAllStatus);
+		this.client.get()
+			.uri("/bookstores/{bookStoreId}", bookStoreId)
+			.accept(MediaType.APPLICATION_JSON)
+			.exchange()
+			.expectStatus()
+			.isEqualTo(getAllStatus);
 
-		this.client.get().uri("/bookstores/{bookStoreId}/books/{bookId}", bookStoreId, bookId)
-				.accept(MediaType.APPLICATION_JSON)
-				.exchange()
-				.expectStatus().isEqualTo(getStatus);
+		this.client.get()
+			.uri("/bookstores/{bookStoreId}/books/{bookId}", bookStoreId, bookId)
+			.accept(MediaType.APPLICATION_JSON)
+			.exchange()
+			.expectStatus()
+			.isEqualTo(getStatus);
 
-		this.client.put().uri("/bookstores/{bookStoreId}/books", bookStoreId)
-				.accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON)
-				.bodyValue("{\"isbn\":\"111-1111111111\", \"title\":\"test book\", \"author\":\"test author\"}")
-				.exchange()
-				.expectStatus().isEqualTo(putStatus);
+		this.client.put()
+			.uri("/bookstores/{bookStoreId}/books", bookStoreId)
+			.accept(MediaType.APPLICATION_JSON)
+			.contentType(MediaType.APPLICATION_JSON)
+			.bodyValue("{\"isbn\":\"111-1111111111\", \"title\":\"test book\", \"author\":\"test author\"}")
+			.exchange()
+			.expectStatus()
+			.isEqualTo(putStatus);
 
-		this.client.delete().uri("/bookstores/{bookStoreId}/books/{bookId}", bookStoreId, bookId)
-				.accept(MediaType.APPLICATION_JSON)
-				.exchange()
-				.expectStatus().isEqualTo(deleteStatus);
+		this.client.delete()
+			.uri("/bookstores/{bookStoreId}/books/{bookId}", bookStoreId, bookId)
+			.accept(MediaType.APPLICATION_JSON)
+			.exchange()
+			.expectStatus()
+			.isEqualTo(deleteStatus);
 	}
 
 }

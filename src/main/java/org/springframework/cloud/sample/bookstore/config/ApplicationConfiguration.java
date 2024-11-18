@@ -34,11 +34,7 @@ public class ApplicationConfiguration {
 	public ApplicationInformation cloudFoundryApplicationInformation(Environment environment) {
 		String uri = environment.getProperty("vcap.application.uris[0]");
 
-		String baseUrl = UriComponentsBuilder.newInstance()
-				.scheme("https")
-				.host(uri)
-				.build()
-				.toUriString();
+		String baseUrl = UriComponentsBuilder.newInstance().scheme("https").host(uri).build().toUriString();
 
 		return new ApplicationInformation(baseUrl);
 	}
@@ -49,12 +45,7 @@ public class ApplicationConfiguration {
 		String uri = environment.getProperty("KUBERNETES_SERVICE_HOST");
 		String port = environment.getProperty("KUBERNETES_SERVICE_PORT");
 
-		String baseUrl = UriComponentsBuilder.newInstance()
-				.scheme("https")
-				.host(uri)
-				.port(port)
-				.build()
-				.toUriString();
+		String baseUrl = UriComponentsBuilder.newInstance().scheme("https").host(uri).port(port).build().toUriString();
 
 		return new ApplicationInformation(baseUrl);
 	}
@@ -63,11 +54,11 @@ public class ApplicationConfiguration {
 	@ConditionalOnMissingBean(ApplicationInformation.class)
 	public ApplicationInformation defaultApplicationInformation() {
 		String baseUrl = UriComponentsBuilder.newInstance()
-				.scheme("http")
-				.host("localhost")
-				.port(8080)
-				.build()
-				.toUriString();
+			.scheme("http")
+			.host("localhost")
+			.port(8080)
+			.build()
+			.toUriString();
 
 		return new ApplicationInformation(baseUrl);
 	}

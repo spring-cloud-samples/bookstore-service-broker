@@ -20,4 +20,5 @@ import org.springframework.cloud.sample.bookstore.web.model.BookStore;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 
 public interface BookStoreRepository extends ReactiveCrudRepository<BookStore, String> {
+
 }

@@ -40,13 +40,12 @@ public class BookStoreService {
 	}
 
 	public Mono<BookStore> createBookStore() {
-		return generateRandomId()
-				.flatMap(this::createBookStore);
+		return generateRandomId().flatMap(this::createBookStore);
 	}
 
 	public Mono<BookStore> getBookStore(String storeId) {
 		return repository.findById(storeId)
-				.switchIfEmpty(Mono.error(new IllegalArgumentException("Invalid book store ID " + storeId + ".")));
+			.switchIfEmpty(Mono.error(new IllegalArgumentException("Invalid book store ID " + storeId + ".")));
 	}
 
 	public Mono<Void> deleteBookStore(String id) {
@@ -54,37 +53,26 @@ public class BookStoreService {
 	}
 
 	public Mono<Book> putBookInStore(String storeId, Book book) {
-		return generateRandomId()
-				.flatMap(bookId -> Mono.just(new Book(bookId, book)))
-				.flatMap(bookWithId -> getBookStore(storeId)
-						.flatMap(store -> {
-							store.addBook(bookWithId);
-							return Mono.just(store);
-						})
-						.flatMap(store -> repository.save(store))
-						.thenReturn(bookWithId));
+		return generateRandomId().flatMap(bookId -> Mono.just(new Book(bookId, book)))
+			.flatMap(bookWithId -> getBookStore(storeId).flatMap(store -> {
+				store.addBook(bookWithId);
+				return Mono.just(store);
+			}).flatMap(store -> repository.save(store)).thenReturn(bookWithId));
 	}
 
 	public Mono<Book> getBookFromStore(String storeId, String bookId) {
-		return getBookStore(storeId)
-				.flatMap(store -> Mono.justOrEmpty(store.getBookById(bookId)))
-				.switchIfEmpty(
-						Mono.error(new IllegalArgumentException("Invalid book ID " + storeId + ":" + bookId + ".")));
+		return getBookStore(storeId).flatMap(store -> Mono.justOrEmpty(store.getBookById(bookId)))
+			.switchIfEmpty(Mono.error(new IllegalArgumentException("Invalid book ID " + storeId + ":" + bookId + ".")));
 	}
 
 	public Mono<Book> removeBookFromStore(String storeId, String bookId) {
-		return getBookStore(storeId)
-				.flatMap(store -> Mono.justOrEmpty(store.remove(bookId))
-						.switchIfEmpty(
-								Mono.error(new IllegalArgumentException(
-										"Invalid book ID " + storeId + ":" + bookId + ".")))
-						.flatMap(book -> repository.save(store)
-								.thenReturn(book)));
+		return getBookStore(storeId).flatMap(store -> Mono.justOrEmpty(store.remove(bookId))
+			.switchIfEmpty(Mono.error(new IllegalArgumentException("Invalid book ID " + storeId + ":" + bookId + ".")))
+			.flatMap(book -> repository.save(store).thenReturn(book)));
 	}
 
 	private Mono<String> generateRandomId() {
-		return Mono.fromCallable(() -> UUID.randomUUID().toString())
-				.publishOn(Schedulers.boundedElastic());
+		return Mono.fromCallable(() -> UUID.randomUUID().toString()).publishOn(Schedulers.boundedElastic());
 	}
 
 }

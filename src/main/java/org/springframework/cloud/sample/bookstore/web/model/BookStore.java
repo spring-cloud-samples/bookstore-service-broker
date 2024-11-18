@@ -53,9 +53,7 @@ public class BookStore {
 	}
 
 	public Optional<Book> getBookById(String bookId) {
-		return books.stream()
-				.filter(book -> book.getId().equals(bookId))
-				.findFirst();
+		return books.stream().filter(book -> book.getId().equals(bookId)).findFirst();
 	}
 
 	public Optional<Book> remove(String bookId) {

@@ -20,4 +20,5 @@ import org.springframework.cloud.sample.bookstore.servicebroker.model.ServiceIns
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 
 public interface ServiceInstanceRepository extends ReactiveCrudRepository<ServiceInstance, String> {
+
 }
