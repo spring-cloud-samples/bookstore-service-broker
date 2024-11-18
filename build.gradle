@@ -18,6 +18,7 @@ plugins {
 	id 'org.springframework.boot' version '3.2.11'
 	id 'java'
 	id 'com.palantir.docker' version '0.35.0'
+	id 'io.spring.javaformat' version '0.0.43'
 }
 
 group = 'org.springframework.cloud'
@@ -65,6 +66,8 @@ dependencies {
 	testImplementation('org.springframework.security:spring-security-test')
 	testImplementation('io.projectreactor:reactor-test')
 }
+
+apply plugin: 'io.spring.javaformat'
 
 test {
 	useJUnitPlatform()

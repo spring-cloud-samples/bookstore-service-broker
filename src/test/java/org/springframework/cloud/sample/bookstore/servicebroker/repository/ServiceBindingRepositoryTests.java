@@ -55,21 +55,19 @@ public class ServiceBindingRepositoryTests {
 		ServiceBinding binding = new ServiceBinding("binding-id", parameters, credentials);
 
 		StepVerifier.create(repository.save(binding))
-				.assertNext(savedBinding -> assertThat(savedBinding).usingRecursiveComparison().isEqualTo(binding))
-				.verifyComplete();
+			.assertNext(savedBinding -> assertThat(savedBinding).usingRecursiveComparison().isEqualTo(binding))
+			.verifyComplete();
 	}
 
 	@Test
 	public void retrieve() {
 		ServiceBinding binding = new ServiceBinding("binding-id", parameters, credentials);
 
-		StepVerifier.create(repository.save(binding))
-				.expectNext(binding)
-				.verifyComplete();
+		StepVerifier.create(repository.save(binding)).expectNext(binding).verifyComplete();
 
 		StepVerifier.create(repository.findById("binding-id"))
-				.assertNext(foundBinding -> assertThat(foundBinding).usingRecursiveComparison().isEqualTo(binding))
-				.verifyComplete();
+			.assertNext(foundBinding -> assertThat(foundBinding).usingRecursiveComparison().isEqualTo(binding))
+			.verifyComplete();
 	}
 
 }
