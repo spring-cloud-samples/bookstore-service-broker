@@ -24,6 +24,8 @@ group = 'org.springframework.cloud'
 archivesBaseName = 'bookstore-service-broker'
 version = '0.0.1.BUILD-SNAPSHOT'
 
+sourceCompatibility = 17
+
 [compileJava, compileTestJava]*.options*.compilerArgs = [
 		"-Xlint:serial",
 		"-Xlint:varargs",
