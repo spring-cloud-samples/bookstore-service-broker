@@ -37,9 +37,9 @@ public class UserApplicationListenerIntegrationTests {
 
 	@Test
 	public void adminUserIsPopulatedOnApplicationEvent() {
-		StepVerifier.create(userRepository.findByUsername("admin")).consumeNextWith(user -> {
+		StepVerifier.create(this.userRepository.findByUsername("admin")).consumeNextWith((user) -> {
 			assertThat(user).isNotNull();
-			assertThat(passwordEncoder.matches("supersecret", user.getPassword()));
+			assertThat(this.passwordEncoder.matches("supersecret", user.getPassword()));
 		}).verifyComplete();
 	}
 

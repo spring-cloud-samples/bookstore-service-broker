@@ -21,6 +21,9 @@ plugins {
 	id 'io.spring.javaformat' version '0.0.43'
 }
 
+apply plugin: 'checkstyle'
+apply plugin: 'io.spring.javaformat'
+
 group = 'org.springframework.cloud'
 archivesBaseName = 'bookstore-service-broker'
 version = '0.0.1.BUILD-SNAPSHOT'
@@ -53,6 +56,7 @@ repositories {
 }
 
 dependencies {
+	checkstyle("io.spring.javaformat:spring-javaformat-checkstyle:0.0.43")
 	implementation platform('org.springframework.boot:spring-boot-dependencies:3.2.11')
 	implementation('org.springframework.cloud:spring-cloud-starter-open-service-broker:4.2.0')
 	implementation('org.springframework.boot:spring-boot-starter-webflux')
@@ -67,7 +71,12 @@ dependencies {
 	testImplementation('io.projectreactor:reactor-test')
 }
 
-apply plugin: 'io.spring.javaformat'
+checkstyle {
+	showViolations = true
+}
+checkstyleTest {
+	configFile = configDirectory.get().file("checkstyle-test.xml").asFile
+}
 
 test {
 	useJUnitPlatform()

@@ -46,36 +46,37 @@ public class UserService {
 	}
 
 	public void initializeUsers() {
-		userRepository.count().flatMap(count -> {
+		this.userRepository.count().flatMap((count) -> {
 			if (count == 0) {
-				return userRepository.save(adminUser());
+				return this.userRepository.save(adminUser());
 			}
 			return Mono.empty();
 		}).subscribe();
 	}
 
 	public Mono<User> createUser(String username, String... authorities) {
-		return generatePassword().flatMap(password -> Mono.fromCallable(() -> passwordEncoder.encode(password))
-			.flatMap(encodedPassword -> userRepository.save(new User(username, encodedPassword, authorities)))
+		return generatePassword().flatMap((password) -> Mono.fromCallable(() -> this.passwordEncoder.encode(password))
+			.flatMap((encodedPassword) -> this.userRepository.save(new User(username, encodedPassword, authorities)))
 			.thenReturn(new User(username, password, authorities)));
 	}
 
 	public Mono<Void> deleteUser(String username) {
-		return userRepository.findByUsername(username).flatMap(user -> userRepository.deleteById(user.getId()));
+		return this.userRepository.findByUsername(username)
+			.flatMap((user) -> this.userRepository.deleteById(user.getId()));
 	}
 
 	private User adminUser() {
-		return new User("admin", passwordEncoder.encode("supersecret"), SecurityAuthorities.ADMIN,
+		return new User("admin", this.passwordEncoder.encode("supersecret"), SecurityAuthorities.ADMIN,
 				SecurityAuthorities.FULL_ACCESS);
 	}
 
 	private Mono<String> generatePassword() {
-		return Mono.just(new StringBuilder(PASSWORD_LENGTH)).flatMap(sb -> Mono.fromCallable(() -> {
+		return Mono.just(new StringBuilder(PASSWORD_LENGTH)).flatMap((sb) -> Mono.fromCallable(() -> {
 			for (int i = 0; i < PASSWORD_LENGTH; i++) {
 				sb.append(PASSWORD_CHARS.charAt(RANDOM.nextInt(PASSWORD_CHARS.length())));
 			}
 			return sb;
-		}).subscribeOn(Schedulers.boundedElastic())).flatMap(sb -> Mono.just(sb.toString()));
+		}).subscribeOn(Schedulers.boundedElastic())).flatMap((sb) -> Mono.just(sb.toString()));
 	}
 
 }

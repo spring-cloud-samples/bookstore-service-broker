@@ -45,15 +45,15 @@ public class ServiceBinding {
 	}
 
 	public String getBindingId() {
-		return bindingId;
+		return this.bindingId;
 	}
 
 	public Map<String, Object> getCredentials() {
-		return credentials;
+		return this.credentials;
 	}
 
 	public Map<String, Object> getParameters() {
-		return parameters;
+		return this.parameters;
 	}
 
 }

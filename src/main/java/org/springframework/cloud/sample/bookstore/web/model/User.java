@@ -50,19 +50,19 @@ public class User {
 	}
 
 	public String getId() {
-		return id;
+		return this.id;
 	}
 
 	public String getUsername() {
-		return username;
+		return this.username;
 	}
 
 	public String getPassword() {
-		return password;
+		return this.password;
 	}
 
 	public List<String> getAuthorities() {
-		return authorities;
+		return this.authorities;
 	}
 
 }

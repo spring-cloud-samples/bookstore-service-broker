@@ -30,7 +30,7 @@ public class BookStoreResource extends RepresentationModel<BookStoreResource> {
 	}
 
 	public Collection<BookResource> getBooks() {
-		return bookResources;
+		return this.bookResources;
 	}
 
 }

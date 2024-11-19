@@ -34,7 +34,7 @@ public class ApplicationTests {
 
 	@Test
 	public void contextLoads() {
-		assertThat(applicationContext.getStartupDate()).isLessThanOrEqualTo(new Date().getTime());
+		assertThat(this.applicationContext.getStartupDate()).isLessThanOrEqualTo(new Date().getTime());
 	}
 
 }

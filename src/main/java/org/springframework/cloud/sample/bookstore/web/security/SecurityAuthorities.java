@@ -16,14 +16,30 @@
 
 package org.springframework.cloud.sample.bookstore.web.security;
 
-public class SecurityAuthorities {
+public final class SecurityAuthorities {
 
+	private SecurityAuthorities() {
+
+	}
+
+	/**
+	 * ROLE_ADMIN security authority.
+	 */
 	public static final String ADMIN = "ROLE_ADMIN";
 
+	/**
+	 * ROLE_FULL_ACCESS security authority.
+	 */
 	public static final String FULL_ACCESS = "ROLE_FULL_ACCESS";
 
+	/**
+	 * ROLE_READ_ONLY security authority.
+	 */
 	public static final String READ_ONLY = "ROLE_READ_ONLY";
 
+	/**
+	 * BOOK_STORE_ID_PREFIX security authority.
+	 */
 	public static final String BOOK_STORE_ID_PREFIX = "BOOK_STORE_";
 
 }

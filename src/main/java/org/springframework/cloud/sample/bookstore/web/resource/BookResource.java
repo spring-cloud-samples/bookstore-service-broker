@@ -29,15 +29,15 @@ public class BookResource extends RepresentationModel<BookResource> {
 	}
 
 	public String getIsbn() {
-		return book.getIsbn();
+		return this.book.getIsbn();
 	}
 
 	public String getTitle() {
-		return book.getTitle();
+		return this.book.getTitle();
 	}
 
 	public String getAuthor() {
-		return book.getAuthor();
+		return this.book.getAuthor();
 	}
 
 }

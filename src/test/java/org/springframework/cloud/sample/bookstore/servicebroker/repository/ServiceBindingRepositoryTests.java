@@ -41,32 +41,32 @@ public class ServiceBindingRepositoryTests {
 	@BeforeEach
 	void setUp() {
 		this.parameters = new HashMap<>();
-		parameters.put("key1", "value1");
-		parameters.put("key2", "value2");
+		this.parameters.put("key1", "value1");
+		this.parameters.put("key2", "value2");
 
 		this.credentials = new HashMap<>();
-		credentials.put("url", "https://example.com");
-		credentials.put("username", "user");
-		credentials.put("password", "secret");
+		this.credentials.put("url", "https://example.com");
+		this.credentials.put("username", "user");
+		this.credentials.put("password", "secret");
 	}
 
 	@Test
 	public void save() {
-		ServiceBinding binding = new ServiceBinding("binding-id", parameters, credentials);
+		ServiceBinding binding = new ServiceBinding("binding-id", this.parameters, this.credentials);
 
-		StepVerifier.create(repository.save(binding))
-			.assertNext(savedBinding -> assertThat(savedBinding).usingRecursiveComparison().isEqualTo(binding))
+		StepVerifier.create(this.repository.save(binding))
+			.assertNext((savedBinding) -> assertThat(savedBinding).usingRecursiveComparison().isEqualTo(binding))
 			.verifyComplete();
 	}
 
 	@Test
 	public void retrieve() {
-		ServiceBinding binding = new ServiceBinding("binding-id", parameters, credentials);
+		ServiceBinding binding = new ServiceBinding("binding-id", this.parameters, this.credentials);
 
-		StepVerifier.create(repository.save(binding)).expectNext(binding).verifyComplete();
+		StepVerifier.create(this.repository.save(binding)).expectNext(binding).verifyComplete();
 
-		StepVerifier.create(repository.findById("binding-id"))
-			.assertNext(foundBinding -> assertThat(foundBinding).usingRecursiveComparison().isEqualTo(binding))
+		StepVerifier.create(this.repository.findById("binding-id"))
+			.assertNext((foundBinding) -> assertThat(foundBinding).usingRecursiveComparison().isEqualTo(binding))
 			.verifyComplete();
 	}
 
