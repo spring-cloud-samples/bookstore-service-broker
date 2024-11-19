@@ -39,29 +39,29 @@ public class ServiceInstanceRepositoryTests {
 	@BeforeEach
 	void setUp() {
 		this.parameters = new HashMap<>();
-		parameters.put("key1", "value1");
-		parameters.put("key2", "value2");
+		this.parameters.put("key1", "value1");
+		this.parameters.put("key2", "value2");
 	}
 
 	@Test
 	public void save() {
 		ServiceInstance instance = new ServiceInstance("service-instance-id", "service-definition-id", "plan-id",
-				parameters);
+				this.parameters);
 
-		StepVerifier.create(repository.save(instance))
-			.assertNext(savedInstance -> assertThat(savedInstance).usingRecursiveComparison().isEqualTo(instance))
+		StepVerifier.create(this.repository.save(instance))
+			.assertNext((savedInstance) -> assertThat(savedInstance).usingRecursiveComparison().isEqualTo(instance))
 			.verifyComplete();
 	}
 
 	@Test
 	public void retrieve() {
 		ServiceInstance instance = new ServiceInstance("service-instance-id", "service-definition-id", "plan-id",
-				parameters);
+				this.parameters);
 
-		StepVerifier.create(repository.save(instance)).expectNext(instance).verifyComplete();
+		StepVerifier.create(this.repository.save(instance)).expectNext(instance).verifyComplete();
 
-		StepVerifier.create(repository.findById("service-instance-id"))
-			.assertNext(foundInstance -> assertThat(foundInstance).usingRecursiveComparison().isEqualTo(instance))
+		StepVerifier.create(this.repository.findById("service-instance-id"))
+			.assertNext((foundInstance) -> assertThat(foundInstance).usingRecursiveComparison().isEqualTo(instance))
 			.verifyComplete();
 	}
 

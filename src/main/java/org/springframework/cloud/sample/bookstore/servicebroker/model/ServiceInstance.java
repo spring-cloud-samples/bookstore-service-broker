@@ -35,10 +35,10 @@ public class ServiceInstance {
 
 	@SuppressWarnings("unused")
 	private ServiceInstance() {
-		instanceId = null;
-		serviceDefinitionId = null;
-		planId = null;
-		parameters = null;
+		this.instanceId = null;
+		this.serviceDefinitionId = null;
+		this.planId = null;
+		this.parameters = null;
 	}
 
 	public ServiceInstance(String instanceId, String serviceDefinitionId, String planId,
@@ -50,19 +50,19 @@ public class ServiceInstance {
 	}
 
 	public String getInstanceId() {
-		return instanceId;
+		return this.instanceId;
 	}
 
 	public String getServiceDefinitionId() {
-		return serviceDefinitionId;
+		return this.serviceDefinitionId;
 	}
 
 	public String getPlanId() {
-		return planId;
+		return this.planId;
 	}
 
 	public Map<String, Object> getParameters() {
-		return parameters;
+		return this.parameters;
 	}
 
 }

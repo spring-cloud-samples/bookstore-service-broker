@@ -36,7 +36,7 @@ public class BookStoreService {
 	}
 
 	public Mono<BookStore> createBookStore(String storeId) {
-		return repository.save(new BookStore(storeId));
+		return this.repository.save(new BookStore(storeId));
 	}
 
 	public Mono<BookStore> createBookStore() {
@@ -44,31 +44,31 @@ public class BookStoreService {
 	}
 
 	public Mono<BookStore> getBookStore(String storeId) {
-		return repository.findById(storeId)
+		return this.repository.findById(storeId)
 			.switchIfEmpty(Mono.error(new IllegalArgumentException("Invalid book store ID " + storeId + ".")));
 	}
 
 	public Mono<Void> deleteBookStore(String id) {
-		return repository.deleteById(id);
+		return this.repository.deleteById(id);
 	}
 
 	public Mono<Book> putBookInStore(String storeId, Book book) {
-		return generateRandomId().flatMap(bookId -> Mono.just(new Book(bookId, book)))
-			.flatMap(bookWithId -> getBookStore(storeId).flatMap(store -> {
+		return generateRandomId().flatMap((bookId) -> Mono.just(new Book(bookId, book)))
+			.flatMap((bookWithId) -> getBookStore(storeId).flatMap((store) -> {
 				store.addBook(bookWithId);
 				return Mono.just(store);
-			}).flatMap(store -> repository.save(store)).thenReturn(bookWithId));
+			}).flatMap((store) -> this.repository.save(store)).thenReturn(bookWithId));
 	}
 
 	public Mono<Book> getBookFromStore(String storeId, String bookId) {
-		return getBookStore(storeId).flatMap(store -> Mono.justOrEmpty(store.getBookById(bookId)))
+		return getBookStore(storeId).flatMap((store) -> Mono.justOrEmpty(store.getBookById(bookId)))
 			.switchIfEmpty(Mono.error(new IllegalArgumentException("Invalid book ID " + storeId + ":" + bookId + ".")));
 	}
 
 	public Mono<Book> removeBookFromStore(String storeId, String bookId) {
-		return getBookStore(storeId).flatMap(store -> Mono.justOrEmpty(store.remove(bookId))
+		return getBookStore(storeId).flatMap((store) -> Mono.justOrEmpty(store.remove(bookId))
 			.switchIfEmpty(Mono.error(new IllegalArgumentException("Invalid book ID " + storeId + ":" + bookId + ".")))
-			.flatMap(book -> repository.save(store).thenReturn(book)));
+			.flatMap((book) -> this.repository.save(store).thenReturn(book)));
 	}
 
 	private Mono<String> generateRandomId() {

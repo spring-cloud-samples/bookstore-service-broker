@@ -41,9 +41,9 @@ public class RepositoryUserDetailsService implements ReactiveUserDetailsService 
 
 	@Override
 	public Mono<UserDetails> findByUsername(String username) {
-		return userRepository.findByUsername(username)
+		return this.userRepository.findByUsername(username)
 			.switchIfEmpty(Mono.error(new UsernameNotFoundException(username)))
-			.flatMap(user -> Mono.just(new CustomUserDetails(user)));
+			.flatMap((user) -> Mono.just(new CustomUserDetails(user)));
 	}
 
 	private static class CustomUserDetails implements UserDetails {
@@ -58,17 +58,20 @@ public class RepositoryUserDetailsService implements ReactiveUserDetailsService 
 
 		@Override
 		public String getUsername() {
-			return delegate.getUsername();
+			return this.delegate.getUsername();
 		}
 
 		@Override
 		public String getPassword() {
-			return delegate.getPassword();
+			return this.delegate.getPassword();
 		}
 
 		@Override
 		public Collection<? extends GrantedAuthority> getAuthorities() {
-			return delegate.getAuthorities().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+			return this.delegate.getAuthorities()
+				.stream()
+				.map(SimpleGrantedAuthority::new)
+				.collect(Collectors.toList());
 		}
 
 		@Override

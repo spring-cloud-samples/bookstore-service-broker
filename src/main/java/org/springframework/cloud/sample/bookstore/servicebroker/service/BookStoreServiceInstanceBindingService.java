@@ -25,6 +25,7 @@ import org.springframework.cloud.sample.bookstore.servicebroker.model.ServiceBin
 import org.springframework.cloud.sample.bookstore.servicebroker.repository.ServiceBindingRepository;
 import org.springframework.cloud.sample.bookstore.web.model.ApplicationInformation;
 import org.springframework.cloud.sample.bookstore.web.model.User;
+import org.springframework.cloud.sample.bookstore.web.security.SecurityAuthorities;
 import org.springframework.cloud.sample.bookstore.web.service.UserService;
 import org.springframework.cloud.servicebroker.exception.ServiceInstanceBindingDoesNotExistException;
 import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceAppBindingResponse;
@@ -38,9 +39,6 @@ import org.springframework.cloud.servicebroker.model.binding.GetServiceInstanceB
 import org.springframework.cloud.servicebroker.service.ServiceInstanceBindingService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import static org.springframework.cloud.sample.bookstore.web.security.SecurityAuthorities.BOOK_STORE_ID_PREFIX;
-import static org.springframework.cloud.sample.bookstore.web.security.SecurityAuthorities.FULL_ACCESS;
 
 @Service
 public class BookStoreServiceInstanceBindingService implements ServiceInstanceBindingService {
@@ -68,42 +66,34 @@ public class BookStoreServiceInstanceBindingService implements ServiceInstanceBi
 	public Mono<CreateServiceInstanceBindingResponse> createServiceInstanceBinding(
 			CreateServiceInstanceBindingRequest request) {
 		return Mono.just(CreateServiceInstanceAppBindingResponse.builder())
-			.flatMap(responseBuilder -> bindingRepository.existsById(request.getBindingId()).flatMap(exists -> {
-				if (exists) {
-					return bindingRepository.findById(request.getBindingId())
-						.flatMap(serviceBinding -> Mono.just(responseBuilder.bindingExisted(true)
-							.credentials(serviceBinding.getCredentials())
-							.build()));
-				}
-				else {
-					return createUser(request).flatMap(user -> buildCredentials(request.getServiceInstanceId(), user))
-						.flatMap(credentials -> bindingRepository
-							.save(new ServiceBinding(request.getBindingId(), request.getParameters(), credentials))
-							.thenReturn(responseBuilder.bindingExisted(false).credentials(credentials).build()));
-				}
-			}));
-	}
-
-	@Override
-	public Mono<GetServiceInstanceBindingResponse> getServiceInstanceBinding(GetServiceInstanceBindingRequest request) {
-		return Mono.just(request.getBindingId())
-			.flatMap(bindingId -> bindingRepository.findById(bindingId)
-				.flatMap(Mono::justOrEmpty)
-				.switchIfEmpty(Mono.error(new ServiceInstanceBindingDoesNotExistException(bindingId)))
-				.flatMap(serviceBinding -> Mono.just(GetServiceInstanceAppBindingResponse.builder()
-					.parameters(serviceBinding.getParameters())
-					.credentials(serviceBinding.getCredentials())
-					.build())));
+			.flatMap(
+					(responseBuilder) -> this.bindingRepository.existsById(request.getBindingId()).flatMap((exists) -> {
+						if (exists) {
+							return this.bindingRepository.findById(request.getBindingId())
+								.flatMap((serviceBinding) -> Mono.just(responseBuilder.bindingExisted(true)
+									.credentials(serviceBinding.getCredentials())
+									.build()));
+						}
+						else {
+							return createUser(request)
+								.flatMap((user) -> buildCredentials(request.getServiceInstanceId(), user))
+								.flatMap((credentials) -> this.bindingRepository
+									.save(new ServiceBinding(request.getBindingId(), request.getParameters(),
+											credentials))
+									.thenReturn(
+											responseBuilder.bindingExisted(false).credentials(credentials).build()));
+						}
+					}));
 	}
 
 	@Override
 	public Mono<DeleteServiceInstanceBindingResponse> deleteServiceInstanceBinding(
 			DeleteServiceInstanceBindingRequest request) {
 		return Mono.just(request.getBindingId())
-			.flatMap(bindingId -> bindingRepository.existsById(bindingId).flatMap(exists -> {
+			.flatMap((bindingId) -> this.bindingRepository.existsById(bindingId).flatMap((exists) -> {
 				if (exists) {
-					return bindingRepository.deleteById(bindingId)
-						.then(userService.deleteUser(bindingId))
+					return this.bindingRepository.deleteById(bindingId)
+						.then(this.userService.deleteUser(bindingId))
 						.thenReturn(DeleteServiceInstanceBindingResponse.builder().build());
 				}
 				else {
@@ -112,13 +102,20 @@ public class BookStoreServiceInstanceBindingService implements ServiceInstanceBi
 			}));
 	}
 
-	private Mono<User> createUser(CreateServiceInstanceBindingRequest request) {
-		return userService.createUser(request.getBindingId(), FULL_ACCESS,
-				BOOK_STORE_ID_PREFIX + request.getServiceInstanceId());
+	@Override
+	public Mono<GetServiceInstanceBindingResponse> getServiceInstanceBinding(GetServiceInstanceBindingRequest request) {
+		return Mono.just(request.getBindingId())
+			.flatMap((bindingId) -> this.bindingRepository.findById(bindingId)
+				.flatMap(Mono::justOrEmpty)
+				.switchIfEmpty(Mono.error(new ServiceInstanceBindingDoesNotExistException(bindingId)))
+				.flatMap((serviceBinding) -> Mono.just(GetServiceInstanceAppBindingResponse.builder()
+					.parameters(serviceBinding.getParameters())
+					.credentials(serviceBinding.getCredentials())
+					.build())));
 	}
 
 	private Mono<Map<String, Object>> buildCredentials(String instanceId, User user) {
-		return buildUri(instanceId).flatMap(uri -> {
+		return buildUri(instanceId).flatMap((uri) -> {
 			Map<String, Object> credentials = new HashMap<>();
 			credentials.put(URI_KEY, uri);
 			credentials.put(USERNAME_KEY, user.getUsername());
@@ -128,10 +125,15 @@ public class BookStoreServiceInstanceBindingService implements ServiceInstanceBi
 	}
 
 	private Mono<String> buildUri(String instanceId) {
-		return Mono.just(UriComponentsBuilder.fromUriString(applicationInformation.getBaseUrl())
+		return Mono.just(UriComponentsBuilder.fromUriString(this.applicationInformation.getBaseUrl())
 			.pathSegment("bookstores", instanceId)
 			.build()
 			.toUriString());
+	}
+
+	private Mono<User> createUser(CreateServiceInstanceBindingRequest request) {
+		return this.userService.createUser(request.getBindingId(), SecurityAuthorities.FULL_ACCESS,
+				SecurityAuthorities.BOOK_STORE_ID_PREFIX + request.getServiceInstanceId());
 	}
 
 }

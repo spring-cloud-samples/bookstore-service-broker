@@ -30,7 +30,7 @@ public class BaseController {
 	@ExceptionHandler(IllegalArgumentException.class)
 	public Mono<ResponseEntity<Map<String, String>>> badBookStoreId(IllegalArgumentException e) {
 		return Mono.just(Collections.singletonMap("errorMessage", e.getMessage()))
-			.flatMap(responseBody -> Mono.just(new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST)));
+			.flatMap((responseBody) -> Mono.just(new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST)));
 	}
 
 }

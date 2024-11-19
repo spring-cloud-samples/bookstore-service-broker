@@ -66,32 +66,32 @@ public class BookStoreIntegrationTests {
 
 	@BeforeEach
 	public void setUp() {
-		this.service = new BookStoreService(repository);
+		this.service = new BookStoreService(this.repository);
 
-		BookStoreController bookStoreController = new BookStoreController(service);
-		BookController bookController = new BookController(service);
+		BookStoreController bookStoreController = new BookStoreController(this.service);
+		BookController bookController = new BookController(this.service);
 
 		this.client = WebTestClient.bindToController(bookStoreController, bookController).build();
 
-		this.bookStoreId = service.createBookStore()
-			.flatMap(bookStore -> service
+		this.bookStoreId = this.service.createBookStore()
+			.flatMap((bookStore) -> this.service
 				.putBookInStore(bookStore.getId(), new Book(BOOK1_ISBN, BOOK1_TITLE, BOOK1_AUTHOR))
-				.then(service.putBookInStore(bookStore.getId(), new Book(BOOK2_ISBN, BOOK2_TITLE, BOOK2_AUTHOR)))
+				.then(this.service.putBookInStore(bookStore.getId(), new Book(BOOK2_ISBN, BOOK2_TITLE, BOOK2_AUTHOR)))
 				.thenReturn(bookStore.getId()))
 			.block();
 	}
 
 	@AfterEach
 	public void tearDown() {
-		service.deleteBookStore(bookStoreId).block();
+		this.service.deleteBookStore(this.bookStoreId).block();
 	}
 
 	@Test
 	public void bookStoreIsRetrieved() {
-		BookStore bookStore = service.getBookStore(bookStoreId).block();
+		BookStore bookStore = this.service.getBookStore(this.bookStoreId).block();
 		assertThat(bookStore).isNotNull();
 
-		client.get()
+		this.client.get()
 			.uri("/bookstores/{bookStoreId}", bookStore.getId())
 			.accept(MediaType.APPLICATION_JSON)
 			.exchange()
@@ -100,7 +100,7 @@ public class BookStoreIntegrationTests {
 			.expectHeader()
 			.contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
 			.expectBody(String.class)
-			.consumeWith(result -> {
+			.consumeWith((result) -> {
 				String body = result.getResponseBody();
 				assertThat(body).isNotNull();
 				ReadContext ctx = JsonPath.parse(body);
@@ -120,13 +120,13 @@ public class BookStoreIntegrationTests {
 
 	@Test
 	public void bookIsRetrieved() {
-		BookStore bookStore = service.getBookStore(bookStoreId).block();
+		BookStore bookStore = this.service.getBookStore(this.bookStoreId).block();
 		assertThat(bookStore).isNotNull();
 		List<Book> books = bookStore.getBooks();
 		Book book = books.get(0);
 		assertThat(book).isNotNull();
 
-		client.get()
+		this.client.get()
 			.uri("/bookstores/{bookStoreId}/books/{bookId}", bookStore.getId(), book.getId())
 			.exchange()
 			.expectStatus()
@@ -134,7 +134,7 @@ public class BookStoreIntegrationTests {
 			.expectHeader()
 			.contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
 			.expectBody(String.class)
-			.consumeWith(result -> {
+			.consumeWith((result) -> {
 				String body = result.getResponseBody();
 				assertThat(body).isNotNull();
 				ReadContext ctx = JsonPath.parse(body);
@@ -145,17 +145,17 @@ public class BookStoreIntegrationTests {
 				assertThat(ctx.read("$.links[0].rel", String.class)).isEqualTo(IanaLinkRelations.SELF.value());
 			});
 
-		BookStore updatedBokStore = service.getBookStore(bookStoreId).block();
+		BookStore updatedBokStore = this.service.getBookStore(this.bookStoreId).block();
 		assertThat(updatedBokStore).isNotNull();
 		assertThat(updatedBokStore.getBooks()).size().isEqualTo(2);
 	}
 
 	@Test
 	public void bookIsAdded() {
-		BookStore bookStore = service.getBookStore(bookStoreId).block();
+		BookStore bookStore = this.service.getBookStore(this.bookStoreId).block();
 		assertThat(bookStore).isNotNull();
 
-		client.put()
+		this.client.put()
 			.uri("/bookstores/{bookStoreId}/books", bookStore.getId())
 			.contentType(MediaType.APPLICATION_JSON)
 			.accept(MediaType.APPLICATION_JSON)
@@ -166,7 +166,7 @@ public class BookStoreIntegrationTests {
 			.expectHeader()
 			.contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
 			.expectBody(String.class)
-			.consumeWith(result -> {
+			.consumeWith((result) -> {
 				String body = result.getResponseBody();
 				assertThat(body).isNotNull();
 				ReadContext ctx = JsonPath.parse(body);
@@ -176,19 +176,19 @@ public class BookStoreIntegrationTests {
 				assertThat(ctx.read("$.links[0].rel", String.class)).isEqualTo(IanaLinkRelations.SELF.value());
 			});
 
-		BookStore updatedBokStore = service.getBookStore(bookStoreId).block();
+		BookStore updatedBokStore = this.service.getBookStore(this.bookStoreId).block();
 		assertThat(updatedBokStore).isNotNull();
 		assertThat(updatedBokStore.getBooks()).size().isEqualTo(3);
 	}
 
 	@Test
 	public void bookIsDeleted() {
-		BookStore bookStore = service.getBookStore(bookStoreId).block();
+		BookStore bookStore = this.service.getBookStore(this.bookStoreId).block();
 		assertThat(bookStore).isNotNull();
 		Book book = bookStore.getBooks().get(0);
 		assertThat(book).isNotNull();
 
-		client.delete()
+		this.client.delete()
 			.uri("/bookstores/{bookStoreId}/books/{bookId}", bookStore.getId(), book.getId())
 			.exchange()
 			.expectStatus()
@@ -196,7 +196,7 @@ public class BookStoreIntegrationTests {
 			.expectHeader()
 			.contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
 			.expectBody(String.class)
-			.consumeWith(result -> {
+			.consumeWith((result) -> {
 				String body = result.getResponseBody();
 				assertThat(body).isNotNull();
 				ReadContext ctx = JsonPath.parse(body);
@@ -207,7 +207,7 @@ public class BookStoreIntegrationTests {
 				assertThat(ctx.read("$.links[0].rel", String.class)).isEqualTo(IanaLinkRelations.SELF.value());
 			});
 
-		BookStore updatedBookStore = service.getBookStore(bookStoreId).block();
+		BookStore updatedBookStore = this.service.getBookStore(this.bookStoreId).block();
 		assertThat(updatedBookStore).isNotNull();
 		assertThat(updatedBookStore.getBooks()).size().isEqualTo(1);
 	}

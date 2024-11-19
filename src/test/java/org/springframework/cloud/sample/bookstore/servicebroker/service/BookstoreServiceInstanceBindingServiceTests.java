@@ -41,9 +41,9 @@ import org.springframework.cloud.servicebroker.model.binding.GetServiceInstanceB
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.refEq;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
 import static org.springframework.cloud.sample.bookstore.web.security.SecurityAuthorities.BOOK_STORE_ID_PREFIX;
 import static org.springframework.cloud.sample.bookstore.web.security.SecurityAuthorities.FULL_ACCESS;
@@ -69,24 +69,24 @@ public class BookstoreServiceInstanceBindingServiceTests {
 	@BeforeEach
 	public void setUp() {
 		this.credentials = new HashMap<>();
-		credentials.put("uri", "https://example.com");
-		credentials.put("username", "testuser");
-		credentials.put("password", "testpassword");
+		this.credentials.put("uri", "https://example.com");
+		this.credentials.put("username", "testuser");
+		this.credentials.put("password", "testpassword");
 
 		openMocks(this);
 
 		ApplicationInformation appInfo = new ApplicationInformation(BASE_URL);
 
-		service = new BookStoreServiceInstanceBindingService(repository, userService, appInfo);
+		this.service = new BookStoreServiceInstanceBindingService(this.repository, this.userService, appInfo);
 	}
 
 	@Test
 	public void createBindingWhenBindingDoesNotExist() {
-		when(repository.existsById(SERVICE_BINDING_ID)).thenReturn(Mono.just(false));
+		given(this.repository.existsById(SERVICE_BINDING_ID)).willReturn(Mono.just(false));
 
-		when(userService.createUser(eq(SERVICE_BINDING_ID), eq(FULL_ACCESS),
+		given(this.userService.createUser(eq(SERVICE_BINDING_ID), eq(FULL_ACCESS),
 				eq(BOOK_STORE_ID_PREFIX + SERVICE_INSTANCE_ID)))
-			.thenReturn(Mono.just(
+			.willReturn(Mono.just(
 					new User(SERVICE_BINDING_ID, "password", FULL_ACCESS, BOOK_STORE_ID_PREFIX + SERVICE_INSTANCE_ID)));
 
 		final Map<String, Object> creds = new HashMap<>();
@@ -95,14 +95,14 @@ public class BookstoreServiceInstanceBindingServiceTests {
 		creds.put("password", "password");
 
 		ServiceBinding binding = new ServiceBinding(SERVICE_BINDING_ID, new HashMap<>(), creds);
-		when(repository.save(refEq(binding))).thenReturn(Mono.just(binding));
+		given(this.repository.save(refEq(binding))).willReturn(Mono.just(binding));
 
 		CreateServiceInstanceBindingRequest request = CreateServiceInstanceBindingRequest.builder()
 			.serviceInstanceId(SERVICE_INSTANCE_ID)
 			.bindingId(SERVICE_BINDING_ID)
 			.build();
 
-		StepVerifier.create(service.createServiceInstanceBinding(request)).consumeNextWith(response -> {
+		StepVerifier.create(this.service.createServiceInstanceBinding(request)).consumeNextWith((response) -> {
 			assertThat(response).isInstanceOf(CreateServiceInstanceAppBindingResponse.class);
 			CreateServiceInstanceAppBindingResponse appResponse = (CreateServiceInstanceAppBindingResponse) response;
 			assertThat(appResponse.isBindingExisted()).isFalse();
@@ -112,121 +112,122 @@ public class BookstoreServiceInstanceBindingServiceTests {
 				.endsWith("bookstores/" + SERVICE_INSTANCE_ID);
 
 			ArgumentCaptor<ServiceBinding> repositoryCaptor = ArgumentCaptor.forClass(ServiceBinding.class);
-			verify(repository).save(repositoryCaptor.capture());
+			verify(this.repository).save(repositoryCaptor.capture());
 			ServiceBinding actualBinding = repositoryCaptor.getValue();
 			assertThat(actualBinding.getBindingId()).isEqualTo(SERVICE_BINDING_ID);
 			assertThat(actualBinding.getCredentials()).isEqualTo(credentials);
 		}).verifyComplete();
 
-		verify(repository).existsById(SERVICE_BINDING_ID);
-		verifyNoMoreInteractions(repository);
+		verify(this.repository).existsById(SERVICE_BINDING_ID);
+		verifyNoMoreInteractions(this.repository);
 
-		verify(userService).createUser(SERVICE_BINDING_ID, FULL_ACCESS, BOOK_STORE_ID_PREFIX + SERVICE_INSTANCE_ID);
-		verify(repository).save(refEq(binding));
-		verifyNoMoreInteractions(userService);
+		verify(this.userService).createUser(SERVICE_BINDING_ID, FULL_ACCESS,
+				BOOK_STORE_ID_PREFIX + SERVICE_INSTANCE_ID);
+		verify(this.repository).save(refEq(binding));
+		verifyNoMoreInteractions(this.userService);
 	}
 
 	@Test
 	public void createBindingWhenBindingExists() {
-		ServiceBinding binding = new ServiceBinding(SERVICE_BINDING_ID, null, credentials);
+		ServiceBinding binding = new ServiceBinding(SERVICE_BINDING_ID, null, this.credentials);
 
-		when(repository.existsById(SERVICE_BINDING_ID)).thenReturn(Mono.just(true));
+		given(this.repository.existsById(SERVICE_BINDING_ID)).willReturn(Mono.just(true));
 
-		when(repository.findById(SERVICE_BINDING_ID)).thenReturn(Mono.just(binding));
+		given(this.repository.findById(SERVICE_BINDING_ID)).willReturn(Mono.just(binding));
 
 		CreateServiceInstanceBindingRequest request = CreateServiceInstanceBindingRequest.builder()
 			.serviceInstanceId(SERVICE_INSTANCE_ID)
 			.bindingId(SERVICE_BINDING_ID)
 			.build();
 
-		StepVerifier.create(service.createServiceInstanceBinding(request)).consumeNextWith(response -> {
+		StepVerifier.create(this.service.createServiceInstanceBinding(request)).consumeNextWith((response) -> {
 			assertThat(response).isInstanceOf(CreateServiceInstanceAppBindingResponse.class);
 			CreateServiceInstanceAppBindingResponse appResponse = (CreateServiceInstanceAppBindingResponse) response;
 			assertThat(appResponse.isBindingExisted()).isTrue();
-			assertThat(credentials).isEqualTo(appResponse.getCredentials());
+			assertThat(this.credentials).isEqualTo(appResponse.getCredentials());
 		}).verifyComplete();
 
-		verify(repository).existsById(SERVICE_BINDING_ID);
-		verify(repository).findById(SERVICE_BINDING_ID);
-		verifyNoMoreInteractions(repository);
+		verify(this.repository).existsById(SERVICE_BINDING_ID);
+		verify(this.repository).findById(SERVICE_BINDING_ID);
+		verifyNoMoreInteractions(this.repository);
 	}
 
 	@Test
 	public void getBindingWhenBindingExists() {
 		HashMap<String, Object> parameters = new HashMap<>();
-		ServiceBinding serviceBinding = new ServiceBinding(SERVICE_BINDING_ID, parameters, credentials);
+		ServiceBinding serviceBinding = new ServiceBinding(SERVICE_BINDING_ID, parameters, this.credentials);
 
-		when(repository.findById(SERVICE_BINDING_ID)).thenReturn(Mono.just(serviceBinding));
+		given(this.repository.findById(SERVICE_BINDING_ID)).willReturn(Mono.just(serviceBinding));
 
 		GetServiceInstanceBindingRequest request = GetServiceInstanceBindingRequest.builder()
 			.bindingId(SERVICE_BINDING_ID)
 			.build();
 
-		StepVerifier.create(service.getServiceInstanceBinding(request)).consumeNextWith(response -> {
+		StepVerifier.create(this.service.getServiceInstanceBinding(request)).consumeNextWith((response) -> {
 			assertThat(response).isInstanceOf(GetServiceInstanceAppBindingResponse.class);
 			GetServiceInstanceAppBindingResponse appResponse = (GetServiceInstanceAppBindingResponse) response;
 			assertThat(appResponse.getParameters()).isEqualTo(parameters);
-			assertThat(appResponse.getCredentials()).isEqualTo(credentials);
+			assertThat(appResponse.getCredentials()).isEqualTo(this.credentials);
 		}).verifyComplete();
 
-		verify(repository).findById(SERVICE_BINDING_ID);
-		verifyNoMoreInteractions(repository);
+		verify(this.repository).findById(SERVICE_BINDING_ID);
+		verifyNoMoreInteractions(this.repository);
 	}
 
 	@Test
 	public void getBindingWhenBindingDoesNotExist() {
-		when(repository.findById(SERVICE_BINDING_ID)).thenReturn(Mono.empty());
+		given(this.repository.findById(SERVICE_BINDING_ID)).willReturn(Mono.empty());
 
 		GetServiceInstanceBindingRequest request = GetServiceInstanceBindingRequest.builder()
 			.bindingId(SERVICE_BINDING_ID)
 			.build();
 
-		StepVerifier.create(service.getServiceInstanceBinding(request))
-			.expectErrorMatches(e -> e instanceof ServiceInstanceBindingDoesNotExistException)
+		StepVerifier.create(this.service.getServiceInstanceBinding(request))
+			.expectErrorMatches((e) -> e instanceof ServiceInstanceBindingDoesNotExistException)
 			.verify();
 
-		verify(repository).findById(SERVICE_BINDING_ID);
-		verifyNoMoreInteractions(repository);
+		verify(this.repository).findById(SERVICE_BINDING_ID);
+		verifyNoMoreInteractions(this.repository);
 	}
 
 	@Test
 	public void deleteBindingWhenBindingExists() {
-		when(repository.existsById(SERVICE_BINDING_ID)).thenReturn(Mono.just(true));
+		given(this.repository.existsById(SERVICE_BINDING_ID)).willReturn(Mono.just(true));
 
-		when(repository.deleteById(SERVICE_BINDING_ID)).thenReturn(Mono.empty());
+		given(this.repository.deleteById(SERVICE_BINDING_ID)).willReturn(Mono.empty());
 
-		when(userService.deleteUser(SERVICE_BINDING_ID)).thenReturn(Mono.empty());
+		given(this.userService.deleteUser(SERVICE_BINDING_ID)).willReturn(Mono.empty());
 
 		DeleteServiceInstanceBindingRequest request = DeleteServiceInstanceBindingRequest.builder()
 			.serviceInstanceId(SERVICE_INSTANCE_ID)
 			.bindingId(SERVICE_BINDING_ID)
 			.build();
 
-		StepVerifier.create(service.deleteServiceInstanceBinding(request)).expectNextCount(1).verifyComplete();
+		StepVerifier.create(this.service.deleteServiceInstanceBinding(request)).expectNextCount(1).verifyComplete();
 
-		verify(repository).existsById(SERVICE_BINDING_ID);
-		verify(repository).deleteById(SERVICE_BINDING_ID);
-		verifyNoMoreInteractions(repository);
+		verify(this.repository).existsById(SERVICE_BINDING_ID);
+		verify(this.repository).deleteById(SERVICE_BINDING_ID);
+		verifyNoMoreInteractions(this.repository);
 
-		verify(userService).deleteUser(SERVICE_BINDING_ID);
-		verifyNoMoreInteractions(userService);
+		verify(this.userService).deleteUser(SERVICE_BINDING_ID);
+		verifyNoMoreInteractions(this.userService);
 	}
 
 	@Test
 	public void deleteBindingWhenBindingDoesNotExist() {
-		when(repository.existsById(SERVICE_BINDING_ID)).thenReturn(Mono.just(false));
+		given(this.repository.existsById(SERVICE_BINDING_ID)).willReturn(Mono.just(false));
 
 		DeleteServiceInstanceBindingRequest request = DeleteServiceInstanceBindingRequest.builder()
 			.serviceInstanceId(SERVICE_INSTANCE_ID)
 			.bindingId(SERVICE_BINDING_ID)
 			.build();
 
-		StepVerifier.create(service.deleteServiceInstanceBinding(request))
-			.expectErrorMatches(e -> e instanceof ServiceInstanceBindingDoesNotExistException)
+		StepVerifier.create(this.service.deleteServiceInstanceBinding(request))
+			.expectErrorMatches((e) -> e instanceof ServiceInstanceBindingDoesNotExistException)
 			.verify();
 
-		verify(repository).existsById(SERVICE_BINDING_ID);
-		verifyNoMoreInteractions(repository);
+		verify(this.repository).existsById(SERVICE_BINDING_ID);
+		verifyNoMoreInteractions(this.repository);
 	}
 
 }

@@ -49,17 +49,17 @@ public class BookStore {
 	}
 
 	public void addBook(Book book) {
-		books.add(book);
+		this.books.add(book);
 	}
 
 	public Optional<Book> getBookById(String bookId) {
-		return books.stream().filter(book -> book.getId().equals(bookId)).findFirst();
+		return this.books.stream().filter((book) -> book.getId().equals(bookId)).findFirst();
 	}
 
 	public Optional<Book> remove(String bookId) {
 		Optional<Book> book = getBookById(bookId);
 
-		book.ifPresent(books::remove);
+		book.ifPresent(this.books::remove);
 
 		return book;
 	}

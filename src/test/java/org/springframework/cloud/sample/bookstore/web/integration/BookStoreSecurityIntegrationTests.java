@@ -54,11 +54,11 @@ public class BookStoreSecurityIntegrationTests {
 
 	@BeforeEach
 	public void setUp() {
-		BookStore bookStore = bookStoreService.createBookStore(BOOKSTORE_INSTANCE_ID).block();
+		BookStore bookStore = this.bookStoreService.createBookStore(BOOKSTORE_INSTANCE_ID).block();
 		this.bookStoreId = bookStore.getId();
 
-		Book book = bookStoreService
-			.putBookInStore(bookStoreId, new Book("978-1617292545", "Spring Boot in Action", "Craig Walls"))
+		Book book = this.bookStoreService
+			.putBookInStore(this.bookStoreId, new Book("978-1617292545", "Spring Boot in Action", "Craig Walls"))
 			.block();
 		this.bookId = book.getId();
 	}
@@ -111,21 +111,21 @@ public class BookStoreSecurityIntegrationTests {
 	private void assertExpectedResponseStatus(HttpStatus getAllStatus, HttpStatus getStatus, HttpStatus putStatus,
 			HttpStatus deleteStatus) {
 		this.client.get()
-			.uri("/bookstores/{bookStoreId}", bookStoreId)
+			.uri("/bookstores/{bookStoreId}", this.bookStoreId)
 			.accept(MediaType.APPLICATION_JSON)
 			.exchange()
 			.expectStatus()
 			.isEqualTo(getAllStatus);
 
 		this.client.get()
-			.uri("/bookstores/{bookStoreId}/books/{bookId}", bookStoreId, bookId)
+			.uri("/bookstores/{bookStoreId}/books/{bookId}", this.bookStoreId, this.bookId)
 			.accept(MediaType.APPLICATION_JSON)
 			.exchange()
 			.expectStatus()
 			.isEqualTo(getStatus);
 
 		this.client.put()
-			.uri("/bookstores/{bookStoreId}/books", bookStoreId)
+			.uri("/bookstores/{bookStoreId}/books", this.bookStoreId)
 			.accept(MediaType.APPLICATION_JSON)
 			.contentType(MediaType.APPLICATION_JSON)
 			.bodyValue("{\"isbn\":\"111-1111111111\", \"title\":\"test book\", \"author\":\"test author\"}")
@@ -134,7 +134,7 @@ public class BookStoreSecurityIntegrationTests {
 			.isEqualTo(putStatus);
 
 		this.client.delete()
-			.uri("/bookstores/{bookStoreId}/books/{bookId}", bookStoreId, bookId)
+			.uri("/bookstores/{bookStoreId}/books/{bookId}", this.bookStoreId, this.bookId)
 			.accept(MediaType.APPLICATION_JSON)
 			.exchange()
 			.expectStatus()

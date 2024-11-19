@@ -18,16 +18,15 @@ package org.springframework.cloud.sample.bookstore.web.security;
 
 import org.springframework.security.core.Authentication;
 
-import static org.springframework.cloud.sample.bookstore.web.security.SecurityAuthorities.BOOK_STORE_ID_PREFIX;
-
 public class BookStoreIdEvaluator {
 
 	public boolean canAccessBookstore(Authentication authentication, String bookStoreId) {
 		return authentication.getAuthorities()
 			.stream()
-			.filter(authority -> authority.getAuthority().startsWith(BOOK_STORE_ID_PREFIX))
-			.map(authority -> {
-				String serviceInstanceId = authority.getAuthority().substring(BOOK_STORE_ID_PREFIX.length());
+			.filter((authority) -> authority.getAuthority().startsWith(SecurityAuthorities.BOOK_STORE_ID_PREFIX))
+			.map((authority) -> {
+				String serviceInstanceId = authority.getAuthority()
+					.substring(SecurityAuthorities.BOOK_STORE_ID_PREFIX.length());
 				return serviceInstanceId.equals(bookStoreId);
 			})
 			.findFirst()

@@ -38,9 +38,9 @@ import org.springframework.cloud.servicebroker.model.instance.GetServiceInstance
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.refEq;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
 
 public class BookstoreServiceInstanceServiceTests {
@@ -58,63 +58,63 @@ public class BookstoreServiceInstanceServiceTests {
 	@BeforeEach
 	public void setUp() {
 		openMocks(this);
-
-		service = new BookStoreServiceInstanceService(store, repository);
+		this.service = new BookStoreServiceInstanceService(this.store, this.repository);
 	}
 
 	@Test
 	public void createServiceInstanceWhenInstanceExists() {
-		when(repository.existsById(SERVICE_INSTANCE_ID)).thenReturn(Mono.just(true));
+		given(this.repository.existsById(SERVICE_INSTANCE_ID)).willReturn(Mono.just(true));
 
 		CreateServiceInstanceRequest request = CreateServiceInstanceRequest.builder()
 			.serviceInstanceId(SERVICE_INSTANCE_ID)
 			.build();
 
-		StepVerifier.create(service.createServiceInstance(request)).consumeNextWith(response -> {
+		StepVerifier.create(this.service.createServiceInstance(request)).consumeNextWith((response) -> {
 			assertThat(response.isInstanceExisted()).isTrue();
 			assertThat(response.getDashboardUrl()).isNull();
 			assertThat(response.isAsync()).isFalse();
 			assertThat(response.getOperation()).isNull();
 		}).verifyComplete();
 
-		verify(repository).existsById(SERVICE_INSTANCE_ID);
-		verifyNoMoreInteractions(repository);
-		verifyNoMoreInteractions(store);
+		verify(this.repository).existsById(SERVICE_INSTANCE_ID);
+		verifyNoMoreInteractions(this.repository);
+		verifyNoMoreInteractions(this.store);
 	}
 
 	@Test
 	public void createServiceInstanceWhenInstanceDoesNotExist() {
 		Context context = PlatformContext.builder().platform("test-platform").build();
 
-		when(repository.existsById(SERVICE_INSTANCE_ID)).thenReturn(Mono.just(false));
+		given(this.repository.existsById(SERVICE_INSTANCE_ID)).willReturn(Mono.just(false));
 
-		when(store.createBookStore(SERVICE_INSTANCE_ID)).thenReturn(Mono.just(new BookStore(SERVICE_INSTANCE_ID)));
+		given(this.store.createBookStore(SERVICE_INSTANCE_ID))
+			.willReturn(Mono.just(new BookStore(SERVICE_INSTANCE_ID)));
 
 		ServiceInstance serviceInstance = new ServiceInstance(SERVICE_INSTANCE_ID, null, null, new HashMap<>());
-		when(repository.save(refEq(serviceInstance))).thenReturn(Mono.just(serviceInstance));
+		given(this.repository.save(refEq(serviceInstance))).willReturn(Mono.just(serviceInstance));
 
 		CreateServiceInstanceRequest request = CreateServiceInstanceRequest.builder()
 			.serviceInstanceId(SERVICE_INSTANCE_ID)
 			.context(context)
 			.build();
 
-		StepVerifier.create(service.createServiceInstance(request)).consumeNextWith(response -> {
+		StepVerifier.create(this.service.createServiceInstance(request)).consumeNextWith((response) -> {
 			assertThat(response.isInstanceExisted()).isFalse();
 			assertThat(response.getDashboardUrl()).isNull();
 			assertThat(response.isAsync()).isFalse();
 			assertThat(response.getOperation()).isNull();
 		}).verifyComplete();
 
-		verify(repository).existsById(SERVICE_INSTANCE_ID);
+		verify(this.repository).existsById(SERVICE_INSTANCE_ID);
 		ArgumentCaptor<ServiceInstance> argumentCaptor = ArgumentCaptor.forClass(ServiceInstance.class);
-		verify(repository).save(argumentCaptor.capture());
-		verifyNoMoreInteractions(repository);
+		verify(this.repository).save(argumentCaptor.capture());
+		verifyNoMoreInteractions(this.repository);
 
 		ServiceInstance actual = argumentCaptor.getValue();
 		assertThat(actual.getInstanceId()).isEqualTo(SERVICE_INSTANCE_ID);
 
-		verify(store).createBookStore(SERVICE_INSTANCE_ID);
-		verifyNoMoreInteractions(store);
+		verify(this.store).createBookStore(SERVICE_INSTANCE_ID);
+		verifyNoMoreInteractions(this.store);
 	}
 
 	@Test
@@ -122,70 +122,70 @@ public class BookstoreServiceInstanceServiceTests {
 		ServiceInstance serviceInstance = new ServiceInstance(SERVICE_INSTANCE_ID, "service-definition-id", "plan-id",
 				new HashMap<>());
 
-		when(repository.findById(SERVICE_INSTANCE_ID)).thenReturn(Mono.just(serviceInstance));
+		given(this.repository.findById(SERVICE_INSTANCE_ID)).willReturn(Mono.just(serviceInstance));
 
 		GetServiceInstanceRequest request = GetServiceInstanceRequest.builder()
 			.serviceInstanceId(SERVICE_INSTANCE_ID)
 			.build();
 
-		StepVerifier.create(service.getServiceInstance(request)).consumeNextWith(response -> {
+		StepVerifier.create(this.service.getServiceInstance(request)).consumeNextWith((response) -> {
 			assertThat(response.getServiceDefinitionId()).isEqualTo(serviceInstance.getServiceDefinitionId());
 			assertThat(response.getPlanId()).isEqualTo(serviceInstance.getPlanId());
 			assertThat(response.getParameters()).isEqualTo(serviceInstance.getParameters());
 		}).verifyComplete();
 
-		verify(repository).findById(SERVICE_INSTANCE_ID);
-		verifyNoMoreInteractions(repository);
+		verify(this.repository).findById(SERVICE_INSTANCE_ID);
+		verifyNoMoreInteractions(this.repository);
 	}
 
 	@Test
 	public void getServiceInstanceWhenInstanceDoesNotExists() {
-		when(repository.findById(SERVICE_INSTANCE_ID)).thenReturn(Mono.empty());
+		given(this.repository.findById(SERVICE_INSTANCE_ID)).willReturn(Mono.empty());
 
 		GetServiceInstanceRequest request = GetServiceInstanceRequest.builder()
 			.serviceInstanceId(SERVICE_INSTANCE_ID)
 			.build();
 
-		StepVerifier.create(service.getServiceInstance(request))
-			.expectErrorMatches(e -> e instanceof ServiceInstanceDoesNotExistException)
+		StepVerifier.create(this.service.getServiceInstance(request))
+			.expectErrorMatches((e) -> e instanceof ServiceInstanceDoesNotExistException)
 			.verify();
 	}
 
 	@Test
 	public void deleteServiceInstanceWhenInstanceExists() {
-		when(repository.existsById(SERVICE_INSTANCE_ID)).thenReturn(Mono.just(true));
+		given(this.repository.existsById(SERVICE_INSTANCE_ID)).willReturn(Mono.just(true));
 
-		when(store.deleteBookStore(SERVICE_INSTANCE_ID)).thenReturn(Mono.empty());
+		given(this.store.deleteBookStore(SERVICE_INSTANCE_ID)).willReturn(Mono.empty());
 
-		when(repository.deleteById(SERVICE_INSTANCE_ID)).thenReturn(Mono.empty());
+		given(this.repository.deleteById(SERVICE_INSTANCE_ID)).willReturn(Mono.empty());
 
 		DeleteServiceInstanceRequest request = DeleteServiceInstanceRequest.builder()
 			.serviceInstanceId(SERVICE_INSTANCE_ID)
 			.build();
 
-		StepVerifier.create(service.deleteServiceInstance(request)).consumeNextWith(response -> {
+		StepVerifier.create(this.service.deleteServiceInstance(request)).consumeNextWith((response) -> {
 			assertThat(response.isAsync()).isFalse();
 			assertThat(response.getOperation()).isNull();
 		}).verifyComplete();
 
-		verify(repository).existsById(SERVICE_INSTANCE_ID);
-		verify(repository).deleteById(SERVICE_INSTANCE_ID);
-		verifyNoMoreInteractions(repository);
+		verify(this.repository).existsById(SERVICE_INSTANCE_ID);
+		verify(this.repository).deleteById(SERVICE_INSTANCE_ID);
+		verifyNoMoreInteractions(this.repository);
 
-		verify(store).deleteBookStore(SERVICE_INSTANCE_ID);
-		verifyNoMoreInteractions(store);
+		verify(this.store).deleteBookStore(SERVICE_INSTANCE_ID);
+		verifyNoMoreInteractions(this.store);
 	}
 
 	@Test
 	public void deleteServiceInstanceWhenInstanceDoesNotExist() {
-		when(repository.existsById(SERVICE_INSTANCE_ID)).thenReturn(Mono.just(false));
+		given(this.repository.existsById(SERVICE_INSTANCE_ID)).willReturn(Mono.just(false));
 
 		DeleteServiceInstanceRequest request = DeleteServiceInstanceRequest.builder()
 			.serviceInstanceId(SERVICE_INSTANCE_ID)
 			.build();
 
-		StepVerifier.create(service.deleteServiceInstance(request))
-			.expectErrorMatches(e -> e instanceof ServiceInstanceDoesNotExistException)
+		StepVerifier.create(this.service.deleteServiceInstance(request))
+			.expectErrorMatches((e) -> e instanceof ServiceInstanceDoesNotExistException)
 			.verify();
 	}
 

@@ -14,18 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.sample.bookstore.web.model;
-
-public class ApplicationInformation {
-
-	private final String baseUrl;
-
-	public ApplicationInformation(String baseUrl) {
-		this.baseUrl = baseUrl;
-	}
-
-	public String getBaseUrl() {
-		return this.baseUrl;
-	}
-
-}
+/**
+ * Service Broker Models.
+ */
+package org.springframework.cloud.sample.bookstore.servicebroker.model;

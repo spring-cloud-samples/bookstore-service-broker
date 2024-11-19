@@ -47,14 +47,14 @@ public class BookStoreServiceInstanceService implements ServiceInstanceService {
 	@Override
 	public Mono<CreateServiceInstanceResponse> createServiceInstance(CreateServiceInstanceRequest request) {
 		return Mono.just(request.getServiceInstanceId())
-			.flatMap(instanceId -> Mono.just(CreateServiceInstanceResponse.builder())
-				.flatMap(responseBuilder -> instanceRepository.existsById(instanceId).flatMap(exists -> {
+			.flatMap((instanceId) -> Mono.just(CreateServiceInstanceResponse.builder())
+				.flatMap((responseBuilder) -> this.instanceRepository.existsById(instanceId).flatMap((exists) -> {
 					if (exists) {
 						return Mono.just(responseBuilder.instanceExisted(true).build());
 					}
 					else {
-						return storeService.createBookStore(instanceId)
-							.then(instanceRepository.save(new ServiceInstance(instanceId,
+						return this.storeService.createBookStore(instanceId)
+							.then(this.instanceRepository.save(new ServiceInstance(instanceId,
 									request.getServiceDefinitionId(), request.getPlanId(), request.getParameters())))
 							.thenReturn(responseBuilder.build());
 					}
@@ -64,9 +64,9 @@ public class BookStoreServiceInstanceService implements ServiceInstanceService {
 	@Override
 	public Mono<GetServiceInstanceResponse> getServiceInstance(GetServiceInstanceRequest request) {
 		return Mono.just(request.getServiceInstanceId())
-			.flatMap(instanceId -> instanceRepository.findById(instanceId)
+			.flatMap((instanceId) -> this.instanceRepository.findById(instanceId)
 				.switchIfEmpty(Mono.error(new ServiceInstanceDoesNotExistException(instanceId)))
-				.flatMap(serviceInstance -> Mono.just(GetServiceInstanceResponse.builder()
+				.flatMap((serviceInstance) -> Mono.just(GetServiceInstanceResponse.builder()
 					.serviceDefinitionId(serviceInstance.getServiceDefinitionId())
 					.planId(serviceInstance.getPlanId())
 					.parameters(serviceInstance.getParameters())
@@ -76,10 +76,10 @@ public class BookStoreServiceInstanceService implements ServiceInstanceService {
 	@Override
 	public Mono<DeleteServiceInstanceResponse> deleteServiceInstance(DeleteServiceInstanceRequest request) {
 		return Mono.just(request.getServiceInstanceId())
-			.flatMap(instanceId -> instanceRepository.existsById(instanceId).flatMap(exists -> {
+			.flatMap((instanceId) -> this.instanceRepository.existsById(instanceId).flatMap((exists) -> {
 				if (exists) {
-					return storeService.deleteBookStore(instanceId)
-						.then(instanceRepository.deleteById(instanceId))
+					return this.storeService.deleteBookStore(instanceId)
+						.then(this.instanceRepository.deleteById(instanceId))
 						.thenReturn(DeleteServiceInstanceResponse.builder().build());
 				}
 				else {

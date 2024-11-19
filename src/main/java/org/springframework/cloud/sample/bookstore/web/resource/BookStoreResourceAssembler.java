@@ -20,19 +20,18 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.cloud.sample.bookstore.web.controller.BookStoreController;
 import org.springframework.cloud.sample.bookstore.web.model.BookStore;
-
-import static org.springframework.hateoas.server.reactive.WebFluxLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.reactive.WebFluxLinkBuilder.methodOn;
+import org.springframework.hateoas.server.reactive.WebFluxLinkBuilder;
 
 public class BookStoreResourceAssembler {
 
 	public Mono<BookStoreResource> toModel(BookStore bookStore) {
 		return new BookResourceAssembler().toCollectionModel(bookStore.getBooks(), bookStore.getId())
-			.flatMap(bookResources -> Mono.just(new BookStoreResource(bookResources))
-				.flatMap(bookStoreResource -> linkTo(methodOn(BookStoreController.class).getBooks(bookStore.getId()))
+			.flatMap((bookResources) -> Mono.just(new BookStoreResource(bookResources))
+				.flatMap((bookStoreResource) -> WebFluxLinkBuilder
+					.linkTo(WebFluxLinkBuilder.methodOn(BookStoreController.class).getBooks(bookStore.getId()))
 					.withSelfRel()
 					.toMono()
-					.flatMap(link -> Mono.just(bookStoreResource.add(link)))
+					.flatMap((link) -> Mono.just(bookStoreResource.add(link)))
 					.thenReturn(bookStoreResource)));
 	}
 
