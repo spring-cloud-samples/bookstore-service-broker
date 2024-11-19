@@ -5,13 +5,13 @@
 # This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
 
-name: Java CI with Gradle
+name: Java 17 with Gradle
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "SCOSB-4.3.x", "SCOSB-4.2.x" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "SCOSB-4.3.x", "SCOSB-4.2.x" ]
 
 jobs:
   build:
