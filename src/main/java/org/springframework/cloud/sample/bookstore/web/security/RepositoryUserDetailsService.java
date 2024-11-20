@@ -50,7 +50,7 @@ public class RepositoryUserDetailsService implements ReactiveUserDetailsService 
 
 		private static final long serialVersionUID = 8772606763988236474L;
 
-		private final User delegate;
+		private final transient User delegate;
 
 		CustomUserDetails(User user) {
 			this.delegate = user;
