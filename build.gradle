@@ -57,7 +57,7 @@ repositories {
 
 dependencies {
 	checkstyle("io.spring.javaformat:spring-javaformat-checkstyle:0.0.43")
-	implementation platform('org.springframework.boot:spring-boot-dependencies:3.2.11')
+	implementation platform('org.springframework.boot:spring-boot-dependencies:3.4.0')
 	implementation('org.springframework.cloud:spring-cloud-starter-open-service-broker:4.2.0')
 	implementation('org.springframework.boot:spring-boot-starter-webflux')
 	implementation('org.springframework.boot:spring-boot-starter-actuator')
