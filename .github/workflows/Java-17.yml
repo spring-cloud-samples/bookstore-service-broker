@@ -9,9 +9,9 @@ name: Java 17 with Gradle
 
 on:
   push:
-    branches: [ "main", "SCOSB-4.3.x", "SCOSB-4.2.x" ]
+    branches: [ main, SCOSB-4.3.x, SCOSB-4.2.x ]
   pull_request:
-    branches: [ "main", "SCOSB-4.3.x", "SCOSB-4.2.x" ]
+    branches: [ main, SCOSB-4.3.x, SCOSB-4.2.x ]
 
 jobs:
   build:
