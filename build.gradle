@@ -15,7 +15,7 @@
  */
 
 plugins {
-	id 'org.springframework.boot' version '3.2.11'
+	id 'org.springframework.boot' version '3.2.12'
 	id 'java'
 	id 'com.palantir.docker' version '0.35.0'
 	id 'io.spring.javaformat' version '0.0.43'
