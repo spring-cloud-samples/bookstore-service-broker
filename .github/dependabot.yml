@@ -16,6 +16,10 @@ updates:
         update-types:
           - "version-update:semver-major"
           - "version-update:semver-minor"
+      - dependency-name: "org.springframework.boot:spring-boot-dependencies"
+        update-types:
+          - "version-update:semver-major"
+          - "version-update:semver-minor"
       - dependency-name: "org.springframework.cloud:spring-cloud-starter-open-service-broker"
         update-types:
           - "version-update:semver-major"
@@ -32,6 +36,10 @@ updates:
         update-types:
           - "version-update:semver-major"
           - "version-update:semver-minor"
+      - dependency-name: "org.springframework.boot:spring-boot-dependencies"
+        update-types:
+          - "version-update:semver-major"
+          - "version-update:semver-minor"
       - dependency-name: "org.springframework.cloud:spring-cloud-starter-open-service-broker"
         update-types:
           - "version-update:semver-major"
@@ -45,6 +53,10 @@ updates:
       - "dependencies"
     ignore:
       - dependency-name: "org.springframework.boot"
+        update-types:
+          - "version-update:semver-major"
+          - "version-update:semver-minor"
+      - dependency-name: "org.springframework.boot:spring-boot-dependencies"
         update-types:
           - "version-update:semver-major"
           - "version-update:semver-minor"
