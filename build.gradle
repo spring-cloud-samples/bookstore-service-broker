@@ -17,7 +17,7 @@
 plugins {
 	id 'org.springframework.boot' version '3.3.6'
 	id 'java'
-	id 'com.palantir.docker' version '0.36.0'
+	id 'com.palantir.docker' version '0.40.0'
 	id 'io.spring.javaformat' version '0.0.43'
 }
 
@@ -25,10 +25,15 @@ apply plugin: 'checkstyle'
 apply plugin: 'io.spring.javaformat'
 
 group = 'org.springframework.cloud'
-archivesBaseName = 'bookstore-service-broker'
 version = '0.0.1.BUILD-SNAPSHOT'
 
-sourceCompatibility = 17
+base {
+	archivesName = 'bookstore-service-broker'
+}
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_17
+}
 
 [compileJava, compileTestJava]*.options*.compilerArgs = [
 		"-Xlint:serial",
@@ -71,6 +76,7 @@ dependencies {
 	testImplementation('org.springframework.boot:spring-boot-starter-test')
 	testImplementation('org.springframework.security:spring-security-test')
 	testImplementation('io.projectreactor:reactor-test')
+	testRuntimeOnly('org.junit.platform:junit-platform-launcher')
 }
 
 checkstyle {
@@ -85,7 +91,7 @@ test {
 }
 
 wrapper {
-	gradleVersion = '8.11'
+	gradleVersion = '9.7.1'
 }
 
 if (!project.hasProperty("dockerGroup")) {
@@ -93,8 +99,8 @@ if (!project.hasProperty("dockerGroup")) {
 }
 
 docker {
-	name "${dockerGroup}/bookstore-service-broker:${version}"
-	dockerfile file('../deploy/docker/Dockerfile')
+	name = "${dockerGroup}/bookstore-service-broker:${version}"
+	dockerfile = file('../deploy/docker/Dockerfile')
 	files jar.archiveFile
 	buildArgs(['JAR_FILE': "${jar.archiveFileName}"])
 }
