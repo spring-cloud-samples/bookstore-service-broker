@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.sample.bookstore.config;
 
-import org.springframework.boot.actuate.autoconfigure.security.reactive.EndpointRequest;
+import org.springframework.boot.security.autoconfigure.actuate.web.reactive.EndpointRequest;
 import org.springframework.cloud.sample.bookstore.web.security.SecurityAuthorities;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

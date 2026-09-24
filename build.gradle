@@ -15,7 +15,7 @@
  */
 
 plugins {
-	id 'org.springframework.boot' version '3.3.6'
+	id 'org.springframework.boot' version '4.1.1'
 	id 'java'
 	id 'checkstyle'
 	id 'com.palantir.docker' version '0.40.0'
@@ -64,18 +64,18 @@ repositories {
 
 dependencies {
 	checkstyle("io.spring.javaformat:spring-javaformat-checkstyle:0.0.48")
-	implementation platform('org.springframework.boot:spring-boot-dependencies:3.3.6')
-	implementation('org.springframework.cloud:spring-cloud-starter-open-service-broker:4.3.1')
+	implementation platform('org.springframework.boot:spring-boot-dependencies:4.1.1')
+	implementation('org.springframework.cloud:spring-cloud-starter-open-service-broker:5.1.1')
 	implementation('org.springframework.boot:spring-boot-starter-webflux')
 	implementation('org.springframework.boot:spring-boot-starter-actuator')
 	implementation('org.springframework.boot:spring-boot-starter-security')
 	implementation('org.springframework.boot:spring-boot-starter-data-mongodb-reactive')
 	implementation('org.springframework.hateoas:spring-hateoas')
-	implementation('de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring3x:4.18.0')
+	implementation('de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring4x:4.33.0')
 	runtimeOnly('org.springframework.boot:spring-boot-devtools')
-	testImplementation('org.springframework.boot:spring-boot-starter-test')
+	testImplementation('org.springframework.boot:spring-boot-starter-webflux-test')
+	testImplementation('org.springframework.boot:spring-boot-starter-data-mongodb-reactive-test')
 	testImplementation('org.springframework.security:spring-security-test')
-	testImplementation('io.projectreactor:reactor-test')
 	testRuntimeOnly('org.junit.platform:junit-platform-launcher')
 }
 

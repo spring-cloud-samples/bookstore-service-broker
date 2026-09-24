@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import reactor.test.StepVerifier;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.boot.data.mongodb.test.autoconfigure.DataMongoTest;
 import org.springframework.cloud.sample.bookstore.servicebroker.model.ServiceBinding;
 
 import static org.assertj.core.api.Assertions.assertThat;
