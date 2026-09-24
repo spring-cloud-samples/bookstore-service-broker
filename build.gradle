@@ -17,12 +17,10 @@
 plugins {
 	id 'org.springframework.boot' version '3.3.6'
 	id 'java'
+	id 'checkstyle'
 	id 'com.palantir.docker' version '0.40.0'
 	id 'io.spring.javaformat' version '0.0.43'
 }
-
-apply plugin: 'checkstyle'
-apply plugin: 'io.spring.javaformat'
 
 group = 'org.springframework.cloud'
 version = '0.0.1.BUILD-SNAPSHOT'
@@ -35,28 +33,30 @@ java {
 	sourceCompatibility = JavaVersion.VERSION_17
 }
 
-[compileJava, compileTestJava]*.options*.compilerArgs = [
-		"-Xlint:serial",
-		"-Xlint:varargs",
-		"-Xlint:cast",
-		"-Xlint:classfile",
-		"-Xlint:dep-ann",
-		"-Xlint:divzero",
-		"-Xlint:empty",
-		"-Xlint:finally",
-		"-Xlint:overrides",
-		"-Xlint:path",
-		"-Xlint:-processing",
-		"-Xlint:static",
-		"-Xlint:try",
-		"-Xlint:fallthrough",
-		"-Xlint:rawtypes",
-		"-Xlint:deprecation",
-		"-Xlint:unchecked",
-		"-Xlint:options",
-		"-Werror",
-		"-parameters"
-]
+tasks.withType(JavaCompile).configureEach {
+	options.compilerArgs = [
+			"-Xlint:serial",
+			"-Xlint:varargs",
+			"-Xlint:cast",
+			"-Xlint:classfile",
+			"-Xlint:dep-ann",
+			"-Xlint:divzero",
+			"-Xlint:empty",
+			"-Xlint:finally",
+			"-Xlint:overrides",
+			"-Xlint:path",
+			"-Xlint:-processing",
+			"-Xlint:static",
+			"-Xlint:try",
+			"-Xlint:fallthrough",
+			"-Xlint:rawtypes",
+			"-Xlint:deprecation",
+			"-Xlint:unchecked",
+			"-Xlint:options",
+			"-Werror",
+			"-parameters"
+	]
+}
 
 repositories {
 	mavenCentral()
@@ -82,11 +82,11 @@ dependencies {
 checkstyle {
 	showViolations = true
 }
-checkstyleTest {
+tasks.named('checkstyleTest') {
 	configFile = configDirectory.get().file("checkstyle-test.xml").asFile
 }
 
-test {
+tasks.named('test') {
 	useJUnitPlatform()
 }
 
