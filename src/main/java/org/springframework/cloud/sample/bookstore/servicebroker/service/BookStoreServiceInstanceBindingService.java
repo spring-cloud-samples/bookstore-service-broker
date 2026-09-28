@@ -16,29 +16,27 @@
 
 package org.springframework.cloud.sample.bookstore.servicebroker.service;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import reactor.core.publisher.Mono;
-
 import org.springframework.cloud.sample.bookstore.servicebroker.model.ServiceBinding;
 import org.springframework.cloud.sample.bookstore.servicebroker.repository.ServiceBindingRepository;
 import org.springframework.cloud.sample.bookstore.web.model.ApplicationInformation;
 import org.springframework.cloud.sample.bookstore.web.model.User;
 import org.springframework.cloud.sample.bookstore.web.security.SecurityAuthorities;
 import org.springframework.cloud.sample.bookstore.web.service.UserService;
+import org.springframework.cloud.servicebroker.exception.ServiceBrokerInvalidParametersException;
 import org.springframework.cloud.servicebroker.exception.ServiceInstanceBindingDoesNotExistException;
-import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceAppBindingResponse;
-import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceBindingRequest;
-import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceBindingResponse;
-import org.springframework.cloud.servicebroker.model.binding.DeleteServiceInstanceBindingRequest;
-import org.springframework.cloud.servicebroker.model.binding.DeleteServiceInstanceBindingResponse;
-import org.springframework.cloud.servicebroker.model.binding.GetServiceInstanceAppBindingResponse;
-import org.springframework.cloud.servicebroker.model.binding.GetServiceInstanceBindingRequest;
-import org.springframework.cloud.servicebroker.model.binding.GetServiceInstanceBindingResponse;
+import org.springframework.cloud.servicebroker.model.binding.*;
+import org.springframework.cloud.servicebroker.model.instance.OperationState;
 import org.springframework.cloud.servicebroker.service.ServiceInstanceBindingService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
+import reactor.core.publisher.Mono;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.Future;
 
 @Service
 public class BookStoreServiceInstanceBindingService implements ServiceInstanceBindingService {
@@ -55,16 +53,21 @@ public class BookStoreServiceInstanceBindingService implements ServiceInstanceBi
 
 	private final ApplicationInformation applicationInformation;
 
+	private final Map<String, Future<?>> tasks;
+
 	public BookStoreServiceInstanceBindingService(ServiceBindingRepository bindingRepository, UserService userService,
 			ApplicationInformation applicationInformation) {
 		this.bindingRepository = bindingRepository;
 		this.userService = userService;
 		this.applicationInformation = applicationInformation;
+		this.tasks = Collections.synchronizedMap(new HashMap<>());
 	}
 
 	@Override
 	public Mono<CreateServiceInstanceBindingResponse> createServiceInstanceBinding(
 			CreateServiceInstanceBindingRequest request) {
+		String operationName = "bind-" + request.getServiceInstanceId() + "-" + request.getBindingId();
+
 		return Mono.just(CreateServiceInstanceAppBindingResponse.builder())
 			.flatMap(
 					(responseBuilder) -> this.bindingRepository.existsById(request.getBindingId()).flatMap((exists) -> {
@@ -74,32 +77,70 @@ public class BookStoreServiceInstanceBindingService implements ServiceInstanceBi
 									.credentials(serviceBinding.getCredentials())
 									.build()));
 						}
-						else {
-							return createUser(request)
-								.flatMap((user) -> buildCredentials(request.getServiceInstanceId(), user))
-								.flatMap((credentials) -> this.bindingRepository
-									.save(new ServiceBinding(request.getBindingId(), request.getParameters(),
-											credentials))
-									.thenReturn(
-											responseBuilder.bindingExisted(false).credentials(credentials).build()));
-						}
+
+						this.tasks.putIfAbsent(operationName,
+								ForkJoinPool.commonPool()
+									.submit(() -> createUser(request)
+										.flatMap((user) -> buildCredentials(request.getServiceInstanceId(), user))
+										.flatMap((credentials) -> this.bindingRepository.save(new ServiceBinding(
+												request.getBindingId(), request.getParameters(), credentials)))
+										.block()));
+						return Mono.just(responseBuilder.async(true).operation(operationName).build());
 					}));
 	}
 
 	@Override
 	public Mono<DeleteServiceInstanceBindingResponse> deleteServiceInstanceBinding(
 			DeleteServiceInstanceBindingRequest request) {
+		String operationName = "unbind-" + request.getServiceInstanceId() + "-" + request.getBindingId();
+
 		return Mono.just(request.getBindingId())
 			.flatMap((bindingId) -> this.bindingRepository.existsById(bindingId).flatMap((exists) -> {
-				if (exists) {
-					return this.bindingRepository.deleteById(bindingId)
-						.then(this.userService.deleteUser(bindingId))
-						.thenReturn(DeleteServiceInstanceBindingResponse.builder().build());
-				}
-				else {
+				if (!exists) {
 					return Mono.error(new ServiceInstanceBindingDoesNotExistException(bindingId));
 				}
+
+				this.tasks.putIfAbsent(operationName,
+						ForkJoinPool.commonPool()
+							.submit(() -> this.bindingRepository.deleteById(bindingId)
+								.then(this.userService.deleteUser(bindingId))
+								.block()));
+				return Mono
+					.just(DeleteServiceInstanceBindingResponse.builder().async(true).operation(operationName).build());
 			}));
+	}
+
+	@Override
+	public Mono<GetLastServiceBindingOperationResponse> getLastOperation(
+			GetLastServiceBindingOperationRequest request) {
+		return Mono.just(request.getOperation()).flatMap((operationName) -> {
+			Future<?> task = tasks.get(operationName);
+			if (task == null) {
+				return Mono.error(new ServiceBrokerInvalidParametersException("unknown operation: " + operationName));
+			}
+			if (task.isDone()) {
+				try {
+					task.get();
+				}
+				catch (ExecutionException | InterruptedException e) {
+					return Mono.just(GetLastServiceBindingOperationResponse.builder()
+						.operationState(OperationState.FAILED)
+						.description(e.getMessage())
+						.build());
+				}
+				finally {
+					tasks.remove(operationName);
+				}
+
+				return Mono.just(GetLastServiceBindingOperationResponse.builder()
+					.operationState(OperationState.SUCCEEDED)
+					.build());
+			}
+
+			return Mono.just(GetLastServiceBindingOperationResponse.builder()
+				.operationState(OperationState.IN_PROGRESS)
+				.build());
+		});
 	}
 
 	@Override
