@@ -18,7 +18,6 @@ package org.springframework.cloud.sample.bookstore.config;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnCloudPlatform;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.cloud.CloudPlatform;
 import org.springframework.cloud.sample.bookstore.web.model.ApplicationInformation;
 import org.springframework.context.annotation.Bean;
@@ -35,17 +34,6 @@ public class ApplicationConfiguration {
 		String uri = environment.getProperty("vcap.application.uris[0]");
 
 		String baseUrl = UriComponentsBuilder.newInstance().scheme("https").host(uri).build().toUriString();
-
-		return new ApplicationInformation(baseUrl);
-	}
-
-	@Bean
-	@ConditionalOnProperty("KUBERNETES_SERVICE_HOST")
-	public ApplicationInformation kubernetesApplicationInformation(Environment environment) {
-		String uri = environment.getProperty("KUBERNETES_SERVICE_HOST");
-		String port = environment.getProperty("KUBERNETES_SERVICE_PORT");
-
-		String baseUrl = UriComponentsBuilder.newInstance().scheme("https").host(uri).port(port).build().toUriString();
 
 		return new ApplicationInformation(baseUrl);
 	}
