@@ -1,0 +1,13 @@
+[versions]
+spring-boot = "4.1.1"
+spring-cloud-open-service-broker = "5.2.0"
+spring-javaformat = "0.0.48"
+
+[plugins]
+spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
+spring-javaformat = { id = "io.spring.javaformat", version.ref = "spring-javaformat" }
+
+[libraries]
+spring-boot-dependencies = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "spring-boot" }
+spring-cloud-starter-open-service-broker = { module = "org.springframework.cloud:spring-cloud-starter-open-service-broker", version.ref = "spring-cloud-open-service-broker" }
+spring-javaformat-checkstyle = { module = "io.spring.javaformat:spring-javaformat-checkstyle", version.ref = "spring-javaformat" }

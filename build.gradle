@@ -15,10 +15,10 @@
  */
 
 plugins {
-	id 'org.springframework.boot' version '4.1.1'
+	alias(libs.plugins.spring.boot)
 	id 'java'
 	id 'checkstyle'
-	id 'io.spring.javaformat' version '0.0.48'
+	alias(libs.plugins.spring.javaformat)
 }
 
 group = 'org.springframework.cloud'
@@ -62,10 +62,10 @@ repositories {
 }
 
 dependencies {
-	checkstyle("io.spring.javaformat:spring-javaformat-checkstyle:0.0.48")
-	implementation platform('org.springframework.boot:spring-boot-dependencies:4.1.1')
-	developmentOnly platform('org.springframework.boot:spring-boot-dependencies:4.1.1')
-	implementation('org.springframework.cloud:spring-cloud-starter-open-service-broker:5.2.0')
+	checkstyle(libs.spring.javaformat.checkstyle)
+	implementation platform(libs.spring.boot.dependencies)
+	developmentOnly platform(libs.spring.boot.dependencies)
+	implementation(libs.spring.cloud.starter.open.service.broker)
 	implementation('org.springframework.boot:spring-boot-starter-webflux')
 	implementation('org.springframework.boot:spring-boot-starter-actuator')
 	implementation('org.springframework.boot:spring-boot-starter-security')
