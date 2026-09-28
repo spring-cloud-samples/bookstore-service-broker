@@ -94,7 +94,7 @@ tasks.named('test') {
 }
 
 wrapper {
-	gradleVersion = '9.7.1'
+	gradleVersion = '9.8.0'
 }
 
 if (!project.hasProperty("dockerGroup")) {
