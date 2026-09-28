@@ -21,12 +21,15 @@ import reactor.test.StepVerifier;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.sample.bookstore.TestcontainersConfiguration;
 import org.springframework.cloud.sample.bookstore.web.repository.UserRepository;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
+@Import(TestcontainersConfiguration.class)
 public class UserApplicationListenerIntegrationTests {
 
 	@Autowired

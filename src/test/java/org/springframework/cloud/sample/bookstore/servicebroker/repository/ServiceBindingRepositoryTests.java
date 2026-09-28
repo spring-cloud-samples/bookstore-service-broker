@@ -24,11 +24,14 @@ import reactor.test.StepVerifier;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.mongodb.test.autoconfigure.DataMongoTest;
+import org.springframework.cloud.sample.bookstore.TestcontainersConfiguration;
 import org.springframework.cloud.sample.bookstore.servicebroker.model.ServiceBinding;
+import org.springframework.context.annotation.Import;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataMongoTest
+@Import(TestcontainersConfiguration.class)
 public class ServiceBindingRepositoryTests {
 
 	@Autowired

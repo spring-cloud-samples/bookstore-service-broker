@@ -18,7 +18,6 @@ plugins {
 	id 'org.springframework.boot' version '4.1.1'
 	id 'java'
 	id 'checkstyle'
-	id 'com.palantir.docker' version '0.40.0'
 	id 'io.spring.javaformat' version '0.0.48'
 }
 
@@ -71,11 +70,14 @@ dependencies {
 	implementation('org.springframework.boot:spring-boot-starter-security')
 	implementation('org.springframework.boot:spring-boot-starter-data-mongodb-reactive')
 	implementation('org.springframework.hateoas:spring-hateoas')
-	implementation('de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring4x:4.33.0')
-	runtimeOnly('org.springframework.boot:spring-boot-devtools')
+	developmentOnly('org.springframework.boot:spring-boot-devtools')
+	developmentOnly('org.springframework.boot:spring-boot-docker-compose')
 	testImplementation('org.springframework.boot:spring-boot-starter-webflux-test')
 	testImplementation('org.springframework.boot:spring-boot-starter-data-mongodb-reactive-test')
+	testImplementation('org.springframework.boot:spring-boot-testcontainers')
 	testImplementation('org.springframework.security:spring-security-test')
+	testImplementation('org.testcontainers:testcontainers-junit-jupiter')
+	testImplementation('org.testcontainers:testcontainers-mongodb')
 	testRuntimeOnly('org.junit.platform:junit-platform-launcher')
 }
 
@@ -98,9 +100,6 @@ if (!project.hasProperty("dockerGroup")) {
 	ext.dockerGroup = "sample"
 }
 
-docker {
-	name = "${dockerGroup}/bookstore-service-broker:${version}"
-	dockerfile = file('deploy/docker/Dockerfile')
-	files bootJar.archiveFile
-	buildArgs(['JAR_FILE': bootJar.archiveFileName.get()])
+tasks.named('bootBuildImage') {
+	imageName = "${dockerGroup}/bookstore-service-broker:${version}"
 }

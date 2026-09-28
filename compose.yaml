@@ -1,0 +1,7 @@
+services:
+  broker-db:
+    image: 'mongo:7.0.14'
+    environment:
+      - 'MONGO_INITDB_DATABASE=broker-db'
+    ports:
+      - '27017'

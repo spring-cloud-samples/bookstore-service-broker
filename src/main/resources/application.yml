@@ -4,16 +4,7 @@ management:
       exposure:
         include: "*"
 
-de:
-  flapdoodle:
-    mongodb:
-      embedded:
-        version: 7.0.14
-
 spring:
-  data:
-    mongodb:
-      uri: mongodb://localhost:27017/broker-db
   hateoas:
     use-hal-as-default-json-media-type: false
 

@@ -27,12 +27,14 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.mongodb.test.autoconfigure.DataMongoTest;
+import org.springframework.cloud.sample.bookstore.TestcontainersConfiguration;
 import org.springframework.cloud.sample.bookstore.web.controller.BookController;
 import org.springframework.cloud.sample.bookstore.web.controller.BookStoreController;
 import org.springframework.cloud.sample.bookstore.web.model.Book;
 import org.springframework.cloud.sample.bookstore.web.model.BookStore;
 import org.springframework.cloud.sample.bookstore.web.repository.BookStoreRepository;
 import org.springframework.cloud.sample.bookstore.web.service.BookStoreService;
+import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -40,6 +42,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataMongoTest
+@Import(TestcontainersConfiguration.class)
 @SuppressWarnings("unchecked")
 public class BookStoreIntegrationTests {
 

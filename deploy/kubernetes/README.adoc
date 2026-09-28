@@ -51,18 +51,24 @@ The VMware Harbor product can be used to deploy a Docker registry in the same in
 
 = Build a Docker image
 
-The Gradle build file for the service broker sample project can be used to build a Docker image and push it to a repository.
+The Gradle build file for the service broker sample project uses Spring Boot's Cloud Native Buildpacks support to build a Docker image, with no `Dockerfile` required.
 
-When using a private Docker repository, the following command can be used to build the image and push it with the default `sample` group. This isn't likely to work with a public Docker repository unless you own the group named `sample` in that repository.
-
-----
-$ ./gradlew assemble dockerPush
-----
-
-When using a public Docker repository, provide your repository username to the Gradle command. 
+The following command can be used to build the image with the default `sample` group.
 
 ----
-$ ./gradlew assemble dockerPush -PdockerGroup=[username]
+$ ./gradlew bootBuildImage
+----
+
+To use a different group, such as your own Docker repository username, provide it to the Gradle command.
+
+----
+$ ./gradlew bootBuildImage -PdockerGroup=[username]
+----
+
+Once built, push the image to a repository using the `docker` CLI.
+
+----
+$ docker push sample/bookstore-service-broker:0.0.1.BUILD-SNAPSHOT
 ----
 
 = Deploy and test the service broker

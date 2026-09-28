@@ -20,7 +20,7 @@ See the blog post https://spring.io/blog/2020/01/14/reactive-bookstore-service-b
 
 == Build
 
-This project requires Java 17 at a minimum.
+This project requires Java 17 at a minimum. A running Docker daemon is also required: tests use https://testcontainers.com/[Testcontainers] to provision a MongoDB instance, and `bootRun` uses Spring Boot's Docker Compose support (see `compose.yaml`) to do the same for local development.
 
 The project is built with Gradle. The https://docs.gradle.org/current/userguide/gradle_wrapper.html[Gradle wrapper] allows you to build the project on multiple platforms and even if you do not have Gradle installed; run it in place of the `gradle` command (as `./gradlew`) from the root of the main project directory.
 

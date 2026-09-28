@@ -22,9 +22,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
+import org.springframework.cloud.sample.bookstore.TestcontainersConfiguration;
 import org.springframework.cloud.sample.bookstore.web.model.Book;
 import org.springframework.cloud.sample.bookstore.web.model.BookStore;
 import org.springframework.cloud.sample.bookstore.web.service.BookStoreService;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -36,6 +38,7 @@ import static org.springframework.cloud.sample.bookstore.web.security.SecurityAu
 
 @SpringBootTest
 @AutoConfigureWebTestClient
+@Import(TestcontainersConfiguration.class)
 public class BookStoreSecurityIntegrationTests {
 
 	private static final String BOOKSTORE_INSTANCE_ID = "1111-1111-1111-1111";
