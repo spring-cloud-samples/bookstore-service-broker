@@ -1,6 +1,6 @@
 [versions]
 spring-boot = "4.1.1"
-spring-cloud-open-service-broker = "5.2.0"
+spring-cloud-open-service-broker = "5.2.1"
 spring-javaformat = "0.0.48"
 
 [plugins]
