@@ -1,5 +1,5 @@
 [versions]
-spring-boot = "4.1.1"
+spring-boot = "4.1.2"
 spring-cloud-open-service-broker = "5.2.0"
 spring-javaformat = "0.0.48"
 
